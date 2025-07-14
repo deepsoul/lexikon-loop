@@ -211,37 +211,114 @@ footer,
   }
 }
 
+@media (max-width: 430px) {
+  :root {
+    font-size: 14px;
+  }
+  .main-wrapper {
+    padding: 0.1rem 0.05rem 0.5rem 0.05rem;
+    border-radius: 0;
+    min-height: unset;
+    box-shadow: none;
+  }
+  .card,
+  .tip-box {
+    padding: 0.5rem 0.1rem;
+    max-width: 100vw;
+    border-radius: 0.5em;
+    margin-bottom: 1.2rem;
+    box-shadow: none;
+  }
+  h1 {
+    font-size: 1.1em;
+    word-break: break-word;
+  }
+  h2 {
+    font-size: 1em;
+    word-break: break-word;
+  }
+  .points-table,
+  .example-table {
+    font-size: 0.93em;
+    margin: 0.5rem 0 0.2rem 0;
+  }
+  .badge,
+  .jackpot-badge {
+    font-size: 1.1em;
+    min-width: 38px;
+    min-height: 32px;
+    padding: 0.2em 0.7em;
+  }
+  .main-header {
+    padding: 1rem 0.2rem 0.7rem 0.2rem;
+    border-radius: 0.5em;
+  }
+  .main-footer {
+    font-size: 0.95em;
+    padding-bottom: 1.5em;
+  }
+}
+
+@media (max-width: 375px) {
+  :root {
+    font-size: 13px;
+  }
+  .main-wrapper {
+    padding: 0.05rem 0.01rem 0.2rem 0.01rem;
+  }
+  .card,
+  .tip-box {
+    padding: 0.3rem 0.05rem;
+    margin-bottom: 0.7rem;
+  }
+  h1 {
+    font-size: 1em;
+  }
+  h2 {
+    font-size: 0.95em;
+  }
+  .badge,
+  .jackpot-badge {
+    font-size: 1em;
+    min-width: 32px;
+    min-height: 28px;
+    padding: 0.15em 0.5em;
+  }
+}
+
+/* Footer immer sichtbar auf kleinen Geräten */
+@media (max-width: 500px) {
+  .main-footer {
+    position: sticky;
+    bottom: 0;
+    background: #f8f9fa;
+    z-index: 10;
+    border-radius: 0;
+    box-shadow: 0 -2px 8px rgba(60, 80, 180, 0.04);
+    margin-top: 1.5em;
+  }
+}
+
 /* Tabellen auf kleinen Screens horizontal scrollbar */
 .points-table,
 .example-table {
   display: block;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  margin-bottom: 1.2em;
 }
 .points-table table,
 .example-table table {
-  min-width: 500px;
+  min-width: 400px;
 }
 
-/* Badges und Buttons touchfreundlich */
-.badge,
-.jackpot-badge {
-  min-width: 44px;
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1em;
-  padding: 0.3em 1.1em;
-}
-
-/* Karten-Grid für große Screens */
-@media (min-width: 900px) {
+/* Karten-Stack für kleine Screens */
+@media (max-width: 700px) {
   .main-wrapper {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    justify-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
   }
   .card,
   .tip-box {
