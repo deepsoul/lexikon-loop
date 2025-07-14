@@ -1,0 +1,10 @@
+{
+  "projectId": "replace-with-your-vercel-project-id",
+  "orgId": "replace-with-your-vercel-org-id",
+  "settings": {
+    "framework": "vite",
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "rootDirectory": "."
+  }
+}
