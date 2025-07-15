@@ -1,6 +1,6 @@
 {
-  "projectId": "replace-with-your-vercel-project-id",
-  "orgId": "replace-with-your-vercel-org-id",
+  "projectId": "rprj_05eYO4rhClYWjb9BockloQquEqeW",
+  "orgId": "ZWmbzfFgzSCNNrcooYcUXXvy",
   "settings": {
     "framework": "vite",
     "buildCommand": "npm run build",
