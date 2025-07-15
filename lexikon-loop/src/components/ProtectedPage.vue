@@ -3,19 +3,6 @@ import {ref, computed, watch, onMounted, onUnmounted} from 'vue';
 import {useRouter} from 'vue-router';
 const router = useRouter();
 
-const showCodeDialog = ref(true);
-const codeInput = ref('');
-const codeError = ref(false);
-function checkCode() {
-  if (codeInput.value === '1312') {
-    showCodeDialog.value = false;
-    codeError.value = false;
-  } else {
-    codeError.value = true;
-    codeInput.value = '';
-  }
-}
-
 // Typ für Spieler
 interface Player {
   name: string;

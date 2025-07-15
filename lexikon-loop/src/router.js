@@ -1,7 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import Home from './components/Home.vue';
-
-const isAuthenticated = true; // Dummy: später durch echte Authentifizierung ersetzen
+import Login from './components/Login.vue';
 
 const ProtectedPage = () => import('./components/ProtectedPage.vue');
 
@@ -12,17 +11,15 @@ const routes = [
     component: Home,
   },
   {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+  },
+  {
     path: '/protected',
     name: 'Protected',
     component: ProtectedPage,
-    beforeEnter: (to, from, next) => {
-      if (isAuthenticated) {
-        next();
-      } else {
-        alert('Nicht berechtigt!');
-        next('/');
-      }
-    },
+    meta: {requiresAuth: true},
   },
 ];
 
@@ -32,6 +29,19 @@ const router = createRouter({
   scrollBehavior() {
     return {top: 0};
   },
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth) {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (!isAuthenticated) {
+      next('/login');
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;
