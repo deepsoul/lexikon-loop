@@ -534,12 +534,179 @@ function handleKeydown(e: KeyboardEvent) {
             <div class="dice-timer-card flex flex-col items-center gap-4">
               <div class="dice-container mt-2">
                 <div class="dice" :style="diceTransform">
-                  <div class="dice-face">STADT</div>
-                  <div class="dice-face">LAND</div>
-                  <div class="dice-face">FLUSS</div>
-                  <div class="dice-face">NAME</div>
-                  <div class="dice-face">TIER</div>
-                  <div class="dice-face">JACKPOT</div>
+                  <div class="dice-face">
+                    <!-- Stadt-Icon -->
+                    <svg
+                      width="38"
+                      height="38"
+                      viewBox="0 0 100 100"
+                      style="display: block; margin: 0 auto 2px auto"
+                    >
+                      <path
+                        d="M20 60V30L35 20L50 30V60M50 30L65 20L80 30V60M20 60H80V90H20V60Z"
+                        stroke="#2563eb"
+                        stroke-width="4"
+                        fill="none"
+                      />
+                      <rect
+                        x="25"
+                        y="40"
+                        width="10"
+                        height="20"
+                        fill="#2563eb"
+                      />
+                      <rect
+                        x="45"
+                        y="40"
+                        width="10"
+                        height="20"
+                        fill="#2563eb"
+                      />
+                      <rect
+                        x="65"
+                        y="40"
+                        width="10"
+                        height="20"
+                        fill="#2563eb"
+                      />
+                    </svg>
+                    STADT
+                  </div>
+                  <div class="dice-face">
+                    <!-- Land-Icon -->
+                    <svg
+                      width="38"
+                      height="38"
+                      viewBox="0 0 100 100"
+                      style="display: block; margin: 0 auto 2px auto"
+                    >
+                      <path
+                        d="M20 60Q35 45 50 50Q65 55 80 40V80Q65 65 50 70Q35 75 20 60Z"
+                        fill="#16a34a"
+                        stroke="#166534"
+                        stroke-width="3"
+                      />
+                      <circle cx="40" cy="55" r="3" fill="#166534" />
+                      <circle cx="60" cy="50" r="3" fill="#166534" />
+                    </svg>
+                    LAND
+                  </div>
+                  <div class="dice-face">
+                    <!-- Fluss-Icon -->
+                    <svg
+                      width="38"
+                      height="38"
+                      viewBox="0 0 100 100"
+                      style="display: block; margin: 0 auto 2px auto"
+                    >
+                      <path
+                        d="M20 50Q30 40 40 55Q50 70 60 55Q70 40 80 50V70Q70 60 60 70Q50 80 40 70Q30 60 20 70Z"
+                        fill="#38bdf8"
+                        stroke="#075985"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M30 55L35 60M50 60L55 55M70 55L65 60"
+                        stroke="#075985"
+                        stroke-width="2"
+                      />
+                    </svg>
+                    FLUSS
+                  </div>
+                  <div class="dice-face">
+                    <!-- Name-Icon -->
+                    <svg
+                      width="38"
+                      height="38"
+                      viewBox="0 0 100 100"
+                      style="display: block; margin: 0 auto 2px auto"
+                    >
+                      <rect
+                        x="30"
+                        y="30"
+                        width="40"
+                        height="40"
+                        rx="5"
+                        stroke="#9333ea"
+                        stroke-width="4"
+                        fill="none"
+                      />
+                      <path
+                        d="M40 45V65M40 50H55M45 55L55 65"
+                        stroke="#9333ea"
+                        stroke-width="3"
+                      />
+                      <circle cx="65" cy="40" r="3" fill="#9333ea" />
+                    </svg>
+                    NAME
+                  </div>
+                  <div class="dice-face">
+                    <!-- Tier-Icon -->
+                    <svg
+                      width="38"
+                      height="38"
+                      viewBox="0 0 100 100"
+                      style="display: block; margin: 0 auto 2px auto"
+                    >
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="25"
+                        fill="#fbbf24"
+                        stroke="#d97706"
+                        stroke-width="3"
+                      />
+                      <circle cx="40" cy="45" r="3" fill="#d97706" />
+                      <circle cx="60" cy="45" r="3" fill="#d97706" />
+                      <path
+                        d="M45 60Q50 65 55 60"
+                        stroke="#d97706"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M35 40L25 35M65 40L75 35"
+                        stroke="#d97706"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    TIER
+                  </div>
+                  <div class="dice-face">
+                    <!-- Jackpot-Icon -->
+                    <svg
+                      width="38"
+                      height="38"
+                      viewBox="0 0 100 100"
+                      style="display: block; margin: 0 auto 2px auto"
+                    >
+                      <path
+                        d="M40 35L50 25L60 35V65L50 75L40 65V35Z"
+                        fill="#fde047"
+                        stroke="#ca8a04"
+                        stroke-width="3"
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="10"
+                        fill="#facc15"
+                        stroke="#ca8a04"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M50 40L53 47L60 48L55 53L56 60L50 57L44 60L45 53L40 48L47 47L50 40Z"
+                        fill="#ca8a04"
+                      />
+                      <path
+                        d="M30 30L35 25M70 30L65 25"
+                        stroke="#facc15"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    JACKPOT
+                  </div>
                 </div>
               </div>
               <button
