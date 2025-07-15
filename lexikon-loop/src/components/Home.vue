@@ -505,6 +505,7 @@ const router = useRouter();
   .main-footer {
     font-size: 0.93rem;
     margin-top: 0.7rem;
+    padding: 1rem;
   }
   .play-btn {
     font-size: 0.98rem;
