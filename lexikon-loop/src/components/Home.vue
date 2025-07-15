@@ -216,42 +216,42 @@
           Blitzrunde mit JACKPOT!-Würfen.
         </p>
       </section>
-
+      <section>
+        <button class="play-btn" @click="router.push('/protected')">
+          Jetzt spielen
+        </button>
+        <div class="pdf-link-wrapper">
+          <a
+            href="/assets/Lexikon-Loop-Anleitung.pdf"
+            target="_blank"
+            rel="noopener"
+            class="pdf-link"
+          >
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <rect
+                x="3"
+                y="3"
+                width="16"
+                height="16"
+                rx="3"
+                stroke="#2563eb"
+                stroke-width="2"
+              />
+              <path
+                d="M7 8h5M7 11h8M7 14h8"
+                stroke="#2563eb"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+            Anleitung als PDF öffnen
+          </a>
+        </div>
+      </section>
       <footer class="main-footer">
-        <p>Viel Spaß beim kreativen Wortketten-Bildung! 🚀✏️</p>
-        <p>Spielregeln © Boris Horn, 2025</p>
-        <p>Druckempfehlung: Auf festem Papier (120-160 g/m²) ausdrucken</p>
+        <p>Viel Spaß beim kreativen Wortketten-Bilden! 🚀✏️</p>
+        <p class="text-[8px]">© Boris Horn - 2025</p>
       </footer>
-    </div>
-    <button class="play-btn" @click="router.push('/protected')">
-      Jetzt spielen
-    </button>
-    <div class="pdf-link-wrapper">
-      <a
-        href="/assets/Lexikon-Loop-Anleitung.pdf"
-        target="_blank"
-        rel="noopener"
-        class="pdf-link"
-      >
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <rect
-            x="3"
-            y="3"
-            width="16"
-            height="16"
-            rx="3"
-            stroke="#2563eb"
-            stroke-width="2"
-          />
-          <path
-            d="M7 8h5M7 11h8M7 14h8"
-            stroke="#2563eb"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-        Anleitung als PDF öffnen
-      </a>
     </div>
   </div>
 </template>
@@ -265,7 +265,7 @@ const router = useRouter();
 .home-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e3eaff 100%);
-  padding: 0 0 3.5rem 0;
+  padding: 0 0 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -293,9 +293,7 @@ const router = useRouter();
   margin-bottom: 2.2rem;
   padding: 2.2rem 1rem 1.5rem;
   color: #2563eb;
-  border-radius: 22px;
-  box-shadow: 0 4px 16px #3c50b41a;
-  background: linear-gradient(90deg, #e3eaff 60%, #f8fafc 100%);
+  background: #fff;
 }
 .main-header h1 {
   font-size: 2.1rem;
@@ -484,7 +482,7 @@ const router = useRouter();
   .main-wrapper {
     max-width: 100%;
     width: 100%;
-    padding: 0.7rem 0.2rem 1.2rem 0.2rem;
+    padding: 0.7rem 0rem 1.2rem 0rem;
     border-radius: 10px;
     box-sizing: border-box;
   }
