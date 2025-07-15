@@ -377,6 +377,30 @@ function handleKeydown(e: KeyboardEvent) {
             <h1 class="game-title-animated">Lexikon-Loop</h1>
             <div class="subtitle-animated">Das digitale Wortketten-Spiel</div>
           </header>
+          <div class="icons-link-btn-wrapper">
+            <button
+              class="icons-link-btn"
+              @click="router.push('/icons')"
+              title="Alle Icons anzeigen"
+            >
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="10"
+                  stroke="#2563eb"
+                  stroke-width="2"
+                />
+                <path
+                  d="M7 11h8M11 7v8"
+                  stroke="#2563eb"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <span class="icons-link-text">Icons</span>
+            </button>
+          </div>
           <!-- Timer-Einstellung -->
           <div
             class="timer-settings flex flex-wrap gap-2 justify-center items-center mb-2"
@@ -1733,5 +1757,34 @@ function handleKeydown(e: KeyboardEvent) {
   .reset-all-text {
     font-size: 0.97rem;
   }
+}
+.icons-link-btn-wrapper {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  z-index: 10;
+}
+.icons-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f1f5f9;
+  border: 1.5px solid #2563eb;
+  border-radius: 1.5rem;
+  padding: 0.4rem 1.1rem 0.4rem 0.7rem;
+  color: #2563eb;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #2563eb11;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.icons-link-btn:hover {
+  background: #e0e7ef;
+  box-shadow: 0 4px 16px #2563eb22;
+}
+.icons-link-text {
+  font-size: 1rem;
+  font-weight: 500;
 }
 </style>

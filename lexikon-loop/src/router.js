@@ -3,6 +3,7 @@ import Home from './components/Home.vue';
 import Login from './components/Login.vue';
 
 const ProtectedPage = () => import('./components/ProtectedPage.vue');
+const IconsPage = () => import('./components/IconsPage.vue');
 
 const routes = [
   {
@@ -21,6 +22,7 @@ const routes = [
     component: ProtectedPage,
     meta: {requiresAuth: true},
   },
+  {path: '/icons', name: 'Icons', component: IconsPage},
 ];
 
 const router = createRouter({
