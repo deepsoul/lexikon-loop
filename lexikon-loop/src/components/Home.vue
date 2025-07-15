@@ -1,3 +1,8 @@
+<script lang="ts" setup>
+import {useRouter} from 'vue-router';
+import Logo from './Logo.vue';
+const router = useRouter();
+</script>
 <template>
   <div class="home-container">
     <div class="main-wrapper">
@@ -247,6 +252,34 @@
             Anleitung als PDF öffnen
           </a>
         </div>
+        <div class="shop-link-wrapper">
+          <a href="/shop" class="shop-link">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <rect
+                x="3"
+                y="6"
+                width="16"
+                height="13"
+                rx="4"
+                stroke="#2563eb"
+                stroke-width="2"
+              />
+              <rect
+                x="7"
+                y="3"
+                width="8"
+                height="6"
+                rx="2"
+                fill="#fbbf24"
+                stroke="#2563eb"
+                stroke-width="2"
+              />
+              <circle cx="8" cy="17" r="1.2" fill="#2563eb" />
+              <circle cx="14" cy="17" r="1.2" fill="#2563eb" />
+            </svg>
+            Würfel & Zubehör kaufen
+          </a>
+        </div>
       </section>
       <footer class="main-footer">
         <p>Viel Spaß beim kreativen Wortketten-Bilden! 🚀✏️</p>
@@ -255,12 +288,7 @@
     </div>
   </div>
 </template>
-<script setup>
-import {useRouter} from 'vue-router';
-import Logo from './Logo.vue';
-const router = useRouter();
-// Keine Logik nötig
-</script>
+
 <style lang="scss" scoped>
 .home-container {
   min-height: 100vh;
@@ -432,6 +460,30 @@ const router = useRouter();
   transition: background 0.2s, box-shadow 0.2s;
 }
 .pdf-link:hover {
+  background: #e0e7ef;
+  box-shadow: 0 4px 16px #2563eb22;
+}
+.shop-link-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0 1.5rem 0;
+}
+.shop-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f1f5f9;
+  border: 1.5px solid #2563eb;
+  border-radius: 1.5rem;
+  padding: 0.7rem 1.7rem;
+  color: #2563eb;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: 0 2px 8px #2563eb11;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.shop-link:hover {
   background: #e0e7ef;
   box-shadow: 0 4px 16px #2563eb22;
 }
