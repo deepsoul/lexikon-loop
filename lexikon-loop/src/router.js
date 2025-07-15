@@ -1,6 +1,7 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import Home from './components/Home.vue';
 import Login from './components/Login.vue';
+import NotFound from './components/NotFound.vue';
 
 const ProtectedPage = () => import('./components/ProtectedPage.vue');
 const IconsPage = () => import('./components/IconsPage.vue');
@@ -23,6 +24,7 @@ const routes = [
     meta: {requiresAuth: true},
   },
   {path: '/icons', name: 'Icons', component: IconsPage},
+  {path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound},
 ];
 
 const router = createRouter({
