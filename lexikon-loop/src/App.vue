@@ -1,16 +1,12 @@
 <script setup>
+import Logo from './components/Logo.vue';
 // Keine Logik nötig
 </script>
 
 <template>
   <div class="main-wrapper">
     <header class="main-header">
-      <h1>Lexikon-Loop</h1>
-      <h3>das Buchstaben-Ketten-Würfelspiel</h3>
-      <div class="subtitle">
-        Stadt · Land · Fluss · Name · Tier ·
-        <span class="jackpot-badge">JACKPOT!</span>
-      </div>
+      <Logo />
     </header>
 
     <section class="card">
@@ -36,7 +32,7 @@
         aneinander: Der nächste Begriff muss mit dem letzten Buchstaben des
         vorherigen beginnen.
       </p>
-      <div class="badges">
+      <div class="badges flex flex-col">
         <span class="badge">👥 2-6 Spieler</span>
         <span class="badge">🎂 Ab 10 Jahren</span>
         <span class="badge">⏱ 20-40 Minuten</span>
@@ -48,7 +44,7 @@
       <ol>
         <li>
           <strong>Startspieler würfelt</strong>
-          <ul>
+          <ul class="me-5">
             <li>
               <span class="symbol">🔸</span> Bei
               <strong>Stadt/Land/Fluss/Name/Tier</strong>: Nenne ein passendes

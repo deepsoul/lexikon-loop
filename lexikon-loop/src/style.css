@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   font-family: 'Segoe UI', 'Arial Rounded MT Bold', Arial, Helvetica, sans-serif;
   line-height: 1.7;
@@ -16,7 +20,7 @@
   text-align: center;
   margin-bottom: 2.5rem;
   padding: 2rem 1rem 1.5rem;
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  /* background: linear-gradient(135deg, #6a11cb, #2575fc); */
   color: #fff;
   border-radius: 18px;
   box-shadow: 0 4px 16px #3c50b41a;
@@ -136,7 +140,7 @@ td {
 
 .badge,
 .jackpot-badge {
-  color: #fff;
+  color: #030d1a;
   text-shadow: 0 2px 8px rgba(60, 80, 180, 0.1);
 }
 
@@ -332,5 +336,10 @@ footer,
   .card,
   .tip-box {
     margin-bottom: 0;
+  }
+  ul > li {
+    margin-left: -30px;
+    padding-left: 0;
+    list-style: none;
   }
 }
