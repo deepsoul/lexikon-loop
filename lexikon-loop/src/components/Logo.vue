@@ -1,3 +1,36 @@
+<script setup lang="ts">
+import {onMounted} from 'vue';
+// Sparkle-Effekt für Jackpot generieren
+const createSparkle = () => {
+  const sparksContainer = document.getElementById('sparks');
+  for (let i = 0; i < 15; i++) {
+    const spark = document.createElement('div');
+    spark.classList.add('spark');
+    spark.style.setProperty('--d', (Math.random() * 4).toString());
+    // Explosionsrichtung: zufälliger Winkel und Radius
+    const angle = Math.random() * 2 * Math.PI;
+    const radius = 60 + Math.random() * 40; // 60-100px
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    spark.style.setProperty('--x', `${x}px`);
+    spark.style.setProperty('--y', `${y}px`);
+    const size = Math.random() * 18 + 8;
+    spark.style.width = size + 'px';
+    spark.style.height = size + 'px';
+    spark.style.left = '50%';
+    spark.style.top = '50%';
+    spark.style.background =
+      i % 3 === 0 ? 'gold' : i % 3 === 1 ? '#ff9e00' : 'white';
+    spark.style.borderRadius = '50%'; // Kreis sicherstellen
+    spark.style.position = 'absolute'; // Falls CSS-Scoping greift
+    sparksContainer?.appendChild(spark);
+  }
+};
+
+onMounted(() => {
+  createSparkle();
+});
+</script>
 <template>
   <div class="package">
     <div class="jackpot-effect" id="sparks"></div>
@@ -24,26 +57,8 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
-// Sparkle-Effekt für Jackpot generieren
-const sparksContainer = document.getElementById('sparks');
-for (let i = 0; i < 15; i++) {
-  const spark = document.createElement('div');
-  spark.classList.add('spark');
-  spark.style.setProperty('--d', (Math.random() * 4).toString());
-  spark.style.setProperty('--x', (Math.random() - 0.5) * 800 + 'px');
-  spark.style.setProperty('--y', (Math.random() - 0.5) * 800 + 'px');
-  const size = Math.random() * 30 + 5;
-  spark.style.width = size + 'px';
-  spark.style.height = size + 'px';
-  spark.style.left = Math.random() * 100 + '%';
-  spark.style.top = Math.random() * 100 + '%';
-  spark.style.background =
-    i % 3 === 0 ? 'gold' : i % 3 === 1 ? '#ff9e00' : 'white';
-  sparksContainer?.appendChild(spark);
-}
-</script>
-<style lang="scss" scoped>
+
+<style lang="scss">
 .package {
   //   width: 400px;
   //   height: 400px;
@@ -136,7 +151,7 @@ for (let i = 0; i < 15; i++) {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 1;
+  z-index: 10; /* erhöht */
 }
 
 .spark {
@@ -146,6 +161,10 @@ for (let i = 0; i < 15; i++) {
   opacity: 0.7;
   animation: sparkle 4s infinite;
   animation-delay: calc(var(--d) * -1s);
+  z-index: 11; /* erhöht */
+  left: 50%;
+  top: 50%;
+  /* Start exakt im Zentrum */
 }
 
 @keyframes float {
@@ -174,14 +193,15 @@ for (let i = 0; i < 15; i++) {
 
 @keyframes sparkle {
   0% {
-    transform: translate(0, 0);
-    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
   }
-  50% {
+  80% {
     opacity: 0.7;
   }
   100% {
-    transform: translate(var(--x), var(--y));
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)))
+      scale(0.7);
     opacity: 0;
   }
 }
