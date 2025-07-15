@@ -325,6 +325,54 @@ function setTimerDuration(val: number) {
 
 const isSpeedRound = computed(() => timerDuration.value <= 15);
 
+// Spracherkennung (SpeechRecognition API)
+const isListening = ref(false);
+const recognizedWord = ref('');
+const recognizedFirstLetter = ref('');
+let recognition: any = null;
+
+function startSpeechRecognition() {
+  if (
+    !('webkitSpeechRecognition' in window) &&
+    !('SpeechRecognition' in window)
+  ) {
+    alert('Dein Browser unterstützt keine Spracheingabe.');
+    return;
+  }
+  const SpeechRecognition =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'de-DE';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  isListening.value = true;
+  recognizedWord.value = '';
+  recognizedFirstLetter.value = '';
+  recognition.onresult = (event: any) => {
+    const word = event.results[0][0].transcript.trim();
+    recognizedWord.value = word;
+    // Ersten Buchstaben extrahieren (ohne Sonderzeichen)
+    const match = word.match(/[a-zA-ZäöüÄÖÜß]/);
+    recognizedFirstLetter.value = match ? match[0].toUpperCase() : '';
+    // Beispiel: Setze currentLetter automatisch
+    if (recognizedFirstLetter.value)
+      currentLetter.value = recognizedFirstLetter.value;
+    isListening.value = false;
+  };
+  recognition.onerror = () => {
+    isListening.value = false;
+  };
+  recognition.onend = () => {
+    isListening.value = false;
+  };
+  recognition.start();
+}
+function stopSpeechRecognition() {
+  if (recognition) recognition.stop();
+  isListening.value = false;
+}
+
 watch(players, savePlayers, {deep: true});
 onMounted(() => {
   loadPlayers();
@@ -714,6 +762,27 @@ function handleKeydown(e: KeyboardEvent) {
                 <div class="result-subtext">{{ subResult }}</div>
                 <div class="current-letter-box">
                   <span class="current-letter">{{ currentLetter }}</span>
+                </div>
+                <!-- Spracheingabe-UI -->
+                <div class="speech-section">
+                  <button
+                    class="speech-btn"
+                    @click="
+                      isListening
+                        ? stopSpeechRecognition()
+                        : startSpeechRecognition()
+                    "
+                  >
+                    <span v-if="isListening">🎤 Hören…</span>
+                    <span v-else>🎤 Spracheingabe</span>
+                  </button>
+                  <div v-if="recognizedWord" class="speech-result">
+                    <strong>Erkannt:</strong> {{ recognizedWord }}<br />
+                    <span v-if="recognizedFirstLetter"
+                      ><strong>Erster Buchstabe:</strong>
+                      {{ recognizedFirstLetter }}</span
+                    >
+                  </div>
                 </div>
                 <div
                   class="flex gap-2 justify-center items-center mt-2 timer-controls-animated"
@@ -1989,5 +2058,34 @@ function handleKeydown(e: KeyboardEvent) {
 .add-player-input:focus {
   border: 2px solid #2563eb;
   box-shadow: 0 0 0 2px #2563eb33;
+}
+.speech-section {
+  margin: 1.2rem 0 0.5rem 0;
+  text-align: center;
+}
+.speech-btn {
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 60%,
+    var(--color-accent) 100%
+  );
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 12px var(--color-primary) 22;
+  cursor: pointer;
+  margin-bottom: 0.7rem;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.speech-btn:active {
+  transform: scale(0.97);
+}
+.speech-result {
+  font-size: 1.08rem;
+  color: var(--color-primary);
+  margin-top: 0.3rem;
 }
 </style>
