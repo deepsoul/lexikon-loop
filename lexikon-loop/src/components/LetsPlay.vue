@@ -13,7 +13,7 @@ interface Player {
 const players = ref<Player[]>([]);
 const currentPlayer = ref(0);
 const currentLetter = ref('-');
-const timerOptions = [10, 20, 30, 45];
+const timerOptions = [10, 15, 30, 45];
 const timerDuration = ref(30);
 const timeLeft = ref(timerDuration.value);
 const timerActive = ref(false);
@@ -804,12 +804,10 @@ function handleKeydown(e: KeyboardEvent) {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .page-bg {
   min-height: 100vh;
-  background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -820,7 +818,7 @@ function handleKeydown(e: KeyboardEvent) {
   border-radius: 24px;
   box-shadow: 0 8px 32px rgba(30, 41, 59, 0.1);
   padding: 32px 18px 24px 18px;
-  margin: 32px 0 0 0;
+  margin: 0 0 0 0;
   max-width: 900px;
   width: 100%;
   display: flex;
@@ -1786,5 +1784,14 @@ function handleKeydown(e: KeyboardEvent) {
 .icons-link-text {
   font-size: 1rem;
   font-weight: 500;
+}
+.rules-card {
+  background: #f8fafc;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px #2563eb11;
+  padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+  text-align: left;
 }
 </style>

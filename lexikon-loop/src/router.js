@@ -3,7 +3,7 @@ import Home from './components/Home.vue';
 import Login from './components/Login.vue';
 import NotFound from './components/NotFound.vue';
 
-const ProtectedPage = () => import('./components/ProtectedPage.vue');
+const LetsPlay = () => import('./components/LetsPlay.vue');
 const IconsPage = () => import('./components/IconsPage.vue');
 
 const routes = [
@@ -19,8 +19,8 @@ const routes = [
   },
   {
     path: '/protected',
-    name: 'Protected',
-    component: ProtectedPage,
+    name: 'LetsPlay',
+    component: LetsPlay,
     meta: {requiresAuth: true},
   },
   {path: '/icons', name: 'Icons', component: IconsPage},
