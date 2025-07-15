@@ -74,6 +74,7 @@ for (let i = 0; i < 15; i++) {
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 30px;
   z-index: 3;
+  padding: 0 1rem;
 }
 
 .dice {
