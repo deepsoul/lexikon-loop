@@ -1,17 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;700&family=Lora:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: 'Segoe UI', 'Arial Rounded MT Bold', Arial, Helvetica, sans-serif;
+  --font-headline: 'Playfair Display', serif;
+  --font-body: 'Lora', serif;
+  --font-ui: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --color-primary: #355c7d;
+  --color-accent: #f8b195;
+  --color-bg: #f3f6fa;
+  --color-text: #23243a;
+  font-size: 18px;
   line-height: 1.7;
   font-weight: 400;
   color-scheme: light dark;
-  color: #23243a;
-  background-color: #f3f6fa;
+  color: var(--color-text);
+  background-color: var(--color-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 18px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+h1,
+h2,
+h3,
+.title {
+  font-family: var(--font-headline);
+}
+
+.btn,
+.chip,
+.subtitle,
+.reset-all-btn,
+.reset-all-text,
+.player-chip,
+.chip-name-block,
+.chip-score,
+.roll-btn {
+  font-family: var(--font-ui);
 }

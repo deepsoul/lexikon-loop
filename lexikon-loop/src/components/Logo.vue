@@ -24,7 +24,7 @@
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .package {
   background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
   border-radius: 20px;
@@ -63,6 +63,13 @@ p,
 .dice,
 .dice-face {
   font-family: 'Lora', serif;
+}
+.btn,
+.chip,
+.subtitle,
+.reset-all-btn,
+.reset-all-text {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 .dice {
   width: 100px;

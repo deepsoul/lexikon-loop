@@ -290,12 +290,6 @@ const router = useRouter();
 </template>
 
 <style lang="scss" scoped>
-h1,
-h2,
-h3,
-.title {
-  font-family: 'Playfair Display', serif;
-}
 body,
 p,
 .card,
