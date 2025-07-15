@@ -35,10 +35,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   min-height: 400px;
 }
 .title {
+  font-family: 'Playfair Display', serif;
   font-size: 42px;
   font-weight: bold;
   color: white;
@@ -48,11 +49,20 @@
   text-align: center;
 }
 .subtitle {
+  font-family: 'Playfair Display', serif;
   font-size: 20px;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 30px;
   z-index: 3;
   padding: 0 1rem;
+}
+body,
+p,
+.letter,
+.arrow,
+.dice,
+.dice-face {
+  font-family: 'Lora', serif;
 }
 .dice {
   width: 100px;

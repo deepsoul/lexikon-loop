@@ -290,6 +290,24 @@ const router = useRouter();
 </template>
 
 <style lang="scss" scoped>
+h1,
+h2,
+h3,
+.title {
+  font-family: 'Playfair Display', serif;
+}
+body,
+p,
+.card,
+.main,
+.footer {
+  font-family: 'Lora', serif;
+}
+.btn,
+.chip,
+.subtitle {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
 .home-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e3eaff 100%);
