@@ -1,0 +1,81 @@
+# 🎲 **Buchstaben-Ketten-Würfelspiel**
+*Stadt · Land · Fluss · Name · Tier · JACKPOT!*
+
+## 📦 **Spielmaterial**
+- 1 Spezialwürfel mit den Seiten: **Stadt**, **Land**, **Fluss**, **Name**, **Tier**, **JACKPOT!**
+- Stift und Papier für Punkte
+- Timer (Smartphone oder Sanduhr, optional)
+
+## 🎯 **Spielziel**
+Sammle durch cleveres Wortfinden die meisten Punkte! Kette Begriffe aneinander: Der nächste Begriff muss mit dem letzten Buchstaben des vorherigen beginnen.
+
+## 👥 **Für wen?**
+2–6 Spieler · Ab 10 Jahren · Ca. 20–40 Minuten
+
+## 📜 **Spielablauf**
+1. **Startspieler** würfelt.
+- 🔸 Bei **Stadt/Land/Fluss/Name/Tier**: Nenne ein passendes Beispiel (z. B. Land → "**D**eutschland").
+- 🎰 Bei **JACKPOT!**: Wähle *frei* eine Kategorie und einen Anfangsbuchstaben (z. B. "Für den Jackpot nehme ich TIER mit **Q** → '**Q**uokka'").
+
+2. **Nächster Spieler**:
+- Würfelt erneut.
+- Finde einen Begriff für die gewürfelte Kategorie, der mit dem **letzten Buchstaben** des vorherigen Wortes beginnt.
+*Beispiel:* Vorher "Deutschlan**d**" → Neuer Begriff muss mit **D** starten (z. B. Fluss → "**D**onau").
+
+3. **Runden-Ende**:
+Sobald alle Spieler an der Reihe waren, ist die Runde vorbei. Der nächste Spieler beginnt eine neue Runde mit einem neuen Wurf.
+
+## ✨ **Punkte sammeln**
+| Aktion | Punkte |
+|-------------------------------|--------|
+| Korrekte Antwort | +1 |
+| Antwort auf **JACKPOT!**-Wurf | +2 |
+| Begriff endet auf **Q, X, Y, Ä, Ö, Ü, ß** | +1 Zusatzpunkt |
+| Kettenbruch-Bonus* | +1 |
+
+*\* Wenn niemand nach 30 Sekunden einen Begriff nennen kann, erhält der letzte erfolgreiche Spieler 1 Extrapunkt.*
+
+## ⚠️ **Wichtige Regeln**
+- **Buchstaben-Ketten**:
+- Endet ein Wort auf **ß** → Nächstes Wort beginnt mit **S** (Beispiel: "Straß**e**" → "**E**rft").
+- Endet auf **-tion**, **-ung** etc. → Nimm den letzten **aussprechbaren** Buchstaben (Beispiel: "Lösun**g**" → "**G**abel").
+- Umlaute werden normalisiert: **Ä** = A, **Ö** = O, **Ü** = U.
+- **Gültige Begriffe**:
+Keine Fantasiewörter! Bei Streit: Mehrheitsentscheid.
+- **Zeitlimit**: Max. 30 Sekunden pro Zug (sonst Punktabzug).
+
+## 🏆 **Spielende**
+Nach vereinbarten Runden (z. B. 5 Runden) gewinnt der Spieler mit den meisten Punkten!
+
+---
+
+### 🔍 **Beispielrunde**
+| Spieler | Würfelergebnis | Begriff | Kette | Punkte* |
+|---------|----------------|----------------|-------|---------|
+| Anna | 🎰 **JACKPOT!** (wählt Tier) | "**Q**uokka" | – | +2 |
+| Ben | **Land** | "**A**lbanien" | Q→A | +1 |
+| Clara | **Stadt** | "**N**airobi" | A→N | +1 |
+| David | **Name** | "**I**ris" | N→I | +1 (+1 für **I**-Endung!) |
+
+*\* Mit Bonusmodul "Seltene Endbuchstaben"*
+
+---
+
+### 💡 **Tipps für flüssiges Spielen**
+> - Nutzt die **Jackpot!**-Runden strategisch, um schwierige Buchstaben zu setzen!
+> - Bei Blockaden: Einfach neuen Buchstaben würfeln und weitermachen.
+> - Spielt mit oder ohne Zeitdruck – je nach Gruppe!
+
+---
+
+**Viel Spaß beim kreativen Wortketten-Bildung!** 🚀✏️
+*(Spielregeln © [Dein Name/Spielname] – frei zur Anpassung)*
+
+---
+
+### 🖨️ Drucktipps:
+- Auf festem Papier (120–160 g/m²) ausdrucken
+- Eventuell laminieren
+- In Spielschachtel eingelegt oder als Booklet falten
+- Graue Kästen mit Symbolen lockern das Layout auf
+- Wichtigste Regeln in **Fett** oder <span style="color:green">Grün</span> (wie im Beispiel) hervorheben
