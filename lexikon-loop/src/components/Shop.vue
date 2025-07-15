@@ -162,21 +162,47 @@ const router = useRouter();
   </div>
 </template>
 
-<style scoped>
+<style lang="scss">
 .shop-container {
-  max-width: 540px;
+  max-width: 900px;
   margin: 2.5rem auto 3.5rem auto;
-  background: #fff;
-  border-radius: 2.2rem;
-  box-shadow: 0 8px 32px #2563eb11;
-  padding: 2.5rem 1.5rem 2.5rem 1.5rem;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 32px;
+  box-shadow: 0 8px 32px rgba(60, 80, 180, 0.1);
+  padding: 3.2rem 1.2rem 2.7rem 1.2rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 80vh;
+  justify-content: flex-start;
+  gap: 2.2rem;
+  box-sizing: border-box;
 }
 .shop-title {
   font-size: 2.1rem;
-  color: #2563eb;
+  color: var(--color-primary);
   font-weight: 800;
   margin-bottom: 2.2rem;
+}
+.shop-product-card,
+.shop-order-form {
+  width: 100%;
+  max-width: 700px;
+  background: #fff;
+  color: var(--color-text);
+  border-radius: 22px;
+  box-shadow: 0 2px 12px rgba(60, 80, 180, 0.07);
+  margin-bottom: 0.7rem;
+  padding: 2.1rem 1.5rem 1.7rem 1.5rem;
+  text-align: left;
+  position: relative;
+  transition: box-shadow 0.2s;
+  font-size: 1.01rem;
+  line-height: 1.7;
+  box-sizing: border-box;
+  overflow-x: auto;
+  max-width: 100%;
 }
 .shop-product-card {
   display: flex;
@@ -196,23 +222,23 @@ const router = useRouter();
 }
 .shop-product-info h2 {
   font-size: 1.3rem;
-  color: #2563eb;
+  color: var(--color-primary);
   margin-bottom: 0.7rem;
 }
 .shop-includes {
   list-style: disc inside;
   margin-bottom: 0.7rem;
   font-size: 1.01rem;
-  color: #1e293b;
+  color: var(--color-text);
 }
 .shop-price {
   font-size: 1.25rem;
   font-weight: bold;
-  color: #fbbf24;
+  color: var(--color-accent);
   margin-bottom: 0.2rem;
 }
 .shop-plus {
-  color: #2563eb;
+  color: var(--color-primary);
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -224,35 +250,27 @@ const router = useRouter();
 .shop-order-form {
   margin-top: 2.5rem;
   background: #f8fafc;
-  border-radius: 1.5rem;
-  padding: 2rem 1.2rem 1.2rem 1.2rem;
-  box-shadow: 0 2px 12px #2563eb11;
+  border-radius: 22px;
+  padding: 2.1rem 1.5rem 1.7rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(60, 80, 180, 0.07);
 }
 .shop-order-form h3 {
   font-size: 1.2rem;
-  color: #2563eb;
+  color: var(--color-primary);
   margin-bottom: 1.2rem;
 }
-.shop-address {
+.shop-address,
+.shop-email {
   width: 100%;
   border-radius: 0.7rem;
-  border: 1.5px solid #2563eb33;
+  border: 1.5px solid var(--color-primary);
   padding: 0.7rem 1rem;
   margin-bottom: 1.1rem;
   font-size: 1rem;
   resize: vertical;
 }
-.shop-email {
-  width: 100%;
-  border-radius: 0.7rem;
-  border: 1.5px solid #2563eb33;
-  padding: 0.7rem 1rem;
-  margin-bottom: 1.1rem;
-  font-size: 1rem;
-}
 .shop-pay-methods {
-  margin-bottom: 1.2rem;
-  text-align: left;
+  margin: 1.2rem 0 1.2rem 0;
 }
 .shop-pay-icons {
   display: flex;
@@ -260,24 +278,140 @@ const router = useRouter();
   margin-top: 0.5rem;
 }
 .shop-order-btn {
-  background: linear-gradient(90deg, #2563eb 60%, #fbbf24 100%);
-  color: #fff;
-  font-size: 1.1rem;
+  display: block;
+  margin: 2.2rem auto 0 auto;
+  padding: 1.1rem 2.2rem;
+  font-size: 1.15rem;
   font-weight: bold;
+  color: #fff;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 60%,
+    var(--color-accent) 100%
+  );
   border: none;
-  border-radius: 1.5rem;
-  padding: 1rem 2.2rem;
+  border-radius: 2rem;
+  box-shadow: 0 4px 24px var(--color-primary) 33, 0 0 0 0 var(--color-accent) 44;
   cursor: pointer;
-  box-shadow: 0 2px 12px #2563eb22;
   transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
-  margin-top: 0.7rem;
 }
 .shop-order-btn:active {
   transform: scale(0.97);
 }
 .shop-note {
-  color: #64748b;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
+  color: #888;
   margin-top: 1.2rem;
+  text-align: center;
+}
+@media (max-width: 700px) {
+  .shop-container {
+    max-width: 100%;
+    width: 100%;
+    padding: 1.2rem 0.7rem 2.5rem 0.7rem;
+    gap: 1.7rem;
+    border-radius: 18px;
+    box-sizing: border-box;
+  }
+  .shop-product-card,
+  .shop-order-form {
+    max-width: 100%;
+    width: 100%;
+    padding: 1.2rem 0.8rem 1.1rem 0.8rem;
+    border-radius: 14px;
+    font-size: 0.98rem;
+    box-sizing: border-box;
+  }
+  .shop-product-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.1rem;
+  }
+  .shop-product-img {
+    justify-content: center;
+    margin-bottom: 0.7rem;
+  }
+  .shop-product-img svg {
+    width: 64px;
+    height: 64px;
+  }
+  .shop-title {
+    font-size: 1.45rem;
+  }
+  .shop-product-info h2 {
+    font-size: 1.08rem;
+  }
+  .shop-includes {
+    font-size: 0.97rem;
+  }
+  .shop-price {
+    font-size: 1.08rem;
+  }
+  .shop-order-form h3 {
+    font-size: 1.05rem;
+  }
+  .shop-address,
+  .shop-email {
+    font-size: 0.97rem;
+    padding: 0.6rem 0.7rem;
+    border-radius: 0.5rem;
+  }
+  .shop-order-btn {
+    font-size: 1.01rem;
+    padding: 0.9rem 1.3rem;
+    border-radius: 1.2rem;
+  }
+  .shop-pay-icons svg {
+    width: 26px;
+    height: 26px;
+  }
+}
+@media (max-width: 430px) {
+  .shop-container {
+    max-width: 100%;
+    width: 100%;
+    padding: 0.7rem 0rem 1.2rem 0rem;
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+  .shop-product-card,
+  .shop-order-form {
+    max-width: 100%;
+    width: 100%;
+    padding: 0.7rem 0.3rem 0.7rem 0.3rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+  }
+  .shop-title {
+    font-size: 1.08rem;
+  }
+  .shop-product-info h2 {
+    font-size: 0.97rem;
+  }
+  .shop-includes {
+    font-size: 0.93rem;
+  }
+  .shop-price {
+    font-size: 0.97rem;
+  }
+  .shop-order-form h3 {
+    font-size: 0.97rem;
+  }
+  .shop-address,
+  .shop-email {
+    font-size: 0.93rem;
+    padding: 0.5rem 0.5rem;
+    border-radius: 0.3rem;
+  }
+  .shop-order-btn {
+    font-size: 0.93rem;
+    padding: 0.7rem 0.7rem;
+    border-radius: 0.7rem;
+  }
+  .shop-pay-icons svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 </style>
