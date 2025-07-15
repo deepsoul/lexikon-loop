@@ -469,6 +469,52 @@ function handleKeydown(e: KeyboardEvent) {
               ＋
             </button>
           </div>
+          <div
+            class="reset-all-container flex items-center justify-center mb-4"
+          >
+            <button
+              class="reset-all-btn"
+              @click="resetAllPlayers"
+              title="Alle Spieler & Punkte löschen"
+            >
+              <svg
+                class="reset-all-icon"
+                width="28"
+                height="28"
+                viewBox="0 0 28 28"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  x="2"
+                  y="14"
+                  width="24"
+                  height="10"
+                  rx="4"
+                  fill="#fbbf24"
+                />
+                <rect x="7" y="6" width="14" height="8" rx="4" fill="#2563eb" />
+                <path
+                  d="M9 8l2 2 4-4 4 4"
+                  stroke="#fff"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <rect
+                  x="12"
+                  y="18"
+                  width="4"
+                  height="4"
+                  rx="2"
+                  fill="#fffbe8"
+                />
+              </svg>
+              <span class="reset-all-text"
+                >Alle Spieler & Punkte zurücksetzen</span
+              >
+            </button>
+          </div>
           <!-- Hauptbereich: Würfel, Ergebnis, Steuerung -->
           <div
             class="flex flex-col md:flex-row gap-6 items-center justify-center"
@@ -485,199 +531,11 @@ function handleKeydown(e: KeyboardEvent) {
                   <div class="dice-face">JACKPOT</div>
                 </div>
               </div>
-              <div class="timer-circle mb-2">
-                <svg width="80" height="80">
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="#e5e7eb"
-                    stroke-width="8"
-                    fill="none"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    :stroke="
-                      timeLeft <= 10
-                        ? '#ef4444'
-                        : timeLeft <= 20
-                        ? '#fde047'
-                        : '#16a34a'
-                    "
-                    stroke-width="8"
-                    fill="none"
-                    :stroke-dasharray="2 * Math.PI * 36"
-                    :stroke-dashoffset="
-                      2 * Math.PI * 36 * (1 - timeLeft / timerDuration)
-                    "
-                    stroke-linecap="round"
-                    style="transition: stroke-dashoffset 1s linear"
-                  />
-                </svg>
-                <span class="timer-value">{{ timeLeft }}s</span>
-              </div>
-              <div
-                class="flex gap-2 justify-center items-center mt-2 timer-controls-animated"
-              >
-                <button
-                  class="timer-btn-main"
-                  :class="{'timer-btn-glow': timerActive}"
-                  @click="toggleTimer"
-                  aria-label="Timer starten/stoppen"
-                >
-                  <span v-if="timerActive" class="timer-icon">
-                    <svg
-                      width="38"
-                      height="38"
-                      viewBox="0 0 38 38"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <rect
-                        x="8"
-                        y="7"
-                        width="7"
-                        height="24"
-                        rx="2.5"
-                        fill="white"
-                        filter="url(#shadow)"
-                      />
-                      <rect
-                        x="23"
-                        y="7"
-                        width="7"
-                        height="24"
-                        rx="2.5"
-                        fill="white"
-                        filter="url(#shadow)"
-                      />
-                      <defs>
-                        <filter
-                          id="shadow"
-                          x="0"
-                          y="0"
-                          width="38"
-                          height="38"
-                          filterUnits="userSpaceOnUse"
-                        >
-                          <feDropShadow
-                            dx="0"
-                            dy="1"
-                            stdDeviation="2"
-                            flood-color="#1e293b"
-                            flood-opacity="0.25"
-                          />
-                        </filter>
-                      </defs>
-                    </svg>
-                  </span>
-                  <span v-else class="timer-icon">
-                    <svg
-                      width="38"
-                      height="38"
-                      viewBox="0 0 38 38"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <polygon
-                        points="10,7 30,19 10,31"
-                        fill="white"
-                        filter="url(#shadow)"
-                      />
-                      <defs>
-                        <filter
-                          id="shadow"
-                          x="0"
-                          y="0"
-                          width="38"
-                          height="38"
-                          filterUnits="userSpaceOnUse"
-                        >
-                          <feDropShadow
-                            dx="0"
-                            dy="1"
-                            stdDeviation="2"
-                            flood-color="#1e293b"
-                            flood-opacity="0.25"
-                          />
-                        </filter>
-                      </defs>
-                    </svg>
-                  </span>
-                </button>
-                <button
-                  class="timer-btn-reset"
-                  @click="resetGameTimer"
-                  aria-label="Timer zurücksetzen"
-                >
-                  <span class="timer-icon-reset">
-                    <svg
-                      width="32"
-                      height="32"
-                      viewBox="0 0 32 32"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="13"
-                        stroke="white"
-                        stroke-width="3"
-                        filter="url(#resetshadow)"
-                        fill="none"
-                      />
-                      <path
-                        d="M16 5v5l4-4"
-                        stroke="white"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        filter="url(#resetshadow)"
-                      />
-                      <defs>
-                        <filter
-                          id="resetshadow"
-                          x="0"
-                          y="0"
-                          width="32"
-                          height="32"
-                          filterUnits="userSpaceOnUse"
-                        >
-                          <feDropShadow
-                            dx="0"
-                            dy="1"
-                            stdDeviation="2"
-                            flood-color="#1e293b"
-                            flood-opacity="0.25"
-                          />
-                        </filter>
-                      </defs>
-                    </svg>
-                  </span>
-                </button>
-              </div>
-            </div>
-            <!-- Ergebnis & Steuerung -->
-            <div
-              class="result-card flex flex-col items-center gap-4 w-full max-w-md"
-            >
-              <div
-                class="result-text flex justify-center"
-                :class="{'jackpot-animation': isJackpot}"
-              >
-                <span> {{ resultText }}</span>
-              </div>
-              <div class="result-subtext">{{ subResult }}</div>
-              <div class="current-letter-box">
-                <span class="current-letter">{{ currentLetter }}</span>
-              </div>
               <button
-                class="roll-btn w-full"
+                class="roll-btn mt-2"
                 :disabled="rolling"
                 @click="rollDice"
+                style="width: 100%; max-width: 260px; align-self: center"
               >
                 <span v-if="rolling">🎲 Würfelt...</span>
                 <span v-else-if="resultText === 'Bereit zum Würfeln!'"
@@ -685,33 +543,189 @@ function handleKeydown(e: KeyboardEvent) {
                 >
                 <span v-else>🎲 NEU WÜRFELN</span>
               </button>
-              <div class="player-controls flex gap-2 w-full justify-center">
-                <button
-                  class="control-btn flex-1"
-                  @click="switchPlayer('prev')"
+              <!-- Ergebnis & Steuerung -->
+              <div
+                class="result-card flex flex-col items-center gap-4 w-full max-w-md"
+              >
+                <div
+                  class="result-text flex justify-center"
+                  :class="{'jackpot-animation': isJackpot}"
                 >
-                  ← Vorheriger
-                </button>
-                <button
-                  class="control-btn flex-1"
-                  @click="switchPlayer('next')"
+                  <span> {{ resultText }}</span>
+                </div>
+                <div class="result-subtext">{{ subResult }}</div>
+                <div class="current-letter-box">
+                  <span class="current-letter">{{ currentLetter }}</span>
+                </div>
+                <div
+                  class="flex gap-2 justify-center items-center mt-2 timer-controls-animated"
                 >
-                  Nächster →
-                </button>
-              </div>
-              <div class="points-container flex gap-2 w-full justify-center">
-                <button class="points-btn flex-1" @click="addPoints(1)">
-                  +1 Punkt
-                </button>
-                <button class="points-btn flex-1" @click="addPoints(2)">
-                  +2 Punkte
-                </button>
-                <button class="points-btn flex-1" @click="addPoints(-1)">
-                  -1 Punkt
-                </button>
-                <button class="points-btn flex-1" @click="resetPoints">
-                  Punkte zurücksetzen
-                </button>
+                  <button
+                    class="timer-btn-main"
+                    :class="{'timer-btn-glow': timerActive}"
+                    @click="toggleTimer"
+                    aria-label="Timer starten/stoppen"
+                  >
+                    <span v-if="timerActive" class="timer-icon">
+                      <svg
+                        width="38"
+                        height="38"
+                        viewBox="0 0 38 38"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          x="8"
+                          y="7"
+                          width="7"
+                          height="24"
+                          rx="2.5"
+                          fill="white"
+                          filter="url(#shadow)"
+                        />
+                        <rect
+                          x="23"
+                          y="7"
+                          width="7"
+                          height="24"
+                          rx="2.5"
+                          fill="white"
+                          filter="url(#shadow)"
+                        />
+                        <defs>
+                          <filter
+                            id="shadow"
+                            x="0"
+                            y="0"
+                            width="38"
+                            height="38"
+                            filterUnits="userSpaceOnUse"
+                          >
+                            <feDropShadow
+                              dx="0"
+                              dy="1"
+                              stdDeviation="2"
+                              flood-color="#1e293b"
+                              flood-opacity="0.25"
+                            />
+                          </filter>
+                        </defs>
+                      </svg>
+                    </span>
+                    <span v-else class="timer-icon">
+                      <svg
+                        width="38"
+                        height="38"
+                        viewBox="0 0 38 38"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <polygon
+                          points="10,7 30,19 10,31"
+                          fill="white"
+                          filter="url(#shadow)"
+                        />
+                        <defs>
+                          <filter
+                            id="shadow"
+                            x="0"
+                            y="0"
+                            width="38"
+                            height="38"
+                            filterUnits="userSpaceOnUse"
+                          >
+                            <feDropShadow
+                              dx="0"
+                              dy="1"
+                              stdDeviation="2"
+                              flood-color="#1e293b"
+                              flood-opacity="0.25"
+                            />
+                          </filter>
+                        </defs>
+                      </svg>
+                    </span>
+                  </button>
+                  <button
+                    class="timer-btn-reset"
+                    @click="resetGameTimer"
+                    aria-label="Timer zurücksetzen"
+                  >
+                    <span class="timer-icon-reset">
+                      <svg
+                        width="32"
+                        height="32"
+                        viewBox="0 0 32 32"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="13"
+                          stroke="white"
+                          stroke-width="3"
+                          filter="url(#resetshadow)"
+                          fill="none"
+                        />
+                        <path
+                          d="M16 5v5l4-4"
+                          stroke="white"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          filter="url(#resetshadow)"
+                        />
+                        <defs>
+                          <filter
+                            id="resetshadow"
+                            x="0"
+                            y="0"
+                            width="32"
+                            height="32"
+                            filterUnits="userSpaceOnUse"
+                          >
+                            <feDropShadow
+                              dx="0"
+                              dy="1"
+                              stdDeviation="2"
+                              flood-color="#1e293b"
+                              flood-opacity="0.25"
+                            />
+                          </filter>
+                        </defs>
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+                <div class="player-controls flex gap-2 w-full justify-center">
+                  <button
+                    class="control-btn flex-1"
+                    @click="switchPlayer('prev')"
+                  >
+                    ← Vorheriger
+                  </button>
+                  <button
+                    class="control-btn flex-1"
+                    @click="switchPlayer('next')"
+                  >
+                    Nächster →
+                  </button>
+                </div>
+                <div class="points-container flex gap-2 w-full justify-center">
+                  <button class="points-btn flex-1" @click="addPoints(1)">
+                    +1 Punkt
+                  </button>
+                  <button class="points-btn flex-1" @click="addPoints(2)">
+                    +2 Punkte
+                  </button>
+                  <button class="points-btn flex-1" @click="addPoints(-1)">
+                    -1 Punkt
+                  </button>
+                  <button class="points-btn flex-1" @click="resetPoints">
+                    Punkte zurücksetzen
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -766,13 +780,6 @@ function handleKeydown(e: KeyboardEvent) {
           </div>
         </div>
         <!-- Reset Button Floating -->
-        <button
-          class="reset-fab"
-          @click="resetAllPlayers"
-          title="Alle Spieler & Punkte löschen"
-        >
-          🧹
-        </button>
         <button class="back-home-btn" @click="router.push('/')">
           Zurück zur Startseite
         </button>
@@ -1687,5 +1694,57 @@ function handleKeydown(e: KeyboardEvent) {
   padding: 0.5em 1.2em;
   display: inline-block;
   box-shadow: 0 2px 8px #ef444422;
+}
+.reset-all-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+}
+.reset-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  background: linear-gradient(90deg, #fbbf24 60%, #2563eb 100%);
+  color: #fff;
+  border: none;
+  border-radius: 2.2em;
+  padding: 0.9em 1.7em;
+  font-size: 1.08rem;
+  font-weight: 600;
+  box-shadow: 0 2px 12px #2563eb22;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  outline: none;
+  margin: 0 auto;
+}
+.reset-all-btn:active {
+  transform: scale(0.97);
+}
+.reset-all-icon {
+  width: 28px;
+  height: 28px;
+  margin-right: 0.3em;
+  filter: drop-shadow(0 2px 6px #fbbf2422);
+}
+.reset-all-text {
+  color: #fffbe8;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-size: 1.08rem;
+  text-shadow: 0 1px 4px #2563eb33;
+}
+@media (max-width: 700px) {
+  .reset-all-btn {
+    font-size: 0.97rem;
+    padding: 0.7em 1.1em;
+  }
+  .reset-all-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .reset-all-text {
+    font-size: 0.97rem;
+  }
 }
 </style>
