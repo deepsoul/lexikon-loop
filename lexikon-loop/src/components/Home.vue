@@ -226,6 +226,33 @@
     <button class="play-btn" @click="router.push('/protected')">
       Jetzt spielen
     </button>
+    <div class="pdf-link-wrapper">
+      <a
+        href="/assets/Lexikon-Loop-Anleitung.pdf"
+        target="_blank"
+        rel="noopener"
+        class="pdf-link"
+      >
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect
+            x="3"
+            y="3"
+            width="16"
+            height="16"
+            rx="3"
+            stroke="#2563eb"
+            stroke-width="2"
+          />
+          <path
+            d="M7 8h5M7 11h8M7 14h8"
+            stroke="#2563eb"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+        Anleitung als PDF öffnen
+      </a>
+    </div>
   </div>
 </template>
 <script setup>
@@ -385,6 +412,30 @@ const router = useRouter();
 }
 .play-btn:active {
   transform: scale(0.97);
+}
+.pdf-link-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 2.5rem 0 1.5rem 0;
+}
+.pdf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f1f5f9;
+  border: 1.5px solid #2563eb;
+  border-radius: 1.5rem;
+  padding: 0.7rem 1.7rem;
+  color: #2563eb;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: 0 2px 8px #2563eb11;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.pdf-link:hover {
+  background: #e0e7ef;
+  box-shadow: 0 4px 16px #2563eb22;
 }
 @media (max-width: 700px) {
   .main-wrapper {
