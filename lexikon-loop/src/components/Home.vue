@@ -222,7 +222,7 @@ const router = useRouter();
         </p>
       </section>
       <section>
-        <button class="play-btn" @click="router.push('/protected')">
+        <button class="play-btn" @click="router.push('/lets-play')">
           Jetzt spielen
         </button>
         <div class="pdf-link-wrapper">

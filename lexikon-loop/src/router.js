@@ -19,8 +19,8 @@ const routes = [
     component: Login,
   },
   {
-    path: '/protected',
-    name: 'Protected',
+    path: '/lets-play',
+    name: 'LetsPlay',
     component: LetsPlay,
     meta: {requiresAuth: true},
   },

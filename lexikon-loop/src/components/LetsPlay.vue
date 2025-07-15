@@ -28,11 +28,6 @@ const showAddPlayer = ref(false);
 const newPlayerName = ref('');
 const editingPlayerIndex = ref<number | null>(null);
 const editingPlayerName = ref('');
-// Entferne showNamesMobile und isDesktop
-
-function toggleNamesMobile() {
-  // Entferne showNamesMobile und isDesktop
-}
 
 const categories = [
   {name: 'STADT', description: 'Nenne eine Stadt (z.B. Berlin)'},
@@ -355,22 +350,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 <template>
   <div>
-    <div v-if="showCodeDialog" class="code-modal">
-      <div class="code-modal-content">
-        <h2>Seite geschützt</h2>
-        <p>Bitte Code eingeben, um fortzufahren:</p>
-        <input
-          v-model="codeInput"
-          @keyup.enter="checkCode"
-          type="password"
-          maxlength="8"
-          autofocus
-        />
-        <button @click="checkCode">Bestätigen</button>
-        <div v-if="codeError" class="code-error">Falscher Code!</div>
-      </div>
-    </div>
-    <div v-else>
+    <div>
       <div class="page-bg">
         <div class="main-card">
           <header class="header-animated">
@@ -875,6 +855,19 @@ function handleKeydown(e: KeyboardEvent) {
                       </svg>
                     </span>
                   </button>
+                </div>
+                <!-- TIMER-ANZEIGE WIEDER EINFÜGEN -->
+                <div
+                  v-if="timerActive || timeLeft < timerDuration"
+                  class="timer-container"
+                >
+                  <div class="timer-display">{{ timeLeft }}s</div>
+                  <div class="timer-bar">
+                    <div
+                      class="timer-progress"
+                      :style="timerProgressStyle"
+                    ></div>
+                  </div>
                 </div>
                 <div class="player-controls flex gap-2 w-full justify-center">
                   <button
@@ -1959,5 +1952,42 @@ function handleKeydown(e: KeyboardEvent) {
   margin-top: 2.5rem;
   margin-bottom: 2.5rem;
   text-align: left;
+}
+.add-player-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 41, 59, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+.add-player-card {
+  background: #fff;
+  border-radius: 2.2rem;
+  box-shadow: 0 8px 32px #2563eb33, 0 2px 24px #fbbf2444;
+  padding: 2.5rem 2rem 2rem 2rem;
+  min-width: 320px;
+  text-align: center;
+  position: relative;
+  animation: popIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.add-player-input {
+  width: 80%;
+  font-size: 1.1rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 1.2rem;
+  border: 2px solid #e0e7ef;
+  margin: 1.2rem 0 1.5rem 0;
+  outline: none;
+  box-shadow: 0 2px 12px #2563eb11;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.add-player-input:focus {
+  border: 2px solid #2563eb;
+  box-shadow: 0 0 0 2px #2563eb33;
 }
 </style>
