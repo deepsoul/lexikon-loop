@@ -982,7 +982,6 @@ function handleKeydown(e: KeyboardEvent) {
   height: 200px;
   margin: 20px auto;
   position: relative;
-  perspective: 1000px;
 }
 
 .dice {
