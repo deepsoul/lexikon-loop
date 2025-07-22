@@ -380,9 +380,9 @@
                   </button>
                   <div v-if="recognizedWord" class="speech-result">
                     <strong>Erkannt:</strong> {{ recognizedWord }}<br />
-                    <span v-if="recognizedFirstLetter"
+                    <span v-if="recognizedLastLetter"
                       ><strong>Letzter Buchstabe:</strong>
-                      {{ recognizedFirstLetter }}</span
+                      {{ recognizedLastLetter }}</span
                     >
                   </div>
                 </div>
@@ -960,7 +960,7 @@ const isSpeedRound = computed(() => timerDuration.value <= 15);
 // Spracherkennung (SpeechRecognition API)
 const isListening = ref(false);
 const recognizedWord = ref('');
-const recognizedFirstLetter = ref('');
+const recognizedLastLetter = ref('');
 let recognition: any = null;
 
 function startSpeechRecognition() {
@@ -980,16 +980,16 @@ function startSpeechRecognition() {
   recognition.maxAlternatives = 1;
   isListening.value = true;
   recognizedWord.value = '';
-  recognizedFirstLetter.value = '';
+  recognizedLastLetter.value = '';
   recognition.onresult = (event: any) => {
     const word = event.results[0][0].transcript.trim();
     recognizedWord.value = word;
     // Letzten Buchstaben extrahieren (ohne Sonderzeichen)
     const match = word.match(/[a-zA-ZäöüÄÖÜß](?=[^a-zA-ZäöüÄÖÜß]*$)/);
-    recognizedFirstLetter.value = match ? match[0].toUpperCase() : '';
+    recognizedLastLetter.value = match ? match[0].toUpperCase() : '';
     // Setze currentLetter automatisch auf den letzten Buchstaben
-    if (recognizedFirstLetter.value)
-      currentLetter.value = recognizedFirstLetter.value;
+    if (recognizedLastLetter.value)
+      currentLetter.value = recognizedLastLetter.value;
     isListening.value = false;
   };
   recognition.onerror = () => {
