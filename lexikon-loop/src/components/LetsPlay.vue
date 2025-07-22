@@ -381,7 +381,7 @@
                   <div v-if="recognizedWord" class="speech-result">
                     <strong>Erkannt:</strong> {{ recognizedWord }}<br />
                     <span v-if="recognizedFirstLetter"
-                      ><strong>Erster Buchstabe:</strong>
+                      ><strong>Letzter Buchstabe:</strong>
                       {{ recognizedFirstLetter }}</span
                     >
                   </div>
