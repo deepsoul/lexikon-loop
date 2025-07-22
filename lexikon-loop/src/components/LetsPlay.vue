@@ -1,401 +1,3 @@
-<script setup lang="ts">
-import {ref, computed, watch, onMounted, onUnmounted} from 'vue';
-import {useRouter} from 'vue-router';
-const router = useRouter();
-
-// Typ für Spieler
-interface Player {
-  name: string;
-  score: number;
-}
-
-// Spieler-Liste mit LocalStorage-Laden
-const players = ref<Player[]>([]);
-const currentPlayer = ref(0);
-const currentLetter = ref('-');
-const timerOptions = [10, 15, 30, 45];
-const timerDuration = ref(30);
-const timeLeft = ref(timerDuration.value);
-const timerActive = ref(false);
-let timerInterval: number | null = null;
-const rolling = ref(false);
-const resultText = ref('Bereit zum Würfeln!');
-const subResult = ref('Klicke auf den Würfeln-Button');
-const isJackpot = ref(false);
-const diceRotation = ref({x: 0, y: 0, z: 0});
-const scorePulse = ref(false);
-const showAddPlayer = ref(false);
-const newPlayerName = ref('');
-const editingPlayerIndex = ref<number | null>(null);
-const editingPlayerName = ref('');
-
-const categories = [
-  {name: 'STADT', description: 'Nenne eine Stadt (z.B. Berlin)'},
-  {name: 'LAND', description: 'Nenne ein Land (z.B. Frankreich)'},
-  {name: 'FLUSS', description: 'Nenne einen Fluss (z.B. Rhein)'},
-  {name: 'NAME', description: 'Nenne einen Vornamen (z.B. Anna)'},
-  {name: 'TIER', description: 'Nenne ein Tier (z.B. Elefant)'},
-  {name: 'JACKPOT', description: 'Wähle KATEGORIE & BUCHSTABEN frei!'},
-];
-
-const rotations = [
-  {x: 4, y: 5, z: 3},
-  {x: -5, y: -4, z: -3},
-  {x: 6, y: -5, z: 4},
-  {x: -4, y: 6, z: -5},
-  {x: 5, y: 3, z: -6},
-  {x: -3, y: -6, z: 5},
-];
-
-const diceTransform = computed(() => {
-  const {x, y, z} = diceRotation.value;
-  return {
-    transform: `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`,
-  };
-});
-
-const timerProgressStyle = computed(() => {
-  const percent = (timeLeft.value / timerDuration.value) * 100;
-  let bg = '#16a34a';
-  if (timeLeft.value <= 10) bg = '#ef4444';
-  else if (timeLeft.value <= 20) bg = '#fde047';
-  return {
-    width: percent + '%',
-    background: bg,
-  };
-});
-
-function playSound(type: 'roll' | 'success' | 'jackpot' | 'timer') {
-  // @ts-ignore
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = ctx.createOscillator();
-  const gainNode = ctx.createGain();
-  oscillator.connect(gainNode);
-  gainNode.connect(ctx.destination);
-  switch (type) {
-    case 'roll':
-      oscillator.type = 'sawtooth';
-      oscillator.frequency.setValueAtTime(150, ctx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(
-        0.001,
-        ctx.currentTime + 1,
-      );
-      gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
-      break;
-    case 'success':
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(523.25, ctx.currentTime);
-      oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-      oscillator.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
-      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      break;
-    case 'jackpot':
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(392.0, ctx.currentTime);
-      oscillator.frequency.setValueAtTime(523.25, ctx.currentTime + 0.1);
-      oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
-      oscillator.frequency.setValueAtTime(830.61, ctx.currentTime + 0.3);
-      gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-      break;
-    case 'timer':
-      oscillator.type = 'square';
-      oscillator.frequency.setValueAtTime(440, ctx.currentTime);
-      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-      break;
-  }
-  oscillator.start();
-  oscillator.stop(ctx.currentTime + 0.5);
-}
-
-function switchPlayer(direction: 'next' | 'prev') {
-  if (players.value.length === 0) return;
-  if (direction === 'next') {
-    currentPlayer.value = (currentPlayer.value + 1) % players.value.length;
-  } else {
-    currentPlayer.value =
-      currentPlayer.value === 0
-        ? players.value.length - 1
-        : currentPlayer.value - 1;
-  }
-  playSound('success');
-}
-
-function addPlayer() {
-  showAddPlayer.value = true;
-  newPlayerName.value = '';
-}
-function confirmAddPlayer() {
-  const name =
-    newPlayerName.value.trim() || `Spieler ${players.value.length + 1}`;
-  players.value.push({name, score: 0});
-  currentPlayer.value = players.value.length - 1;
-  showAddPlayer.value = false;
-  newPlayerName.value = '';
-  playSound('success');
-}
-function cancelAddPlayer() {
-  showAddPlayer.value = false;
-  newPlayerName.value = '';
-}
-
-function addPoints(points: number) {
-  if (!players.value.length) return;
-  // Speed-Runde: +2 statt +1 für korrekte Antwort
-  let actualPoints = points;
-  if (points === 1 && isSpeedRound.value) actualPoints = 2;
-  players.value[currentPlayer.value].score += actualPoints;
-  scorePulse.value = true;
-  setTimeout(() => (scorePulse.value = false), 500);
-  if (actualPoints > 0) playSound('success');
-}
-
-function resetPoints() {
-  players.value.forEach((p) => (p.score = 0));
-  playSound('timer');
-}
-
-function toggleTimer() {
-  if (timerActive.value) {
-    stopTimer();
-  } else {
-    startTimer();
-  }
-}
-
-function startTimer() {
-  stopTimer();
-  timeLeft.value = timerDuration.value;
-  timerActive.value = true;
-  timerInterval = window.setInterval(() => {
-    timeLeft.value--;
-    if (timeLeft.value <= 0) {
-      stopTimer();
-      playSound('timer');
-      alert(
-        `Zeit abgelaufen! Spieler ${
-          players.value[currentPlayer.value]?.name ?? ''
-        } ist dran.`,
-      );
-    }
-  }, 1000);
-}
-
-function stopTimer() {
-  if (timerInterval) clearInterval(timerInterval);
-  timerActive.value = false;
-  timerInterval = null;
-}
-
-function resetGameTimer() {
-  stopTimer();
-  timeLeft.value = timerDuration.value;
-}
-
-function rollDice() {
-  if (rolling.value) return;
-  rolling.value = true;
-  playSound('roll');
-  // Animation
-  const randomRotation = Math.floor(Math.random() * 6);
-  const result = Math.floor(Math.random() * 6);
-  const rot = rotations[randomRotation];
-  diceRotation.value = {x: rot.x * 360, y: rot.y * 360, z: rot.z * 360};
-  setTimeout(() => {
-    // Endposition setzen
-    switch (result) {
-      case 0:
-        diceRotation.value = {x: 0, y: 0, z: 0};
-        break;
-      case 1:
-        diceRotation.value = {x: 180, y: 0, z: 0};
-        break;
-      case 2:
-        diceRotation.value = {x: 0, y: 90, z: 0};
-        break;
-      case 3:
-        diceRotation.value = {x: 0, y: -90, z: 0};
-        break;
-      case 4:
-        diceRotation.value = {x: 90, y: 0, z: 0};
-        break;
-      case 5:
-        diceRotation.value = {x: -90, y: 0, z: 0};
-        break;
-    }
-    // Ergebnis anzeigen
-    const category = categories[result];
-    resultText.value = category.name;
-    subResult.value = category.description;
-    isJackpot.value = result === 5;
-    if (isJackpot.value) {
-      resultText.value = '🎰 JACKPOT 🎰';
-      playSound('jackpot');
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      currentLetter.value = letters[Math.floor(Math.random() * 26)];
-    }
-    rolling.value = false;
-    // Timer ggf. neu starten
-    if (timerActive.value) {
-      resetGameTimer();
-      startTimer();
-    }
-  }, 400);
-}
-
-// LocalStorage: Spieler speichern und laden
-const STORAGE_KEY = 'lexikonloop_players_v1';
-function savePlayers() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(players.value));
-}
-function loadPlayers() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (data) {
-    try {
-      const arr = JSON.parse(data);
-      if (
-        Array.isArray(arr) &&
-        arr.every(
-          (p) => typeof p.name === 'string' && typeof p.score === 'number',
-        )
-      ) {
-        players.value = arr;
-        return;
-      }
-    } catch {}
-  }
-  // Fallback: 1 Spieler
-  players.value = [{name: 'Spieler 1', score: 0}];
-}
-
-function resetAllPlayers() {
-  if (confirm('Möchtest du wirklich alle Spieler und Punkte löschen?')) {
-    players.value = [{name: 'Spieler 1', score: 0}];
-    currentPlayer.value = 0;
-    localStorage.removeItem(STORAGE_KEY);
-    playSound('timer');
-  }
-}
-
-function startEditPlayer(i: number) {
-  editingPlayerIndex.value = i;
-  editingPlayerName.value = players.value[i].name;
-}
-function confirmEditPlayer() {
-  if (editingPlayerIndex.value !== null) {
-    const name =
-      editingPlayerName.value.trim() ||
-      `Spieler ${editingPlayerIndex.value + 1}`;
-    players.value[editingPlayerIndex.value].name = name;
-    editingPlayerIndex.value = null;
-    editingPlayerName.value = '';
-    playSound('success');
-  }
-}
-function cancelEditPlayer() {
-  editingPlayerIndex.value = null;
-  editingPlayerName.value = '';
-}
-function deletePlayer(i: number) {
-  if (players.value.length <= 1) return;
-  if (confirm(`Spieler "${players.value[i].name}" wirklich löschen?`)) {
-    players.value.splice(i, 1);
-    if (currentPlayer.value >= players.value.length) currentPlayer.value = 0;
-    playSound('timer');
-  }
-}
-function movePlayer(i: number, dir: 'up' | 'down') {
-  const newIndex = dir === 'up' ? i - 1 : i + 1;
-  if (newIndex < 0 || newIndex >= players.value.length) return;
-  const temp = players.value[i];
-  players.value[i] = players.value[newIndex];
-  players.value[newIndex] = temp;
-  if (currentPlayer.value === i) currentPlayer.value = newIndex;
-  else if (currentPlayer.value === newIndex) currentPlayer.value = i;
-  playSound('success');
-}
-
-function setTimerDuration(val: number) {
-  timerDuration.value = val;
-  timeLeft.value = val;
-}
-
-const isSpeedRound = computed(() => timerDuration.value <= 15);
-
-// Spracherkennung (SpeechRecognition API)
-const isListening = ref(false);
-const recognizedWord = ref('');
-const recognizedFirstLetter = ref('');
-let recognition: any = null;
-
-function startSpeechRecognition() {
-  if (
-    !('webkitSpeechRecognition' in window) &&
-    !('SpeechRecognition' in window)
-  ) {
-    alert('Dein Browser unterstützt keine Spracheingabe.');
-    return;
-  }
-  const SpeechRecognition =
-    (window as any).SpeechRecognition ||
-    (window as any).webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.lang = 'de-DE';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-  isListening.value = true;
-  recognizedWord.value = '';
-  recognizedFirstLetter.value = '';
-  recognition.onresult = (event: any) => {
-    const word = event.results[0][0].transcript.trim();
-    recognizedWord.value = word;
-    // Ersten Buchstaben extrahieren (ohne Sonderzeichen)
-    const match = word.match(/[a-zA-ZäöüÄÖÜß]/);
-    recognizedFirstLetter.value = match ? match[0].toUpperCase() : '';
-    // Beispiel: Setze currentLetter automatisch
-    if (recognizedFirstLetter.value)
-      currentLetter.value = recognizedFirstLetter.value;
-    isListening.value = false;
-  };
-  recognition.onerror = () => {
-    isListening.value = false;
-  };
-  recognition.onend = () => {
-    isListening.value = false;
-  };
-  recognition.start();
-}
-function stopSpeechRecognition() {
-  if (recognition) recognition.stop();
-  isListening.value = false;
-}
-
-watch(players, savePlayers, {deep: true});
-onMounted(() => {
-  loadPlayers();
-  window.addEventListener('keydown', handleKeydown);
-});
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
-});
-
-function handleKeydown(e: KeyboardEvent) {
-  if (showAddPlayer.value) return;
-  if (e.code === 'Space' || e.code === 'Enter') {
-    rollDice();
-  }
-  if (e.code === 'ArrowRight') {
-    switchPlayer('next');
-  }
-  if (e.code === 'ArrowLeft') {
-    switchPlayer('prev');
-  }
-}
-</script>
-
 <template>
   <div>
     <div>
@@ -1027,6 +629,404 @@ function handleKeydown(e: KeyboardEvent) {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import {ref, computed, watch, onMounted, onUnmounted} from 'vue';
+import {useRouter} from 'vue-router';
+const router = useRouter();
+
+// Typ für Spieler
+interface Player {
+  name: string;
+  score: number;
+}
+
+// Spieler-Liste mit LocalStorage-Laden
+const players = ref<Player[]>([]);
+const currentPlayer = ref(0);
+const currentLetter = ref('-');
+const timerOptions = [10, 15, 30, 45];
+const timerDuration = ref(30);
+const timeLeft = ref(timerDuration.value);
+const timerActive = ref(false);
+let timerInterval: number | null = null;
+const rolling = ref(false);
+const resultText = ref('Bereit zum Würfeln!');
+const subResult = ref('Klicke auf den Würfeln-Button');
+const isJackpot = ref(false);
+const diceRotation = ref({x: 0, y: 0, z: 0});
+const scorePulse = ref(false);
+const showAddPlayer = ref(false);
+const newPlayerName = ref('');
+const editingPlayerIndex = ref<number | null>(null);
+const editingPlayerName = ref('');
+
+const categories = [
+  {name: 'STADT', description: 'Nenne eine Stadt (z.B. Berlin)'},
+  {name: 'LAND', description: 'Nenne ein Land (z.B. Frankreich)'},
+  {name: 'FLUSS', description: 'Nenne einen Fluss (z.B. Rhein)'},
+  {name: 'NAME', description: 'Nenne einen Vornamen (z.B. Anna)'},
+  {name: 'TIER', description: 'Nenne ein Tier (z.B. Elefant)'},
+  {name: 'JACKPOT', description: 'Wähle KATEGORIE & BUCHSTABEN frei!'},
+];
+
+const rotations = [
+  {x: 4, y: 5, z: 3},
+  {x: -5, y: -4, z: -3},
+  {x: 6, y: -5, z: 4},
+  {x: -4, y: 6, z: -5},
+  {x: 5, y: 3, z: -6},
+  {x: -3, y: -6, z: 5},
+];
+
+const diceTransform = computed(() => {
+  const {x, y, z} = diceRotation.value;
+  return {
+    transform: `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`,
+  };
+});
+
+const timerProgressStyle = computed(() => {
+  const percent = (timeLeft.value / timerDuration.value) * 100;
+  let bg = '#16a34a';
+  if (timeLeft.value <= 10) bg = '#ef4444';
+  else if (timeLeft.value <= 20) bg = '#fde047';
+  return {
+    width: percent + '%',
+    background: bg,
+  };
+});
+
+function playSound(type: 'roll' | 'success' | 'jackpot' | 'timer') {
+  // @ts-ignore
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(ctx.destination);
+  switch (type) {
+    case 'roll':
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(150, ctx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(
+        0.001,
+        ctx.currentTime + 1,
+      );
+      gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+      break;
+    case 'success':
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(523.25, ctx.currentTime);
+      oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      break;
+    case 'jackpot':
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(392.0, ctx.currentTime);
+      oscillator.frequency.setValueAtTime(523.25, ctx.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+      oscillator.frequency.setValueAtTime(830.61, ctx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+      break;
+    case 'timer':
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(440, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      break;
+  }
+  oscillator.start();
+  oscillator.stop(ctx.currentTime + 0.5);
+}
+
+function switchPlayer(direction: 'next' | 'prev') {
+  if (players.value.length === 0) return;
+  if (direction === 'next') {
+    currentPlayer.value = (currentPlayer.value + 1) % players.value.length;
+  } else {
+    currentPlayer.value =
+      currentPlayer.value === 0
+        ? players.value.length - 1
+        : currentPlayer.value - 1;
+  }
+  playSound('success');
+}
+
+function addPlayer() {
+  showAddPlayer.value = true;
+  newPlayerName.value = '';
+}
+function confirmAddPlayer() {
+  const name =
+    newPlayerName.value.trim() || `Spieler ${players.value.length + 1}`;
+  players.value.push({name, score: 0});
+  currentPlayer.value = players.value.length - 1;
+  showAddPlayer.value = false;
+  newPlayerName.value = '';
+  playSound('success');
+}
+function cancelAddPlayer() {
+  showAddPlayer.value = false;
+  newPlayerName.value = '';
+}
+
+function addPoints(points: number) {
+  if (!players.value.length) return;
+  // Speed-Runde: +2 statt +1 für korrekte Antwort
+  let actualPoints = points;
+  if (points === 1 && isSpeedRound.value) actualPoints = 2;
+  players.value[currentPlayer.value].score += actualPoints;
+  scorePulse.value = true;
+  setTimeout(() => (scorePulse.value = false), 500);
+  if (actualPoints > 0) playSound('success');
+}
+
+function resetPoints() {
+  players.value.forEach((p) => (p.score = 0));
+  playSound('timer');
+}
+
+function toggleTimer() {
+  if (timerActive.value) {
+    stopTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function startTimer() {
+  stopTimer();
+  timeLeft.value = timerDuration.value;
+  timerActive.value = true;
+  timerInterval = window.setInterval(() => {
+    timeLeft.value--;
+    if (timeLeft.value <= 0) {
+      stopTimer();
+      playSound('timer');
+      alert(
+        `Zeit abgelaufen! Spieler ${
+          players.value[currentPlayer.value]?.name ?? ''
+        } ist dran.`,
+      );
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerActive.value = false;
+  timerInterval = null;
+}
+
+function resetGameTimer() {
+  stopTimer();
+  timeLeft.value = timerDuration.value;
+}
+
+function rollDice() {
+  if (rolling.value) return;
+  rolling.value = true;
+  playSound('roll');
+  // Animation
+  const randomRotation = Math.floor(Math.random() * 6);
+  const result = Math.floor(Math.random() * 6);
+  const rot = rotations[randomRotation];
+  diceRotation.value = {x: rot.x * 360, y: rot.y * 360, z: rot.z * 360};
+  setTimeout(() => {
+    // Endposition setzen
+    switch (result) {
+      case 0:
+        diceRotation.value = {x: 0, y: 0, z: 0};
+        break;
+      case 1:
+        diceRotation.value = {x: 180, y: 0, z: 0};
+        break;
+      case 2:
+        diceRotation.value = {x: 0, y: 90, z: 0};
+        break;
+      case 3:
+        diceRotation.value = {x: 0, y: -90, z: 0};
+        break;
+      case 4:
+        diceRotation.value = {x: 90, y: 0, z: 0};
+        break;
+      case 5:
+        diceRotation.value = {x: -90, y: 0, z: 0};
+        break;
+    }
+    // Ergebnis anzeigen
+    const category = categories[result];
+    resultText.value = category.name;
+    subResult.value = category.description;
+    isJackpot.value = result === 5;
+    if (isJackpot.value) {
+      resultText.value = '🎰 JACKPOT 🎰';
+      playSound('jackpot');
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      currentLetter.value = letters[Math.floor(Math.random() * 26)];
+    }
+    rolling.value = false;
+    // Timer ggf. neu starten
+    if (timerActive.value) {
+      resetGameTimer();
+      startTimer();
+    }
+  }, 400);
+}
+
+// LocalStorage: Spieler speichern und laden
+const STORAGE_KEY = 'lexikonloop_players_v1';
+function savePlayers() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(players.value));
+}
+function loadPlayers() {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (data) {
+    try {
+      const arr = JSON.parse(data);
+      if (
+        Array.isArray(arr) &&
+        arr.every(
+          (p) => typeof p.name === 'string' && typeof p.score === 'number',
+        )
+      ) {
+        players.value = arr;
+        return;
+      }
+    } catch {}
+  }
+  // Fallback: 1 Spieler
+  players.value = [{name: 'Spieler 1', score: 0}];
+}
+
+function resetAllPlayers() {
+  if (confirm('Möchtest du wirklich alle Spieler und Punkte löschen?')) {
+    players.value = [{name: 'Spieler 1', score: 0}];
+    currentPlayer.value = 0;
+    localStorage.removeItem(STORAGE_KEY);
+    playSound('timer');
+  }
+}
+
+function startEditPlayer(i: number) {
+  editingPlayerIndex.value = i;
+  editingPlayerName.value = players.value[i].name;
+}
+function confirmEditPlayer() {
+  if (editingPlayerIndex.value !== null) {
+    const name =
+      editingPlayerName.value.trim() ||
+      `Spieler ${editingPlayerIndex.value + 1}`;
+    players.value[editingPlayerIndex.value].name = name;
+    editingPlayerIndex.value = null;
+    editingPlayerName.value = '';
+    playSound('success');
+  }
+}
+function cancelEditPlayer() {
+  editingPlayerIndex.value = null;
+  editingPlayerName.value = '';
+}
+function deletePlayer(i: number) {
+  if (players.value.length <= 1) return;
+  if (confirm(`Spieler "${players.value[i].name}" wirklich löschen?`)) {
+    players.value.splice(i, 1);
+    if (currentPlayer.value >= players.value.length) currentPlayer.value = 0;
+    playSound('timer');
+  }
+}
+function movePlayer(i: number, dir: 'up' | 'down') {
+  const newIndex = dir === 'up' ? i - 1 : i + 1;
+  if (newIndex < 0 || newIndex >= players.value.length) return;
+  const temp = players.value[i];
+  players.value[i] = players.value[newIndex];
+  players.value[newIndex] = temp;
+  if (currentPlayer.value === i) currentPlayer.value = newIndex;
+  else if (currentPlayer.value === newIndex) currentPlayer.value = i;
+  playSound('success');
+}
+
+function setTimerDuration(val: number) {
+  timerDuration.value = val;
+  timeLeft.value = val;
+}
+
+const isSpeedRound = computed(() => timerDuration.value <= 15);
+
+// Spracherkennung (SpeechRecognition API)
+const isListening = ref(false);
+const recognizedWord = ref('');
+const recognizedFirstLetter = ref('');
+let recognition: any = null;
+
+function startSpeechRecognition() {
+  if (
+    !('webkitSpeechRecognition' in window) &&
+    !('SpeechRecognition' in window)
+  ) {
+    alert('Dein Browser unterstützt keine Spracheingabe.');
+    return;
+  }
+  const SpeechRecognition =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'de-DE';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  isListening.value = true;
+  recognizedWord.value = '';
+  recognizedFirstLetter.value = '';
+  recognition.onresult = (event: any) => {
+    const word = event.results[0][0].transcript.trim();
+    recognizedWord.value = word;
+    // Letzten Buchstaben extrahieren (ohne Sonderzeichen)
+    const match = word.match(/[a-zA-ZäöüÄÖÜß](?=[^a-zA-ZäöüÄÖÜß]*$)/);
+    recognizedFirstLetter.value = match ? match[0].toUpperCase() : '';
+    // Setze currentLetter automatisch auf den letzten Buchstaben
+    if (recognizedFirstLetter.value)
+      currentLetter.value = recognizedFirstLetter.value;
+    isListening.value = false;
+  };
+  recognition.onerror = () => {
+    isListening.value = false;
+  };
+  recognition.onend = () => {
+    isListening.value = false;
+  };
+  recognition.start();
+}
+function stopSpeechRecognition() {
+  if (recognition) recognition.stop();
+  isListening.value = false;
+}
+
+watch(players, savePlayers, {deep: true});
+onMounted(() => {
+  loadPlayers();
+  window.addEventListener('keydown', handleKeydown);
+});
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
+});
+
+function handleKeydown(e: KeyboardEvent) {
+  if (showAddPlayer.value) return;
+  if (e.code === 'Space' || e.code === 'Enter') {
+    rollDice();
+  }
+  if (e.code === 'ArrowRight') {
+    switchPlayer('next');
+  }
+  if (e.code === 'ArrowLeft') {
+    switchPlayer('prev');
+  }
+}
+</script>
 
 <style lang="scss" scoped>
 * {
