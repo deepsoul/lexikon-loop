@@ -5,10 +5,14 @@
         <div class="main-card">
           <!-- Header mit Icons-Link -->
           <header class="header-section">
-            <div class="header-content">
-              <h1 class="game-title-animated">Lexikon-Loop</h1>
-              <div class="subtitle-animated">Das digitale Wortketten-Spiel</div>
-            </div>
+            <router-link to="/" class="logo-link">
+              <div class="header-content">
+                <h1 class="game-title-animated">Lexikon-Loop</h1>
+                <div class="subtitle-animated">
+                  Das digitale Wortketten-Spiel
+                </div>
+              </div>
+            </router-link>
           </header>
 
           <!-- Timer-Einstellung (kompakter) -->

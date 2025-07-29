@@ -1,6 +1,8 @@
 <template>
   <div class="shop-container">
-    <Logo />
+    <router-link to="/" class="logo-link">
+      <Logo />
+    </router-link>
     <h1 class="shop-title">Lexikon-Loop: Würfel & Zubehör bestellen</h1>
 
     <!-- Produkt-Information -->
@@ -563,6 +565,21 @@ const resetForm = () => {
     font-size: 1rem;
     padding: 0.8rem 1.5rem;
   }
+}
+
+/* Logo Link */
+.logo-link {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.logo-link:hover {
+  transform: scale(1.02);
+}
+
+.logo-link:active {
+  transform: scale(0.98);
 }
 
 @media (max-width: 430px) {

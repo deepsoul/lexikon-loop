@@ -2,7 +2,9 @@
   <div class="home-container">
     <div class="main-wrapper">
       <header class="main-header">
-        <Logo />
+        <router-link to="/" class="logo-link">
+          <Logo />
+        </router-link>
         <button class="play-btn" @click="router.push('/lets-play')">
           Jetzt online ausprobieren
         </button>
@@ -559,6 +561,21 @@ p,
 .shop-link:hover {
   background: #e0e7ef;
   box-shadow: 0 4px 16px #2563eb22;
+}
+
+/* Logo Link */
+.logo-link {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.logo-link:hover {
+  transform: scale(1.02);
+}
+
+.logo-link:active {
+  transform: scale(0.98);
 }
 @media (max-width: 700px) {
   .main-wrapper {
