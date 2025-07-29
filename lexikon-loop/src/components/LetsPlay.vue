@@ -3,11 +3,12 @@
     <div>
       <div class="page-bg">
         <div class="main-card">
-          <header class="header-animated">
-            <h1 class="game-title-animated">Lexikon-Loop</h1>
-            <div class="subtitle-animated">Das digitale Wortketten-Spiel</div>
-          </header>
-          <div class="icons-link-btn-wrapper">
+          <!-- Header mit Icons-Link -->
+          <header class="header-section">
+            <div class="header-content">
+              <h1 class="game-title-animated">Lexikon-Loop</h1>
+              <div class="subtitle-animated">Das digitale Wortketten-Spiel</div>
+            </div>
             <button
               class="icons-link-btn"
               @click="router.push('/icons')"
@@ -30,139 +31,119 @@
               </svg>
               <span class="icons-link-text">Icons</span>
             </button>
+          </header>
+
+          <!-- Timer-Einstellung (kompakter) -->
+          <div class="timer-settings-section">
+            <div class="timer-settings">
+              <span class="timer-settings-label">Rundenzeit:</span>
+              <div class="timer-buttons">
+                <button
+                  v-for="opt in timerOptions"
+                  :key="opt"
+                  class="timer-settings-btn"
+                  :class="{active: timerDuration === opt}"
+                  @click="setTimerDuration(opt)"
+                >
+                  {{ opt }}s
+                </button>
+              </div>
+            </div>
+            <div v-if="isSpeedRound" class="speed-round-badge">
+              ⚡ Speed-Runde! Korrekte Antwort = 2 Punkte
+            </div>
           </div>
-          <!-- Timer-Einstellung -->
-          <div
-            class="timer-settings flex flex-wrap gap-2 justify-center items-center mb-2"
-          >
-            <span class="timer-settings-label">Rundenzeit:</span>
-            <button
-              v-for="opt in timerOptions"
-              :key="opt"
-              class="timer-settings-btn"
-              :class="{active: timerDuration === opt}"
-              @click="setTimerDuration(opt)"
-            >
-              {{ opt }}s
-            </button>
-          </div>
-          <div v-if="isSpeedRound" class="speed-round-badge">
-            ⚡ Speed-Runde! Korrekte Antwort = 2 Punkte
-          </div>
-          <!-- Spieler-Chips -->
-          <div class="player-chips flex gap-2 overflow-x-auto pb-2 mb-4">
-            <span
-              v-for="(p, i) in players"
-              :key="i"
-              class="player-chip flex items-center gap-2 px-4 py-2 rounded-full shadow transition-all duration-200 relative"
-              :class="{'chip-active': i === currentPlayer}"
-            >
-              <span class="chip-avatar bg-blue-200 text-blue-700 font-bold">{{
-                p.name.charAt(0).toUpperCase()
-              }}</span>
-              <span class="chip-name-block" @click="startEditPlayer(i)">
-                <template v-if="editingPlayerIndex === i">
-                  <input
-                    v-model="editingPlayerName"
-                    @keyup.enter="confirmEditPlayer"
-                    @blur="confirmEditPlayer"
-                    class="chip-edit-input"
-                    autofocus
-                  />
-                  <button class="chip-cancel" @click="cancelEditPlayer">
-                    ✕
+
+          <!-- Spieler-Management (vereinfacht) -->
+          <div class="players-section">
+            <div class="players-header">
+              <h3 class="section-title">Spieler</h3>
+              <button
+                class="add-player-btn"
+                @click="addPlayer"
+                title="Spieler hinzufügen"
+              >
+                <span>＋</span>
+              </button>
+            </div>
+
+            <!-- Spieler-Liste (vereinfacht) -->
+            <div class="players-list">
+              <div
+                v-for="(p, i) in players"
+                :key="i"
+                class="player-item"
+                :class="{'player-active': i === currentPlayer}"
+              >
+                <div class="player-info">
+                  <span class="player-avatar">{{
+                    p.name.charAt(0).toUpperCase()
+                  }}</span>
+                  <span class="player-name" @click="startEditPlayer(i)">
+                    <template v-if="editingPlayerIndex === i">
+                      <input
+                        v-model="editingPlayerName"
+                        @keyup.enter="confirmEditPlayer"
+                        @blur="confirmEditPlayer"
+                        class="player-edit-input"
+                        autofocus
+                      />
+                    </template>
+                    <template v-else>{{ p.name }}</template>
+                  </span>
+                  <span class="player-score">{{ p.score }}</span>
+                </div>
+
+                <div class="player-actions">
+                  <button
+                    class="action-btn"
+                    @click="deletePlayer(i)"
+                    title="Löschen"
+                  >
+                    🗑️
                   </button>
-                </template>
-                <template v-else>{{ p.name }}</template>
-              </span>
-              <span class="chip-score bg-yellow-400 text-gray-900 font-bold">{{
-                p.score
-              }}</span>
-              <button
-                class="chip-icon"
-                @click="deletePlayer(i)"
-                title="Spieler löschen"
-              >
-                🗑️
-              </button>
-              <button
-                v-if="i > 0"
-                class="chip-icon"
-                @click="movePlayer(i, 'up')"
-                title="Nach oben"
-              >
-                ▲
-              </button>
-              <button
-                v-if="i < players.length - 1"
-                class="chip-icon"
-                @click="movePlayer(i, 'down')"
-                title="Nach unten"
-              >
-                ▼
-              </button>
-            </span>
-            <button
-              class="chip-add-btn"
-              @click="addPlayer"
-              title="Spieler hinzufügen"
-            >
-              ＋
-            </button>
-          </div>
-          <div
-            class="reset-all-container flex items-center justify-center mb-4"
-          >
-            <button
-              class="reset-all-btn"
-              @click="resetAllPlayers"
-              title="Alle Spieler & Punkte löschen"
-            >
+                  <button
+                    v-if="i > 0"
+                    class="action-btn"
+                    @click="movePlayer(i, 'up')"
+                    title="Nach oben"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    v-if="i < players.length - 1"
+                    class="action-btn"
+                    @click="movePlayer(i, 'down')"
+                    title="Nach unten"
+                  >
+                    ▼
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button class="reset-all-btn" @click="resetAllPlayers">
               <svg
-                class="reset-all-icon"
-                width="28"
-                height="28"
-                viewBox="0 0 28 28"
+                class="reset-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
               >
-                <rect
-                  x="2"
-                  y="14"
-                  width="24"
-                  height="10"
-                  rx="4"
-                  fill="#fbbf24"
-                />
-                <rect x="7" y="6" width="14" height="8" rx="4" fill="#2563eb" />
                 <path
-                  d="M9 8l2 2 4-4 4 4"
-                  stroke="#fff"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <rect
-                  x="12"
-                  y="18"
-                  width="4"
-                  height="4"
-                  rx="2"
-                  fill="#fffbe8"
+                  d="M10 3a7 7 0 0 0-7 7h-3l4 4 4-4H7a3 3 0 1 1 3 3v2a5 5 0 1 0-5-5H3a7 7 0 1 1 7 7v-2z"
+                  fill="currentColor"
                 />
               </svg>
-              <span class="reset-all-text"
-                >Alle Spieler & Punkte zurücksetzen</span
-              >
+              Alle zurücksetzen
             </button>
           </div>
-          <!-- Hauptbereich: Würfel, Ergebnis, Steuerung -->
-          <div
-            class="flex flex-col md:flex-row gap-6 items-center justify-center"
-          >
-            <!-- Würfel & Timer -->
-            <div class="dice-timer-card flex flex-col items-center gap-4">
-              <div class="dice-container mt-2">
+
+          <!-- Hauptspielbereich -->
+          <div class="game-section">
+            <!-- Würfel-Bereich -->
+            <div class="dice-section">
+              <div class="dice-container">
                 <div class="dice" :style="diceTransform">
                   <div class="dice-face">
                     <!-- Stadt-Icon -->
@@ -342,201 +323,67 @@
                   </div>
                 </div>
               </div>
-              <button
-                class="roll-btn mt-2"
-                :disabled="rolling"
-                @click="rollDice"
-                style="width: 100%; max-width: 260px; align-self: center"
-              >
+
+              <button class="roll-btn" :disabled="rolling" @click="rollDice">
                 <span v-if="rolling">🎲 Würfelt...</span>
                 <span v-else-if="resultText === 'Bereit zum Würfeln!'"
                   >🎲 WÜRFELN</span
                 >
                 <span v-else>🎲 NEU WÜRFELN</span>
               </button>
-              <!-- Ergebnis & Steuerung -->
-              <div
-                v-if="!rolling && resultText !== 'Bereit zum Würfeln!'"
-                class="result-card flex flex-col items-center gap-4 w-full max-w-md"
-              >
+            </div>
+
+            <!-- Ergebnis-Bereich -->
+            <div
+              v-if="!rolling && resultText !== 'Bereit zum Würfeln!'"
+              class="result-section"
+            >
+              <div class="result-display">
                 <div
-                  class="result-text flex justify-center"
+                  class="result-category"
                   :class="{'jackpot-animation': isJackpot}"
                 >
-                  <span> {{ resultText }}</span>
+                  {{ resultText }}
                 </div>
-                <div class="result-subtext">{{ subResult }}</div>
-                <div class="current-letter-box">
+                <div class="result-description">{{ subResult }}</div>
+                <div class="current-letter-display">
+                  <span class="letter-label">Aktueller Buchstabe:</span>
                   <span class="current-letter">{{ currentLetter }}</span>
                 </div>
-                <!-- Spracheingabe-UI -->
-                <div class="speech-section">
-                  <button
-                    class="speech-btn"
-                    @click="
-                      isListening
-                        ? stopSpeechRecognition()
-                        : startSpeechRecognition()
-                    "
-                  >
-                    <span v-if="isListening">🎤 Hören…</span>
-                    <span v-else>🎤 Spracheingabe</span>
-                  </button>
-                  <div v-if="recognizedWord" class="speech-result">
-                    <strong>Erkannt:</strong> {{ recognizedWord }}<br />
-                    <span v-if="recognizedLastLetter"
-                      ><strong>Letzter Buchstabe:</strong>
-                      {{ recognizedLastLetter }}</span
-                    >
-                  </div>
-                </div>
-                <div
-                  class="flex gap-2 justify-center items-center mt-2 timer-controls-animated"
+              </div>
+
+              <!-- Spracheingabe -->
+              <div class="speech-section">
+                <button
+                  class="speech-btn"
+                  @click="
+                    isListening
+                      ? stopSpeechRecognition()
+                      : startSpeechRecognition()
+                  "
                 >
-                  <button
-                    class="timer-btn-main"
-                    :class="{'timer-btn-glow': timerActive}"
-                    @click="toggleTimer"
-                    aria-label="Timer starten/stoppen"
-                  >
-                    <span v-if="timerActive" class="timer-icon">
-                      <svg
-                        width="38"
-                        height="38"
-                        viewBox="0 0 38 38"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <rect
-                          x="8"
-                          y="7"
-                          width="7"
-                          height="24"
-                          rx="2.5"
-                          fill="white"
-                          filter="url(#shadow)"
-                        />
-                        <rect
-                          x="23"
-                          y="7"
-                          width="7"
-                          height="24"
-                          rx="2.5"
-                          fill="white"
-                          filter="url(#shadow)"
-                        />
-                        <defs>
-                          <filter
-                            id="shadow"
-                            x="0"
-                            y="0"
-                            width="38"
-                            height="38"
-                            filterUnits="userSpaceOnUse"
-                          >
-                            <feDropShadow
-                              dx="0"
-                              dy="1"
-                              stdDeviation="2"
-                              flood-color="#1e293b"
-                              flood-opacity="0.25"
-                            />
-                          </filter>
-                        </defs>
-                      </svg>
-                    </span>
-                    <span v-else class="timer-icon">
-                      <svg
-                        width="38"
-                        height="38"
-                        viewBox="0 0 38 38"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <polygon
-                          points="10,7 30,19 10,31"
-                          fill="white"
-                          filter="url(#shadow)"
-                        />
-                        <defs>
-                          <filter
-                            id="shadow"
-                            x="0"
-                            y="0"
-                            width="38"
-                            height="38"
-                            filterUnits="userSpaceOnUse"
-                          >
-                            <feDropShadow
-                              dx="0"
-                              dy="1"
-                              stdDeviation="2"
-                              flood-color="#1e293b"
-                              flood-opacity="0.25"
-                            />
-                          </filter>
-                        </defs>
-                      </svg>
-                    </span>
-                  </button>
-                  <button
-                    class="timer-btn-reset"
-                    @click="resetGameTimer"
-                    aria-label="Timer zurücksetzen"
-                  >
-                    <span class="timer-icon-reset">
-                      <svg
-                        width="32"
-                        height="32"
-                        viewBox="0 0 32 32"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle
-                          cx="16"
-                          cy="16"
-                          r="13"
-                          stroke="white"
-                          stroke-width="3"
-                          filter="url(#resetshadow)"
-                          fill="none"
-                        />
-                        <path
-                          d="M16 5v5l4-4"
-                          stroke="white"
-                          stroke-width="3"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          filter="url(#resetshadow)"
-                        />
-                        <defs>
-                          <filter
-                            id="resetshadow"
-                            x="0"
-                            y="0"
-                            width="32"
-                            height="32"
-                            filterUnits="userSpaceOnUse"
-                          >
-                            <feDropShadow
-                              dx="0"
-                              dy="1"
-                              stdDeviation="2"
-                              flood-color="#1e293b"
-                              flood-opacity="0.25"
-                            />
-                          </filter>
-                        </defs>
-                      </svg>
-                    </span>
-                  </button>
+                  <span v-if="isListening">🎤 Hören…</span>
+                  <span v-else>🎤 Spracheingabe</span>
+                </button>
+                <div v-if="recognizedWord" class="speech-result">
+                  <strong>Erkannt:</strong> {{ recognizedWord }}<br />
+                  <span v-if="recognizedLastLetter">
+                    <strong>Letzter Buchstabe:</strong>
+                    {{ recognizedLastLetter }}
+                  </span>
                 </div>
-                <!-- TIMER-ANZEIGE WIEDER EINFÜGEN -->
+              </div>
+            </div>
+
+            <!-- Spielsteuerung -->
+            <div class="game-controls">
+              <!-- Timer-Bereich -->
+              <div class="timer-section">
                 <div
+                  class="timer-display"
                   v-if="timerActive || timeLeft < timerDuration"
-                  class="timer-container"
                 >
-                  <div class="timer-display">{{ timeLeft }}s</div>
+                  <div class="timer-time">{{ timeLeft }}s</div>
                   <div class="timer-bar">
                     <div
                       class="timer-progress"
@@ -544,41 +391,54 @@
                     ></div>
                   </div>
                 </div>
-                <div class="player-controls flex gap-2 w-full justify-center">
+
+                <div class="timer-buttons">
                   <button
-                    class="control-btn flex-1"
-                    @click="switchPlayer('prev')"
+                    class="timer-btn"
+                    :class="{'timer-active': timerActive}"
+                    @click="toggleTimer"
                   >
-                    ← Vorheriger
+                    <span v-if="timerActive">⏸️ Pause</span>
+                    <span v-else>▶️ Start</span>
                   </button>
-                  <button
-                    class="control-btn flex-1"
-                    @click="switchPlayer('next')"
-                  >
-                    Nächster →
-                  </button>
-                </div>
-                <div class="points-container flex gap-2 w-full justify-center">
-                  <button class="points-btn flex-1" @click="addPoints(1)">
-                    +1 Punkt
-                  </button>
-                  <button class="points-btn flex-1" @click="addPoints(2)">
-                    +2 Punkte
-                  </button>
-                  <button class="points-btn flex-1" @click="addPoints(-1)">
-                    -1 Punkt
-                  </button>
-                  <button class="points-btn flex-1" @click="resetPoints">
-                    Punkte zurücksetzen
+                  <button class="timer-btn" @click="resetGameTimer">
+                    🔄 Reset
                   </button>
                 </div>
               </div>
+
+              <!-- Spieler-Navigation -->
+              <div class="player-navigation">
+                <button class="nav-btn" @click="switchPlayer('prev')">
+                  ← Vorheriger
+                </button>
+                <button class="nav-btn" @click="switchPlayer('next')">
+                  Nächster →
+                </button>
+              </div>
+
+              <!-- Punkte-Steuerung -->
+              <div class="points-controls">
+                <button class="points-btn" @click="addPoints(1)">
+                  +1 Punkt
+                </button>
+                <button class="points-btn" @click="addPoints(2)">
+                  +2 Punkte
+                </button>
+                <button class="points-btn negative" @click="addPoints(-1)">
+                  -1 Punkt
+                </button>
+                <button class="points-btn reset" @click="resetPoints">
+                  Reset Punkte
+                </button>
+              </div>
             </div>
           </div>
+
           <!-- Spielregeln -->
-          <div class="rules-card mt-8">
-            <h3>Spielregeln</h3>
-            <ul>
+          <div class="rules-section">
+            <h3 class="section-title">Spielregeln</h3>
+            <ul class="rules-list">
               <li>
                 <strong>Würfle</strong> und beachte die angezeigte Kategorie
               </li>
@@ -604,28 +464,30 @@
             </ul>
           </div>
         </div>
+
         <!-- Spieler hinzufügen Dialog -->
         <div v-if="showAddPlayer" class="add-player-modal">
           <div class="add-player-card">
-            <label class="mb-2 font-semibold text-gray-700">Spielername:</label>
+            <label class="modal-label">Spielername:</label>
             <input
               v-model="newPlayerName"
               @keyup.enter="confirmAddPlayer"
-              class="add-player-input"
+              class="modal-input"
               placeholder="Name eingeben"
               autofocus
             />
-            <div class="flex gap-3 w-full mt-4">
-              <button class="points-btn flex-1" @click="confirmAddPlayer">
+            <div class="modal-buttons">
+              <button class="modal-btn primary" @click="confirmAddPlayer">
                 Hinzufügen
               </button>
-              <button class="control-btn flex-1" @click="cancelAddPlayer">
+              <button class="modal-btn secondary" @click="cancelAddPlayer">
                 Abbrechen
               </button>
             </div>
           </div>
         </div>
-        <!-- Reset Button Floating -->
+
+        <!-- Zurück zur Startseite -->
         <button class="back-home-btn" @click="router.push('/')">
           Zurück zur Startseite
         </button>
@@ -1145,6 +1007,7 @@ function handleKeydown(e: KeyboardEvent) {
   flex-direction: column;
   align-items: center;
 }
+
 .main-card {
   background: white;
   border-radius: 24px;
@@ -1157,74 +1020,148 @@ function handleKeydown(e: KeyboardEvent) {
   flex-direction: column;
   align-items: stretch;
 }
-.game-title {
-  font-size: 2.7rem;
-  font-weight: 900;
-  color: #2563eb;
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.game-title-animated {
+  font-size: 2.1rem;
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 800;
   letter-spacing: 0.04em;
-  margin-bottom: 0.2em;
+  background: linear-gradient(90deg, #2563eb 30%, #fbbf24 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
   text-align: center;
+  margin-bottom: 0.1em;
+  opacity: 0;
+  transform: translateY(-24px) scale(0.98);
+  animation: fadeSlideIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) 0.1s forwards;
 }
-.subtitle {
+
+.subtitle-animated {
   color: #64748b;
-  font-size: 1.2rem;
+  font-size: 1.08rem;
   text-align: center;
+  margin-bottom: 1.5em;
+  opacity: 0;
+  transform: translateY(-12px);
+  animation: fadeSlideIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) 0.5s forwards;
 }
-.player-chips {
-  margin-bottom: 0.5em;
-  scrollbar-width: thin;
-  scrollbar-color: #2563eb #e0e7ff;
-}
-.player-chip {
+
+.icons-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   background: #f1f5f9;
-  border: 2px solid #e0e7ff;
-  color: #1e293b;
-  font-size: 1.05rem;
+  border: 1.5px solid #2563eb;
+  border-radius: 1.5rem;
+  padding: 0.4rem 1.1rem 0.4rem 0.7rem;
+  color: #2563eb;
+  font-size: 1rem;
   font-weight: 500;
-  transition: box-shadow 0.2s, border 0.2s, background 0.2s;
   cursor: pointer;
-  min-width: 120px;
-  user-select: none;
+  box-shadow: 0 2px 8px #2563eb11;
+  transition: background 0.2s, box-shadow 0.2s;
 }
-.chip-active {
-  background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
-  color: #fff;
-  border: 2px solid #2563eb;
-  box-shadow: 0 2px 12px #2563eb33;
+
+.icons-link-btn:hover {
+  background: #e0e7ef;
+  box-shadow: 0 4px 16px #2563eb22;
 }
-.chip-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+
+.icons-link-text {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Timer Settings Section */
+.timer-settings-section {
+  margin-bottom: 2rem;
+}
+
+.timer-settings {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  font-weight: bold;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
-.chip-score {
-  margin-left: 0.5em;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: bold;
-  background: #fde047;
+
+.timer-settings-label {
+  font-weight: 500;
+  color: #2563eb;
+  font-size: 1.08rem;
+}
+
+.timer-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.timer-settings-btn {
+  background: #f1f5f9;
   color: #1e293b;
-}
-.chip-icon {
-  background: none;
-  border: none;
-  color: #64748b;
-  font-size: 1.1rem;
-  margin-left: 0.2em;
+  border: 2px solid #e0e7ff;
+  border-radius: 16px;
+  padding: 6px 16px;
+  font-size: 1.05rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s;
-  padding: 0 2px;
+  transition: background 0.2s, color 0.2s, border 0.2s;
 }
-.chip-icon:hover {
-  color: #ef4444;
+
+.timer-settings-btn.active,
+.timer-settings-btn:hover {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
 }
-.chip-add-btn {
+
+.speed-round-badge {
+  background: linear-gradient(90deg, #fde047 60%, #fbbf24 100%);
+  color: #1e293b;
+  font-weight: bold;
+  border-radius: 16px;
+  padding: 6px 18px;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 8px #fde04733;
+  display: inline-block;
+}
+
+/* Players Section */
+.players-section {
+  margin-bottom: 2rem;
+}
+
+.players-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.add-player-btn {
   background: #2563eb;
   color: #fff;
   border: none;
@@ -1235,84 +1172,165 @@ function handleKeydown(e: KeyboardEvent) {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.5em;
-  box-shadow: 0 2px 8px #2563eb33;
   cursor: pointer;
   transition: background 0.2s;
 }
-.chip-add-btn:hover {
+
+.add-player-btn:hover {
   background: #1d4ed8;
 }
-.chip-edit-input {
-  border: 1px solid #2563eb;
-  border-radius: 8px;
-  padding: 2px 8px;
-  font-size: 1rem;
-  width: 80px;
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
-.chip-cancel {
+
+.player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border: 2px solid #e0e7ff;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s;
+}
+
+.player-active {
+  background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+  color: #fff;
+  border-color: #2563eb;
+  box-shadow: 0 2px 12px #2563eb33;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.player-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.player-active .player-avatar {
+  background: #fff;
+  color: #2563eb;
+}
+
+.player-name {
+  font-weight: 500;
+  cursor: pointer;
+  flex: 1;
+}
+
+.player-score {
+  background: #fde047;
+  color: #1e293b;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.player-active .player-score {
+  background: #fff;
+  color: #2563eb;
+}
+
+.player-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.action-btn {
   background: none;
   border: none;
   color: #64748b;
   font-size: 1rem;
-  margin-left: 0.2em;
   cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: color 0.2s;
 }
 
-/* Timer Bereich */
-.timer-container {
-  margin: 15px auto;
-  width: 100%;
-  max-width: 300px;
+.action-btn:hover {
+  color: #ef4444;
 }
 
-.timer-display {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #fde047;
+.player-active .action-btn {
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.timer-bar {
-  height: 20px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  overflow: hidden;
+.player-active .action-btn:hover {
+  color: #fff;
 }
 
-.timer-progress {
-  height: 100%;
-  background: linear-gradient(90deg, #16a34a, #fde047, #ef4444);
-  width: 100%;
-  transition: width 1s linear;
+.player-edit-input {
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+  width: 120px;
 }
 
-.timer-controls {
+.reset-all-btn {
   display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.timer-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fbbf24;
+  color: #1e293b;
   border: none;
-  padding: 8px 15px;
-  border-radius: 20px;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background 0.2s;
+  margin: 0 auto;
 }
 
-.timer-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+.reset-all-btn:hover {
+  background: #f59e1b;
 }
 
-/* Würfel-Container */
+.reset-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Game Section */
+.game-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* Dice Section */
+.dice-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
 .dice-container {
   width: 200px;
   height: 200px;
-  margin: 20px auto;
+  margin: 0 auto;
   position: relative;
 }
 
@@ -1346,172 +1364,311 @@ function handleKeydown(e: KeyboardEvent) {
 .dice-face:nth-child(1) {
   transform: translateZ(100px);
   color: #2563eb;
-} /* Vorne - Stadt */
+}
 .dice-face:nth-child(2) {
   transform: rotateX(180deg) translateZ(100px);
   color: #16a34a;
-} /* Hinten - Land */
+}
 .dice-face:nth-child(3) {
   transform: rotateY(90deg) translateZ(100px);
   color: #075985;
-} /* Rechts - Fluss */
+}
 .dice-face:nth-child(4) {
   transform: rotateY(-90deg) translateZ(100px);
   color: #9333ea;
-} /* Links - Name */
+}
 .dice-face:nth-child(5) {
   transform: rotateX(90deg) translateZ(100px);
   color: #d97706;
-} /* Oben - Tier */
+}
 .dice-face:nth-child(6) {
   transform: rotateX(-90deg) translateZ(100px);
   color: #ca8a04;
-} /* Unten - Jackpot */
-
-/* Ergebnis-Anzeige */
-.result {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 20px;
-  margin: 20px 0;
-  min-height: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-.result-text {
-  font-size: 2.2rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  text-align: center;
-}
-
-.result-subtext {
-  font-size: 1.1rem;
-  opacity: 0.8;
-}
-
-/* Würfel-Button */
 .roll-btn {
   background: #2563eb;
   color: #fff;
   border: none;
-  padding: 18px 44px;
-  font-size: 1.25rem;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
   font-weight: bold;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s;
   box-shadow: 0 5px 18px rgba(30, 41, 59, 0.18);
-  margin: 18px 0;
-  letter-spacing: 0.03em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  min-width: 200px;
 }
+
 .roll-btn:hover {
   background: #1d4ed8;
-  color: #fff;
   box-shadow: 0 8px 24px rgba(30, 41, 59, 0.25);
 }
-.roll-btn:active {
-  background: #1e293b;
-  color: #fff;
+
+.roll-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* Spielersteuerung */
-.player-controls {
+/* Result Section */
+.result-section {
   display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin: 20px 0;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 500px;
 }
 
-.control-btn {
+.result-display {
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(30, 41, 59, 0.1);
+  width: 100%;
+}
+
+.result-category {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #1e293b;
+}
+
+.result-description {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.current-letter-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.letter-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.current-letter {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #2563eb;
+  background: #f1f5f9;
+  border: 3px solid #2563eb;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Speech Section */
+.speech-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.speech-btn {
+  background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.speech-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+}
+
+.speech-result {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 1rem;
+  color: #1e293b;
+  text-align: center;
+  width: 100%;
+}
+
+/* Game Controls */
+.game-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Timer Section */
+.timer-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.timer-display {
+  text-align: center;
+  width: 100%;
+}
+
+.timer-time {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fde047;
+  margin-bottom: 0.5rem;
+}
+
+.timer-bar {
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.timer-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #fde047, #ef4444);
+  width: 100%;
+  transition: width 1s linear;
+}
+
+.timer-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.timer-btn {
+  background: #64748b;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.timer-btn:hover {
+  background: #475569;
+}
+
+.timer-active {
+  background: #2563eb;
+}
+
+.timer-active:hover {
+  background: #1d4ed8;
+}
+
+/* Player Navigation */
+.player-navigation {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.nav-btn {
   background: #fbbf24;
   color: #1e293b;
   border: none;
-  padding: 12px 28px;
-  border-radius: 40px;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  font-weight: bold;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.1);
-  margin: 2px 0;
-  letter-spacing: 0.01em;
-}
-.control-btn:hover {
-  background: #f59e1b;
-  color: #fff;
-}
-.control-btn:active {
-  background: #b45309;
-  color: #fff;
+  flex: 1;
+  max-width: 150px;
 }
 
-/* Punkte-Container */
-.points-container {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin: 15px 0;
-  flex-wrap: wrap;
+.nav-btn:hover {
+  background: #f59e1b;
+  transform: translateY(-1px);
+}
+
+/* Points Controls */
+.points-controls {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
 }
 
 .points-btn {
   background: #22c55e;
   color: #fff;
   border: none;
-  padding: 10px 22px;
-  border-radius: 40px;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  font-weight: bold;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.1);
-  margin: 2px 0;
-  letter-spacing: 0.01em;
-  border: 2px solid #16a34a;
 }
+
 .points-btn:hover {
   background: #16a34a;
-  color: #fff;
-  border-color: #15803d;
-}
-.points-btn:active {
-  background: #166534;
-  color: #fff;
-  border-color: #166534;
+  transform: translateY(-1px);
 }
 
-/* Spielregeln */
-.rules {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 20px;
-  margin-top: 30px;
-  text-align: left;
+.points-btn.negative {
+  background: #ef4444;
 }
 
-.rules h3 {
-  margin-bottom: 15px;
-  font-size: 1.3rem;
-  text-align: center;
+.points-btn.negative:hover {
+  background: #dc2626;
 }
 
-.rules ul {
-  padding-left: 20px;
+.points-btn.reset {
+  background: #64748b;
 }
 
-.rules li {
-  margin-bottom: 10px;
+.points-btn.reset:hover {
+  background: #475569;
+}
+
+/* Rules Section */
+.rules-section {
+  margin-top: 2rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(30, 41, 59, 0.1);
+}
+
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0 0;
+}
+
+.rules-list li {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
   line-height: 1.5;
-  font-size: 0.95rem;
+}
+
+.rules-list li::before {
+  content: '•';
+  color: #2563eb;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
 }
 
 .jackpot-highlight {
@@ -1521,7 +1678,130 @@ function handleKeydown(e: KeyboardEvent) {
   font-weight: bold;
 }
 
-/* Animationen */
+.speed-info {
+  color: #fbbf24;
+  font-weight: bold;
+  font-size: 1.01rem;
+  display: inline-block;
+  margin-top: 0.2em;
+}
+
+/* Modal Styles */
+.add-player-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 41, 59, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.add-player-card {
+  background: #fff;
+  border-radius: 2.2rem;
+  box-shadow: 0 8px 32px #2563eb33, 0 2px 24px #fbbf2444;
+  padding: 2.5rem 2rem 2rem 2rem;
+  min-width: 320px;
+  text-align: center;
+  position: relative;
+  animation: popIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.modal-label {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.modal-input {
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 1.2rem;
+  border: 2px solid #e0e7ef;
+  margin: 1.2rem 0 1.5rem 0;
+  outline: none;
+  box-shadow: 0 2px 12px #2563eb11;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.modal-input:focus {
+  border: 2px solid #2563eb;
+  box-shadow: 0 0 0 2px #2563eb33;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn.primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.modal-btn.primary:hover {
+  background: #1d4ed8;
+}
+
+.modal-btn.secondary {
+  background: #64748b;
+  color: #fff;
+}
+
+.modal-btn.secondary:hover {
+  background: #475569;
+}
+
+/* Back Home Button */
+.back-home-btn {
+  display: block;
+  margin: 2.5rem auto 0 auto;
+  padding: 1.1rem 2.2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2563eb;
+  background: #f1f5f9;
+  border: 2px solid #2563eb;
+  border-radius: 2rem;
+  box-shadow: 0 2px 12px #2563eb22;
+  cursor: pointer;
+  transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
+}
+
+.back-home-btn:hover {
+  background: #e0e7ef;
+  box-shadow: 0 4px 16px #2563eb33;
+}
+
+.back-home-btn:active {
+  transform: scale(0.97);
+}
+
+/* Animations */
+@keyframes fadeSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes jackpot-glow {
   0% {
     text-shadow: 0 0 5px #fde047;
@@ -1538,417 +1818,6 @@ function handleKeydown(e: KeyboardEvent) {
   animation: jackpot-glow 2s infinite;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.pulse {
-  animation: pulse 0.5s;
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-  h1 {
-    font-size: 2rem;
-  }
-  .subtitle {
-    font-size: 1rem;
-  }
-  .dice-container {
-    transform: scale(0.8);
-    margin: 0 auto;
-  }
-  .result-text {
-    font-size: 1.8rem;
-  }
-  .game-info {
-    flex-direction: column;
-  }
-  .info-value {
-    font-size: 1.8rem;
-  }
-  .current-letter {
-    font-size: 2.5rem;
-  }
-  .player-chips {
-    gap: 0.5em;
-    padding-bottom: 0.5em;
-    margin-bottom: 1.2em;
-    box-shadow: 0 2px 12px #2563eb11;
-    background: #f8fafc;
-    border-radius: 16px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .player-chip {
-    min-width: 80px;
-    max-width: 110px;
-    font-size: 0.97rem;
-    padding: 6px 8px;
-    border-radius: 18px;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
-  .chip-avatar {
-    width: 22px;
-    height: 22px;
-    font-size: 0.98rem;
-    margin-bottom: 2px;
-  }
-  .chip-score {
-    font-size: 0.92rem;
-    padding: 1px 7px;
-    border-radius: 9px;
-    margin: 0 auto 2px auto;
-    display: block;
-  }
-  .chip-icon {
-    font-size: 0.95rem;
-    margin-left: 0.1em;
-    padding: 0 1px;
-  }
-  .chip-name {
-    max-width: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block;
-    vertical-align: middle;
-  }
-  .chip-add-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 1.2rem;
-    margin-left: 0.2em;
-  }
-  .toggle-names-btn {
-    display: block;
-  }
-  .player-chips.collapsed-mobile {
-    gap: 0.2em;
-    background: #f8fafc;
-    box-shadow: 0 2px 12px #2563eb11;
-    border-radius: 16px;
-    padding-bottom: 0.5em;
-    margin-bottom: 1.2em;
-  }
-  .player-chip.collapsed-mobile-chip {
-    min-width: 44px;
-    max-width: 54px;
-    padding: 6px 4px;
-    border-radius: 18px;
-    font-size: 0.97rem;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
-  .chip-name-full {
-    display: block;
-    max-width: 100vw;
-    font-size: 1.01rem;
-    font-weight: 500;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    margin: 0 2px;
-    text-align: center;
-  }
-  .chip-name-block {
-    display: block;
-    width: 100%;
-    text-align: center;
-    font-size: 0.99rem;
-    margin: 0 0 2px 0;
-    line-height: 1.15;
-    max-width: 100%;
-    white-space: normal;
-    word-break: break-word;
-  }
-  .dice-timer-card {
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    width: 100%;
-  }
-  .dice-container {
-    margin: 0 auto 0.5em auto !important;
-    display: block !important;
-  }
-  .timer-circle {
-    margin-bottom: 0 !important;
-    margin-right: 0 !important;
-    margin-left: 0 !important;
-    display: block !important;
-  }
-  .timer-controls-animated {
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 10px !important;
-    margin-top: 0 !important;
-    justify-content: center !important;
-    width: 100%;
-  }
-}
-@media (min-width: 601px) {
-  .toggle-names-btn {
-    display: none !important;
-  }
-  .player-chips.collapsed-mobile,
-  .player-chip.collapsed-mobile-chip {
-    /* Desktop: immer ausgeklappt */
-    min-width: 120px;
-    max-width: 220px;
-    font-size: 1.05rem;
-    padding: 8px 16px;
-    border-radius: 22px;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-  }
-  .chip-name-full {
-    display: inline-block;
-    max-width: 120px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: middle;
-  }
-  .chip-name-block {
-    display: inline-block;
-    max-width: 120px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: middle;
-    margin: 0 6px 0 0;
-    text-align: left;
-  }
-  .chip-score {
-    font-size: 1rem;
-    padding: 2px 10px;
-    border-radius: 12px;
-    margin-left: 0.5em;
-    display: inline-block;
-  }
-}
-.game-title-animated {
-  font-size: 2.1rem;
-  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  background: linear-gradient(90deg, #2563eb 30%, #fbbf24 70%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  text-align: center;
-  margin-bottom: 0.1em;
-  opacity: 0;
-  transform: translateY(-24px) scale(0.98);
-  animation: fadeSlideIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) 0.1s forwards;
-}
-.subtitle-animated {
-  color: #64748b;
-  font-size: 1.08rem;
-  text-align: center;
-  margin-bottom: 1.5em;
-  opacity: 0;
-  transform: translateY(-12px);
-  animation: fadeSlideIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) 0.5s forwards;
-}
-.header-animated {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 0.5em;
-}
-@keyframes fadeSlideIn {
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.timer-controls-animated {
-  display: flex;
-  gap: 18px;
-  justify-content: center;
-  align-items: center;
-  margin-top: 10px;
-}
-.timer-btn-main {
-  background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 72px;
-  height: 72px;
-  font-size: 2.5rem;
-  font-weight: bold;
-  box-shadow: 0 4px 24px #2563eb33, 0 0 0 0 #60a5fa44;
-  cursor: pointer;
-  transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  outline: none;
-  position: relative;
-  z-index: 1;
-}
-.timer-btn-main:active {
-  transform: scale(0.96);
-}
-.timer-btn-glow {
-  animation: timer-glow 1.2s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 0 0 #60a5fa44, 0 8px 32px #2563eb55;
-}
-@keyframes timer-glow {
-  0% {
-    box-shadow: 0 0 0 0 #60a5fa44, 0 8px 32px #2563eb55;
-    transform: scale(1);
-  }
-  60% {
-    box-shadow: 0 0 0 16px #60a5fa22, 0 8px 32px #2563eb55;
-    transform: scale(1.08);
-  }
-  100% {
-    box-shadow: 0 0 0 0 #60a5fa44, 0 8px 32px #2563eb55;
-    transform: scale(1);
-  }
-}
-.timer-settings {
-  margin-bottom: 0.5em;
-  gap: 0.5em;
-}
-.timer-settings-label {
-  font-weight: 500;
-  color: #2563eb;
-  font-size: 1.08rem;
-}
-.timer-settings-btn {
-  background: #f1f5f9;
-  color: #1e293b;
-  border: 2px solid #e0e7ff;
-  border-radius: 16px;
-  padding: 6px 16px;
-  font-size: 1.05rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, border 0.2s;
-}
-.timer-settings-btn.active,
-.timer-settings-btn:hover {
-  background: #2563eb;
-  color: #fff;
-  border-color: #2563eb;
-}
-.speed-round-badge {
-  background: linear-gradient(90deg, #fde047 60%, #fbbf24 100%);
-  color: #1e293b;
-  font-weight: bold;
-  border-radius: 16px;
-  padding: 6px 18px;
-  margin: 0 auto 1em auto;
-  text-align: center;
-  font-size: 1.08rem;
-  box-shadow: 0 2px 8px #fde04733;
-  display: inline-block;
-}
-.speed-info {
-  color: #fbbf24;
-  font-weight: bold;
-  font-size: 1.01rem;
-  display: inline-block;
-  margin-top: 0.2em;
-}
-.timer-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  color: white;
-  filter: drop-shadow(0 2px 6px #1e293b33);
-}
-.timer-btn-reset {
-  background: linear-gradient(90deg, #64748b 60%, #2563eb 100%);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 52px;
-  height: 52px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  box-shadow: 0 2px 12px #2563eb33, 0 0 0 0 #64748b44;
-  cursor: pointer;
-  transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  outline: none;
-  position: relative;
-  z-index: 1;
-  margin-left: 8px;
-}
-.timer-btn-reset:active {
-  transform: scale(0.96);
-}
-.timer-icon-reset {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  color: white;
-  filter: drop-shadow(0 2px 6px #1e293b33);
-}
-.back-home-btn {
-  display: block;
-  margin: 2.5rem auto 0 auto;
-  padding: 1.1rem 2.2rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #2563eb;
-  background: #f1f5f9;
-  border: 2px solid #2563eb;
-  border-radius: 2rem;
-  box-shadow: 0 2px 12px #2563eb22;
-  cursor: pointer;
-  transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
-}
-.back-home-btn:active {
-  transform: scale(0.97);
-}
-.code-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(30, 41, 59, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.code-modal-content {
-  background: #fff;
-  border-radius: 2.2rem;
-  box-shadow: 0 8px 32px #2563eb33, 0 2px 24px #fbbf2444;
-  padding: 3.2rem 2.5rem 2.7rem 2.5rem;
-  min-width: 340px;
-  text-align: center;
-  position: relative;
-  animation: popIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-}
 @keyframes popIn {
   0% {
     transform: scale(0.85) translateY(40px);
@@ -1959,236 +1828,186 @@ function handleKeydown(e: KeyboardEvent) {
     opacity: 1;
   }
 }
-.code-modal-content h2 {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #2563eb;
-  margin-bottom: 0.7rem;
-  letter-spacing: 0.01em;
-}
-.code-modal-content p {
-  color: #64748b;
-  font-size: 1.13rem;
-  margin-bottom: 2.2rem;
-}
-.code-modal-content input {
-  font-size: 2.1rem;
-  padding: 1.1rem 2.2rem;
-  border-radius: 2.5rem;
-  border: 2.5px solid #2563eb;
-  margin: 0 0 1.5rem 0;
-  outline: none;
-  width: 90%;
-  max-width: 260px;
-  text-align: center;
-  background: #f8fafc;
-  box-shadow: 0 2px 16px #2563eb22, 0 0px 0px #fbbf2444;
-  transition: border 0.2s, box-shadow 0.2s;
-  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  letter-spacing: 0.18em;
-}
-.code-modal-content input:focus {
-  border: 2.5px solid #fbbf24;
-  box-shadow: 0 0 0 4px #fbbf2422, 0 2px 16px #2563eb22;
-  background: #fffbe8;
-}
-.code-modal-content button {
-  background: linear-gradient(90deg, #2563eb 60%, #fbbf24 100%);
-  color: #fff;
-  border: none;
-  border-radius: 2.5rem;
-  padding: 1.1rem 2.7rem 1.1rem 2.7rem;
-  font-size: 1.25rem;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 0.2rem;
-  box-shadow: 0 2px 16px #2563eb22, 0 0px 0px #fbbf2444;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7em;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-  position: relative;
-}
-.code-modal-content button:active {
-  transform: scale(0.97);
-}
-.code-modal-content button::after {
-  content: '→';
-  font-size: 1.3em;
-  margin-left: 0.5em;
-  color: #fffbe8;
-  opacity: 0.8;
-  transition: margin 0.2s;
-}
-.code-modal-content button:hover::after {
-  margin-left: 0.8em;
-}
-.code-error {
-  color: #ef4444;
-  margin-top: 1.1rem;
-  font-weight: bold;
-  font-size: 1.1rem;
-  letter-spacing: 0.04em;
-  background: #fff0f0;
-  border-radius: 1.2rem;
-  padding: 0.5em 1.2em;
-  display: inline-block;
-  box-shadow: 0 2px 8px #ef444422;
-}
-.reset-all-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.2rem;
-}
-.reset-all-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.7em;
-  background: linear-gradient(90deg, #fbbf24 60%, #2563eb 100%);
-  color: #fff;
-  border: none;
-  border-radius: 2.2em;
-  padding: 0.9em 1.7em;
-  font-size: 1.08rem;
-  font-weight: 600;
-  box-shadow: 0 2px 12px #2563eb22;
-  cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-  outline: none;
-  margin: 0 auto;
-}
-.reset-all-btn:active {
-  transform: scale(0.97);
-}
-.reset-all-icon {
-  width: 28px;
-  height: 28px;
-  margin-right: 0.3em;
-  filter: drop-shadow(0 2px 6px #fbbf2422);
-}
-.reset-all-text {
-  color: #fffbe8;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  font-size: 1.08rem;
-  text-shadow: 0 1px 4px #2563eb33;
-}
-@media (max-width: 700px) {
-  .reset-all-btn {
-    font-size: 0.97rem;
-    padding: 0.7em 1.1em;
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-card {
+    padding: 24px 16px 20px 16px;
+    margin: 0 8px;
   }
-  .reset-all-icon {
-    width: 22px;
-    height: 22px;
+
+  .header-section {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
   }
-  .reset-all-text {
-    font-size: 0.97rem;
+
+  .game-title-animated {
+    font-size: 1.8rem;
+  }
+
+  .subtitle-animated {
+    font-size: 1rem;
+  }
+
+  .timer-settings {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .timer-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .players-list {
+    gap: 0.25rem;
+  }
+
+  .player-item {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .player-info {
+    gap: 0.5rem;
+  }
+
+  .player-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+
+  .player-name {
+    font-size: 0.9rem;
+  }
+
+  .player-score {
+    font-size: 0.9rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .action-btn {
+    font-size: 0.9rem;
+    padding: 0.2rem;
+  }
+
+  .dice-container {
+    width: 160px;
+    height: 160px;
+  }
+
+  .dice-face {
+    width: 160px;
+    height: 160px;
+    font-size: 1.4rem;
+    padding: 16px;
+  }
+
+  .roll-btn {
+    font-size: 1.1rem;
+    padding: 0.8rem 1.5rem;
+    min-width: 180px;
+  }
+
+  .result-category {
+    font-size: 1.6rem;
+  }
+
+  .result-description {
+    font-size: 1rem;
+  }
+
+  .current-letter {
+    font-size: 2.5rem;
+    padding: 0.4rem 0.8rem;
+    min-width: 70px;
+  }
+
+  .game-controls {
+    gap: 1rem;
+  }
+
+  .timer-time {
+    font-size: 2rem;
+  }
+
+  .timer-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .timer-btn {
+    width: 100%;
+  }
+
+  .player-navigation {
+    flex-direction: column;
+  }
+
+  .nav-btn {
+    max-width: none;
+  }
+
+  .points-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .rules-section {
+    padding: 1rem;
+  }
+
+  .rules-list li {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
   }
 }
-.icons-link-btn-wrapper {
-  position: absolute;
-  top: 1.2rem;
-  right: 1.2rem;
-  z-index: 10;
-}
-.icons-link-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: #f1f5f9;
-  border: 1.5px solid #2563eb;
-  border-radius: 1.5rem;
-  padding: 0.4rem 1.1rem 0.4rem 0.7rem;
-  color: #2563eb;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 8px #2563eb11;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.icons-link-btn:hover {
-  background: #e0e7ef;
-  box-shadow: 0 4px 16px #2563eb22;
-}
-.icons-link-text {
-  font-size: 1rem;
-  font-weight: 500;
-}
-.rules-card {
-  background: #f8fafc;
-  border-radius: 18px;
-  box-shadow: 0 2px 12px #2563eb11;
-  padding: 1.5rem 1.5rem 1.5rem 1.5rem;
-  margin-top: 2.5rem;
-  margin-bottom: 2.5rem;
-  text-align: left;
-}
-.add-player-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(30, 41, 59, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1200;
-}
-.add-player-card {
-  background: #fff;
-  border-radius: 2.2rem;
-  box-shadow: 0 8px 32px #2563eb33, 0 2px 24px #fbbf2444;
-  padding: 2.5rem 2rem 2rem 2rem;
-  min-width: 320px;
-  text-align: center;
-  position: relative;
-  animation: popIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-}
-.add-player-input {
-  width: 80%;
-  font-size: 1.1rem;
-  padding: 0.9rem 1.2rem;
-  border-radius: 1.2rem;
-  border: 2px solid #e0e7ef;
-  margin: 1.2rem 0 1.5rem 0;
-  outline: none;
-  box-shadow: 0 2px 12px #2563eb11;
-  transition: border 0.2s, box-shadow 0.2s;
-}
-.add-player-input:focus {
-  border: 2px solid #2563eb;
-  box-shadow: 0 0 0 2px #2563eb33;
-}
-.speech-section {
-  margin: 1.2rem 0 0.5rem 0;
-  text-align: center;
-}
-.speech-btn {
-  background: linear-gradient(
-    90deg,
-    var(--color-primary) 60%,
-    var(--color-accent) 100%
-  );
-  color: #fff;
-  border: none;
-  border-radius: 2rem;
-  padding: 0.8rem 2rem;
-  font-size: 1.1rem;
-  font-weight: bold;
-  box-shadow: 0 2px 12px var(--color-primary) 22;
-  cursor: pointer;
-  margin-bottom: 0.7rem;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.speech-btn:active {
-  transform: scale(0.97);
-}
-.speech-result {
-  font-size: 1.08rem;
-  color: var(--color-primary);
-  margin-top: 0.3rem;
+
+@media (max-width: 480px) {
+  .main-card {
+    padding: 20px 12px 16px 12px;
+    margin: 0 4px;
+  }
+
+  .game-title-animated {
+    font-size: 1.6rem;
+  }
+
+  .dice-container {
+    width: 140px;
+    height: 140px;
+  }
+
+  .dice-face {
+    width: 140px;
+    height: 140px;
+    font-size: 1.2rem;
+    padding: 12px;
+  }
+
+  .roll-btn {
+    font-size: 1rem;
+    padding: 0.7rem 1.2rem;
+    min-width: 160px;
+  }
+
+  .result-category {
+    font-size: 1.4rem;
+  }
+
+  .current-letter {
+    font-size: 2rem;
+    padding: 0.3rem 0.6rem;
+    min-width: 60px;
+  }
+
+  .timer-time {
+    font-size: 1.8rem;
+  }
+
+  .points-btn {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+  }
 }
 </style>
