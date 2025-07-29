@@ -1,15 +1,101 @@
 <script lang="ts" setup>
 import {useRouter} from 'vue-router';
+import {ref} from 'vue';
+import emailjs from '@emailjs/browser';
 import Logo from './Logo.vue';
+
 const router = useRouter();
+
+// Formular-Daten
+const formData = ref({
+  name: '',
+  email: '',
+  address: '',
+  phone: '',
+  message: '',
+});
+
+const isSubmitting = ref(false);
+const submitStatus = ref<'idle' | 'success' | 'error'>('idle');
+const submitMessage = ref('');
+
+// EmailJS Konfiguration
+const EMAILJS_SERVICE_ID = 'service_936cf4s'; // Ersetze mit deiner Service ID
+const EMAILJS_TEMPLATE_ID = 'template_d872bjs'; // Ersetze mit deiner Template ID
+const EMAILJS_PUBLIC_KEY = '1caDskB4OK6Io6HxJ'; // Ersetze mit deinem Public Key
+
+const handleSubmit = async () => {
+  if (isSubmitting.value) return;
+
+  // Validierung
+  if (
+    !formData.value.name ||
+    !formData.value.email ||
+    !formData.value.address
+  ) {
+    submitStatus.value = 'error';
+    submitMessage.value = 'Bitte fülle alle Pflichtfelder aus.';
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitStatus.value = 'idle';
+  submitMessage.value = '';
+
+  try {
+    const templateParams = {
+      from_name: formData.value.name,
+      from_email: formData.value.email,
+      from_address: formData.value.address,
+      from_phone: formData.value.phone,
+      message: formData.value.message || 'Bestellung: Lexikon-Loop Würfel-Set',
+      to_name: 'Lexikon-Loop Shop',
+      reply_to: formData.value.email,
+    };
+
+    await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams,
+      EMAILJS_PUBLIC_KEY,
+    );
+
+    submitStatus.value = 'success';
+    submitMessage.value =
+      'Bestellung erfolgreich versendet! Wir melden uns bald bei dir.';
+
+    // Formular zurücksetzen
+    formData.value = {
+      name: '',
+      email: '',
+      address: '',
+      phone: '',
+      message: '',
+    };
+  } catch (error) {
+    console.error('Email send error:', error);
+    submitStatus.value = 'error';
+    submitMessage.value =
+      'Fehler beim Versenden. Bitte versuche es später erneut.';
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+const resetForm = () => {
+  submitStatus.value = 'idle';
+  submitMessage.value = '';
+};
 </script>
+
 <template>
   <div class="shop-container">
     <Logo />
-    <h1 class="shop-title">Lexikon-Loop: Würfel & Zubehör kaufen</h1>
+    <h1 class="shop-title">Lexikon-Loop: Würfel & Zubehör bestellen</h1>
+
+    <!-- Produkt-Information -->
     <div class="shop-product-card">
       <div class="shop-product-img">
-        <!-- Platzhalter für Würfelbild -->
         <svg width="90" height="90" viewBox="0 0 100 100">
           <rect
             x="10"
@@ -48,117 +134,113 @@ const router = useRouter();
         <div class="shop-shipping">Lieferzeit: 2–4 Werktage</div>
       </div>
     </div>
+
+    <!-- Bestellformular -->
     <div class="shop-order-form">
-      <h3>Jetzt bestellen</h3>
-      <form @submit.prevent>
-        <label>
-          Deine Adresse (Versand):<br />
-          <textarea
-            placeholder="Name, Straße, PLZ Ort"
-            rows="3"
-            required
-            class="shop-address"
-          ></textarea>
-        </label>
-        <label>
-          E-Mail für Bestätigung:<br />
+      <h3>Bestellung per E-Mail</h3>
+      <p class="form-description">
+        Fülle das Formular aus und wir senden dir eine Bestätigung per E-Mail.
+        Die Bezahlung erfolgt nach Erhalt der Bestätigung.
+      </p>
+
+      <form @submit.prevent="handleSubmit" @input="resetForm">
+        <div class="form-group">
+          <label for="name" class="form-label">
+            Name * <span class="required">*</span>
+          </label>
           <input
+            id="name"
+            v-model="formData.name"
+            type="text"
+            placeholder="Vor- und Nachname"
+            required
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">
+            E-Mail-Adresse <span class="required">*</span>
+          </label>
+          <input
+            id="email"
+            v-model="formData.email"
             type="email"
             placeholder="deine@email.de"
             required
-            class="shop-email"
+            class="form-input"
           />
-        </label>
-        <div class="shop-pay-methods">
-          <span>Zahlungsmethode:</span>
-          <div class="shop-pay-icons">
-            <span title="PayPal"
-              ><svg width="32" height="32" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="16" fill="#fff" />
-                <text
-                  x="16"
-                  y="22"
-                  text-anchor="middle"
-                  font-size="18"
-                  fill="#2563eb"
-                >
-                  PP
-                </text>
-              </svg></span
-            >
-            <span title="Apple Pay"
-              ><svg width="32" height="32" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="16" fill="#fff" />
-                <text
-                  x="16"
-                  y="22"
-                  text-anchor="middle"
-                  font-size="18"
-                  fill="#111"
-                >
-                  
-                </text>
-              </svg></span
-            >
-            <span title="Kreditkarte"
-              ><svg width="32" height="32" viewBox="0 0 32 32">
-                <rect
-                  x="4"
-                  y="8"
-                  width="24"
-                  height="16"
-                  rx="4"
-                  fill="#fbbf24"
-                  stroke="#2563eb"
-                  stroke-width="2"
-                />
-                <rect x="8" y="20" width="8" height="2" fill="#2563eb" /></svg
-            ></span>
-            <span title="Google Pay"
-              ><svg width="32" height="32" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="16" fill="#fff" />
-                <text
-                  x="16"
-                  y="22"
-                  text-anchor="middle"
-                  font-size="18"
-                  fill="#34a853"
-                >
-                  G
-                </text>
-              </svg></span
-            >
-            <span title="SEPA"
-              ><svg width="32" height="32" viewBox="0 0 32 32">
-                <rect
-                  x="4"
-                  y="8"
-                  width="24"
-                  height="16"
-                  rx="4"
-                  fill="#e0e7ef"
-                  stroke="#2563eb"
-                  stroke-width="2"
-                />
-                <text
-                  x="16"
-                  y="22"
-                  text-anchor="middle"
-                  font-size="13"
-                  fill="#2563eb"
-                >
-                  SEPA
-                </text>
-              </svg></span
-            >
-          </div>
         </div>
-        <button class="shop-order-btn" type="submit">Jetzt kaufen</button>
+
+        <div class="form-group">
+          <label for="phone" class="form-label"> Telefonnummer </label>
+          <input
+            id="phone"
+            v-model="formData.phone"
+            type="tel"
+            placeholder="+49 123 456789"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="address" class="form-label">
+            Lieferadresse <span class="required">*</span>
+          </label>
+          <textarea
+            id="address"
+            v-model="formData.address"
+            placeholder="Straße, Hausnummer&#10;PLZ Ort&#10;Land"
+            rows="4"
+            required
+            class="form-textarea"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="message" class="form-label"> Nachricht (optional) </label>
+          <textarea
+            id="message"
+            v-model="formData.message"
+            placeholder="Zusätzliche Wünsche oder Anmerkungen..."
+            rows="3"
+            class="form-textarea"
+          ></textarea>
+        </div>
+
+        <!-- Status-Nachrichten -->
+        <div
+          v-if="submitStatus !== 'idle'"
+          class="status-message"
+          :class="submitStatus"
+        >
+          {{ submitMessage }}
+        </div>
+
+        <button
+          type="submit"
+          class="shop-order-btn"
+          :disabled="isSubmitting"
+          :class="{submitting: isSubmitting}"
+        >
+          <span v-if="isSubmitting">Wird gesendet...</span>
+          <span v-else>Bestellung senden</span>
+        </button>
       </form>
+
       <div class="shop-note">
-        (Dies ist ein Demo-Shop. Adresse & Zahlung sind Platzhalter.)
+        <p>
+          <strong>Hinweis:</strong> Nach dem Versenden der Bestellung erhältst
+          du eine E-Mail-Bestätigung. Die Bezahlung erfolgt per Banküberweisung
+          oder PayPal nach Erhalt der Bestätigung.
+        </p>
       </div>
     </div>
+
+    <!-- Zurück zur Startseite -->
+    <button class="back-home-btn" @click="router.push('/')">
+      Zurück zur Startseite
+    </button>
   </div>
 </template>
 
@@ -179,12 +261,14 @@ const router = useRouter();
   gap: 2.2rem;
   box-sizing: border-box;
 }
+
 .shop-title {
   font-size: 2.1rem;
   color: var(--color-primary);
   font-weight: 800;
   margin-bottom: 2.2rem;
 }
+
 .shop-product-card,
 .shop-order-form {
   width: 100%;
@@ -198,220 +282,324 @@ const router = useRouter();
   text-align: left;
   position: relative;
   transition: box-shadow 0.2s;
-  font-size: 1.01rem;
-  line-height: 1.7;
-  box-sizing: border-box;
-  overflow-x: auto;
-  max-width: 100%;
 }
+
+.shop-product-card:hover,
+.shop-order-form:hover {
+  box-shadow: 0 4px 20px rgba(60, 80, 180, 0.12);
+}
+
 .shop-product-card {
   display: flex;
+  align-items: flex-start;
   gap: 1.5rem;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2.2rem;
+  margin-bottom: 2rem;
 }
+
 .shop-product-img {
-  flex: 0 0 90px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 120px;
+  height: 120px;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 2px solid #e0e7ef;
 }
+
 .shop-product-info {
-  text-align: left;
+  flex: 1;
 }
+
 .shop-product-info h2 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--color-primary);
-  margin-bottom: 0.7rem;
+  margin-bottom: 1rem;
 }
+
 .shop-includes {
-  list-style: disc inside;
-  margin-bottom: 0.7rem;
-  font-size: 1.01rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.shop-includes li {
+  padding: 0.3rem 0;
+  font-size: 1rem;
   color: var(--color-text);
+  position: relative;
+  padding-left: 1.5rem;
 }
-.shop-price {
-  font-size: 1.25rem;
+
+.shop-includes li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #22c55e;
   font-weight: bold;
-  color: var(--color-accent);
-  margin-bottom: 0.2rem;
 }
-.shop-plus {
+
+.shop-price {
+  font-size: 1.3rem;
+  font-weight: 700;
   color: var(--color-primary);
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-.shop-shipping {
-  font-size: 0.98rem;
-  color: #64748b;
   margin-bottom: 0.5rem;
 }
-.shop-order-form {
-  margin-top: 2.5rem;
-  background: #f8fafc;
-  border-radius: 22px;
-  padding: 2.1rem 1.5rem 1.7rem 1.5rem;
-  box-shadow: 0 2px 12px rgba(60, 80, 180, 0.07);
+
+.shop-plus {
+  color: #64748b;
+  font-weight: 400;
 }
-.shop-order-form h3 {
-  font-size: 1.2rem;
-  color: var(--color-primary);
-  margin-bottom: 1.2rem;
+
+.shop-shipping {
+  font-size: 0.9rem;
+  color: #64748b;
 }
-.shop-address,
-.shop-email {
-  width: 100%;
-  border-radius: 0.7rem;
-  border: 1.5px solid var(--color-primary);
-  padding: 0.7rem 1rem;
-  margin-bottom: 1.1rem;
+
+/* Formular Styles */
+.form-description {
+  color: #64748b;
   font-size: 1rem;
-  resize: vertical;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
-.shop-pay-methods {
-  margin: 1.2rem 0 1.2rem 0;
+
+.form-group {
+  margin-bottom: 1.5rem;
 }
-.shop-pay-icons {
-  display: flex;
-  gap: 0.7rem;
-  margin-top: 0.5rem;
-}
-.shop-order-btn {
+
+.form-label {
   display: block;
-  margin: 2.2rem auto 0 auto;
-  padding: 1.1rem 2.2rem;
-  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.required {
+  color: #ef4444;
   font-weight: bold;
-  color: #fff;
-  background: linear-gradient(
-    90deg,
-    var(--color-primary) 60%,
-    var(--color-accent) 100%
-  );
-  border: none;
-  border-radius: 2rem;
-  box-shadow: 0 4px 24px var(--color-primary) 33, 0 0 0 0 var(--color-accent) 44;
-  cursor: pointer;
-  transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
 }
-.shop-order-btn:active {
-  transform: scale(0.97);
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e0e7ef;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #fff;
+  color: var(--color-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
-.shop-note {
-  font-size: 0.98rem;
-  color: #888;
-  margin-top: 1.2rem;
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Status Nachrichten */
+.status-message {
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  font-weight: 500;
   text-align: center;
 }
-@media (max-width: 700px) {
+
+.status-message.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.status-message.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* Button Styles */
+.shop-order-btn {
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.shop-order-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+}
+
+.shop-order-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.shop-order-btn.submitting {
+  background: linear-gradient(90deg, #64748b 60%, #94a3b8 100%);
+}
+
+.shop-note {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border-left: 4px solid #2563eb;
+}
+
+.shop-note p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Back Home Button */
+.back-home-btn {
+  display: block;
+  margin: 2rem auto 0 auto;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2563eb;
+  background: #f1f5f9;
+  border: 2px solid #2563eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.back-home-btn:hover {
+  background: #e0e7ef;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .shop-container {
-    max-width: 100%;
-    width: 100%;
-    padding: 1.2rem 0.7rem 2.5rem 0.7rem;
-    gap: 1.7rem;
-    border-radius: 18px;
-    box-sizing: border-box;
+    margin: 1.5rem 0.5rem 2rem 0.5rem;
+    padding: 2rem 1rem 2rem 1rem;
+    gap: 1.5rem;
   }
-  .shop-product-card,
-  .shop-order-form {
-    max-width: 100%;
-    width: 100%;
-    padding: 1.2rem 0.8rem 1.1rem 0.8rem;
-    border-radius: 14px;
-    font-size: 0.98rem;
-    box-sizing: border-box;
+
+  .shop-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
   }
+
   .shop-product-card {
     flex-direction: column;
-    align-items: stretch;
-    gap: 1.1rem;
+    text-align: center;
+    gap: 1rem;
   }
+
   .shop-product-img {
-    justify-content: center;
-    margin-bottom: 0.7rem;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
   }
-  .shop-product-img svg {
-    width: 64px;
-    height: 64px;
-  }
-  .shop-title {
-    font-size: 1.45rem;
-  }
+
   .shop-product-info h2 {
-    font-size: 1.08rem;
+    font-size: 1.3rem;
   }
-  .shop-includes {
-    font-size: 0.97rem;
+
+  .shop-includes li {
+    font-size: 0.9rem;
   }
+
   .shop-price {
-    font-size: 1.08rem;
+    font-size: 1.2rem;
   }
-  .shop-order-form h3 {
-    font-size: 1.05rem;
+
+  .form-input,
+  .form-textarea {
+    font-size: 0.95rem;
+    padding: 0.7rem 0.9rem;
   }
-  .shop-address,
-  .shop-email {
-    font-size: 0.97rem;
-    padding: 0.6rem 0.7rem;
-    border-radius: 0.5rem;
-  }
+
   .shop-order-btn {
-    font-size: 1.01rem;
-    padding: 0.9rem 1.3rem;
-    border-radius: 1.2rem;
+    font-size: 1rem;
+    padding: 0.9rem 1.5rem;
   }
-  .shop-pay-icons svg {
-    width: 26px;
-    height: 26px;
+
+  .back-home-btn {
+    font-size: 1rem;
+    padding: 0.8rem 1.5rem;
   }
 }
-@media (max-width: 430px) {
+
+@media (max-width: 480px) {
   .shop-container {
-    max-width: 100%;
-    width: 100%;
-    padding: 0.7rem 0rem 1.2rem 0rem;
-    border-radius: 10px;
-    box-sizing: border-box;
+    margin: 1rem 0.3rem 1.5rem 0.3rem;
+    padding: 1.5rem 0.8rem 1.5rem 0.8rem;
+    gap: 1rem;
   }
+
+  .shop-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
   .shop-product-card,
   .shop-order-form {
-    max-width: 100%;
-    width: 100%;
-    padding: 0.7rem 0.3rem 0.7rem 0.3rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    box-sizing: border-box;
+    padding: 1.5rem 1rem 1.2rem 1rem;
   }
-  .shop-title {
-    font-size: 1.08rem;
+
+  .shop-product-img {
+    width: 80px;
+    height: 80px;
   }
+
   .shop-product-info h2 {
-    font-size: 0.97rem;
+    font-size: 1.2rem;
   }
-  .shop-includes {
-    font-size: 0.93rem;
+
+  .shop-includes li {
+    font-size: 0.85rem;
+    padding-left: 1.2rem;
   }
+
   .shop-price {
-    font-size: 0.97rem;
+    font-size: 1.1rem;
   }
-  .shop-order-form h3 {
-    font-size: 0.97rem;
+
+  .form-input,
+  .form-textarea {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
   }
-  .shop-address,
-  .shop-email {
-    font-size: 0.93rem;
-    padding: 0.5rem 0.5rem;
-    border-radius: 0.3rem;
-  }
+
   .shop-order-btn {
-    font-size: 0.93rem;
-    padding: 0.7rem 0.7rem;
-    border-radius: 0.7rem;
+    font-size: 0.95rem;
+    padding: 0.8rem 1.2rem;
   }
-  .shop-pay-icons svg {
-    width: 20px;
-    height: 20px;
+
+  .back-home-btn {
+    font-size: 0.95rem;
+    padding: 0.7rem 1.2rem;
   }
 }
 </style>
