@@ -27,7 +27,7 @@ const router = useRouter();
 function login() {
   if (password.value === '1312') {
     localStorage.setItem('isAuthenticated', 'true');
-    router.push('/protected');
+    router.push('/lets-play');
   } else {
     error.value = true;
     password.value = '';

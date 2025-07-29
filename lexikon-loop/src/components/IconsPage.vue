@@ -4,7 +4,7 @@
     <div class="icons-svg-wrapper">
       <object
         type="image/svg+xml"
-        data="/assets/icons.svg"
+        data="/assets/icons2.svg"
         class="icons-svg"
       ></object>
     </div>

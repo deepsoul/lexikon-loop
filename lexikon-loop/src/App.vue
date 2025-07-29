@@ -6,7 +6,3 @@ import Logo from './components/Logo.vue';
 <template>
   <router-view />
 </template>
-
-<style lang="scss" scoped>
-@import './style.css';
-</style>

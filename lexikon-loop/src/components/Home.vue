@@ -63,7 +63,6 @@ const router = useRouter();
           <li>
             <strong>Nächster Spieler</strong>
             <ul>
-              <li>Würfelt erneut</li>
               <li>
                 Finde einen Begriff für die gewürfelte Kategorie, der mit dem
                 <strong>letzten Buchstaben</strong> des vorherigen Wortes

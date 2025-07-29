@@ -32,602 +32,226 @@
             </button>
           </div>
           <!-- Timer-Einstellung -->
-          <div
-            class="timer-settings flex flex-wrap gap-2 justify-center items-center mb-2"
-          >
-            <span class="timer-settings-label">Rundenzeit:</span>
-            <button
-              v-for="opt in timerOptions"
-              :key="opt"
-              class="timer-settings-btn"
-              :class="{active: timerDuration === opt}"
-              @click="setTimerDuration(opt)"
-            >
-              {{ opt }}s
-            </button>
-          </div>
+          <TimerSettings
+            :timerOptions="timerOptions"
+            :timerDuration="timerDuration"
+            @update:timerDuration="setTimerDuration"
+          />
           <div v-if="isSpeedRound" class="speed-round-badge">
             ⚡ Speed-Runde! Korrekte Antwort = 2 Punkte
           </div>
           <!-- Spieler-Chips -->
-          <div class="player-chips flex gap-2 overflow-x-auto pb-2 mb-4">
-            <span
-              v-for="(p, i) in players"
-              :key="i"
-              class="player-chip flex items-center gap-2 px-4 py-2 rounded-full shadow transition-all duration-200 relative"
-              :class="{'chip-active': i === currentPlayer}"
-            >
-              <span class="chip-avatar bg-blue-200 text-blue-700 font-bold">{{
-                p.name.charAt(0).toUpperCase()
-              }}</span>
-              <span class="chip-name-block" @click="startEditPlayer(i)">
-                <template v-if="editingPlayerIndex === i">
-                  <input
-                    v-model="editingPlayerName"
-                    @keyup.enter="confirmEditPlayer"
-                    @blur="confirmEditPlayer"
-                    class="chip-edit-input"
-                    autofocus
-                  />
-                  <button class="chip-cancel" @click="cancelEditPlayer">
-                    ✕
-                  </button>
-                </template>
-                <template v-else>{{ p.name }}</template>
-              </span>
-              <span class="chip-score bg-yellow-400 text-gray-900 font-bold">{{
-                p.score
-              }}</span>
-              <button
-                class="chip-icon"
-                @click="deletePlayer(i)"
-                title="Spieler löschen"
-              >
-                🗑️
-              </button>
-              <button
-                v-if="i > 0"
-                class="chip-icon"
-                @click="movePlayer(i, 'up')"
-                title="Nach oben"
-              >
-                ▲
-              </button>
-              <button
-                v-if="i < players.length - 1"
-                class="chip-icon"
-                @click="movePlayer(i, 'down')"
-                title="Nach unten"
-              >
-                ▼
-              </button>
-            </span>
-            <button
-              class="chip-add-btn"
-              @click="addPlayer"
-              title="Spieler hinzufügen"
-            >
-              ＋
-            </button>
-          </div>
+          <PlayerChips
+            :players="players"
+            :currentPlayer="currentPlayer"
+            :editingPlayerIndex="editingPlayerIndex"
+            v-model:editingPlayerName="editingPlayerName"
+            @edit-player="startEditPlayer"
+            @confirm-edit-player="confirmEditPlayer"
+            @cancel-edit-player="cancelEditPlayer"
+            @delete-player="deletePlayer"
+            @move-player="movePlayer"
+            @add-player="addPlayer"
+          />
           <div
             class="reset-all-container flex items-center justify-center mb-4"
           >
-            <button
-              class="reset-all-btn"
-              @click="resetAllPlayers"
-              title="Alle Spieler & Punkte löschen"
-            >
-              <svg
-                class="reset-all-icon"
-                width="28"
-                height="28"
-                viewBox="0 0 28 28"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect
-                  x="2"
-                  y="14"
-                  width="24"
-                  height="10"
-                  rx="4"
-                  fill="#fbbf24"
-                />
-                <rect x="7" y="6" width="14" height="8" rx="4" fill="#2563eb" />
-                <path
-                  d="M9 8l2 2 4-4 4 4"
-                  stroke="#fff"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <rect
-                  x="12"
-                  y="18"
-                  width="4"
-                  height="4"
-                  rx="2"
-                  fill="#fffbe8"
-                />
-              </svg>
-              <span class="reset-all-text"
-                >Alle Spieler & Punkte zurücksetzen</span
-              >
-            </button>
+            <ResetAllButton @reset-all="resetAllPlayers" />
           </div>
           <!-- Hauptbereich: Würfel, Ergebnis, Steuerung -->
           <div
             class="flex flex-col md:flex-row gap-6 items-center justify-center"
           >
             <!-- Würfel & Timer -->
-            <div class="dice-timer-card flex flex-col items-center gap-4">
-              <div class="dice-container mt-2">
-                <div class="dice" :style="diceTransform">
-                  <div class="dice-face">
-                    <!-- Stadt-Icon -->
-                    <svg
-                      width="38"
-                      height="38"
-                      viewBox="0 0 100 100"
-                      style="display: block; margin: 0 auto 2px auto"
-                    >
-                      <rect
-                        width="100"
-                        height="100"
-                        rx="10"
-                        fill="#fdf8f4"
-                        stroke="#2563eb"
-                        stroke-width="2"
-                      />
-                      <g transform="translate(30,20)">
-                        <rect
-                          width="10"
-                          height="20"
-                          x="0"
-                          y="10"
-                          fill="#2563eb"
-                        />
-                        <rect
-                          width="10"
-                          height="30"
-                          x="10"
-                          y="0"
-                          fill="#2563eb"
-                        />
-                        <rect
-                          width="10"
-                          height="20"
-                          x="20"
-                          y="10"
-                          fill="#2563eb"
-                        />
-                      </g>
-                    </svg>
-                    STADT
-                  </div>
-                  <div class="dice-face">
-                    <!-- Land-Icon -->
-                    <svg
-                      width="38"
-                      height="38"
-                      viewBox="0 0 100 100"
-                      style="display: block; margin: 0 auto 2px auto"
-                    >
-                      <rect
-                        width="100"
-                        height="100"
-                        rx="10"
-                        fill="#dff5dc"
-                        stroke="#16a34a"
-                        stroke-width="2"
-                      />
-                      <circle
-                        cx="50"
-                        cy="40"
-                        r="18"
-                        stroke="#16a34a"
-                        stroke-width="2"
-                        fill="none"
-                      />
-                      <path
-                        d="M32,40 h36 M50,22 v36 M38,28 a18,18 0 0 1 24,24"
-                        stroke="#16a34a"
-                        fill="none"
-                      />
-                    </svg>
-                    LAND
-                  </div>
-                  <div class="dice-face">
-                    <!-- Fluss-Icon -->
-                    <svg
-                      width="38"
-                      height="38"
-                      viewBox="0 0 100 100"
-                      style="display: block; margin: 0 auto 2px auto"
-                    >
-                      <rect
-                        width="100"
-                        height="100"
-                        rx="10"
-                        fill="#d6edff"
-                        stroke="#075985"
-                        stroke-width="2"
-                      />
-                      <path
-                        d="M20,40 q5,5 10,0 t10,0 t10,0 t10,0"
-                        stroke="#075985"
-                        stroke-width="3"
-                        fill="none"
-                      />
-                      <path
-                        d="M20,55 q5,5 10,0 t10,0 t10,0 t10,0"
-                        stroke="#075985"
-                        stroke-width="3"
-                        fill="none"
-                      />
-                    </svg>
-                    FLUSS
-                  </div>
-                  <div class="dice-face">
-                    <!-- Name-Icon -->
-                    <svg
-                      width="38"
-                      height="38"
-                      viewBox="0 0 100 100"
-                      style="display: block; margin: 0 auto 2px auto"
-                    >
-                      <rect
-                        width="100"
-                        height="100"
-                        rx="10"
-                        fill="#fdeef2"
-                        stroke="#9333ea"
-                        stroke-width="2"
-                      />
-                      <circle cx="50" cy="35" r="10" fill="#9333ea" />
-                      <path d="M35,70 q15,-20 30,0 z" fill="#9333ea" />
-                    </svg>
-                    NAME
-                  </div>
-                  <div class="dice-face">
-                    <!-- Tier-Icon -->
-                    <svg
-                      width="38"
-                      height="38"
-                      viewBox="0 0 100 100"
-                      style="display: block; margin: 0 auto 2px auto"
-                    >
-                      <rect
-                        width="100"
-                        height="100"
-                        rx="10"
-                        fill="#fff2ea"
-                        stroke="#d97706"
-                        stroke-width="2"
-                      />
-                      <circle cx="35" cy="40" r="8" fill="#d97706" />
-                      <circle cx="65" cy="40" r="8" fill="#d97706" />
-                      <circle cx="40" cy="60" r="7" fill="#d97706" />
-                      <circle cx="60" cy="60" r="7" fill="#d97706" />
-                      <path
-                        d="M42,55 q8,-10 16,0 q-4,10 -16,0"
-                        fill="#d97706"
-                      />
-                    </svg>
-                    TIER
-                  </div>
-                  <div class="dice-face">
-                    <!-- Jackpot-Icon -->
-                    <svg
-                      width="38"
-                      height="38"
-                      viewBox="0 0 100 100"
-                      style="display: block; margin: 0 auto 2px auto"
-                    >
-                      <rect
-                        width="100"
-                        height="100"
-                        rx="10"
-                        fill="#ffec69"
-                        stroke="#ca8a04"
-                        stroke-width="2"
-                      />
-                      <polygon
-                        points="50,20 58,40 80,40 62,55 70,75 50,62 30,75 38,55 20,40 42,40"
-                        fill="#ca8a04"
-                      />
-                    </svg>
-                    JACKPOT
-                  </div>
-                </div>
-              </div>
-              <button
-                class="roll-btn mt-2"
-                :disabled="rolling"
-                @click="rollDice"
-                style="width: 100%; max-width: 260px; align-self: center"
-              >
-                <span v-if="rolling">🎲 Würfelt...</span>
-                <span v-else-if="resultText === 'Bereit zum Würfeln!'"
-                  >🎲 WÜRFELN</span
-                >
-                <span v-else>🎲 NEU WÜRFELN</span>
-              </button>
-              <!-- Ergebnis & Steuerung -->
-              <div
-                class="result-card flex flex-col items-center gap-4 w-full max-w-md"
-              >
-                <div
-                  class="result-text flex justify-center"
-                  :class="{'jackpot-animation': isJackpot}"
-                >
-                  <span> {{ resultText }}</span>
-                </div>
-                <div class="result-subtext">{{ subResult }}</div>
-                <div class="current-letter-box">
-                  <span class="current-letter">{{ currentLetter }}</span>
-                </div>
-                <!-- Spracheingabe-UI -->
-                <div class="speech-section">
-                  <button
-                    class="speech-btn"
-                    @click="
-                      isListening
-                        ? stopSpeechRecognition()
-                        : startSpeechRecognition()
-                    "
+            <DiceArea
+              :diceTransform="diceTransform"
+              :rolling="rolling"
+              :resultText="resultText"
+              :timerActive="timerActive"
+              :timeLeft="timeLeft"
+              :timerDuration="timerDuration"
+              :timerProgressStyle="timerProgressStyle"
+              @roll-dice="rollDice"
+              @toggle-timer="toggleTimer"
+              @reset-game-timer="resetGameTimer"
+            >
+              <template #dice-faces>
+                <div class="dice-face">
+                  <!-- Stadt-Icon -->
+                  <svg
+                    width="38"
+                    height="38"
+                    viewBox="0 0 100 100"
+                    style="display: block; margin: 0 auto 2px auto"
                   >
-                    <span v-if="isListening">🎤 Hören…</span>
-                    <span v-else>🎤 Spracheingabe</span>
-                  </button>
-                  <div v-if="recognizedWord" class="speech-result">
-                    <strong>Erkannt:</strong> {{ recognizedWord }}<br />
-                    <span v-if="recognizedLastLetter"
-                      ><strong>Letzter Buchstabe:</strong>
-                      {{ recognizedLastLetter }}</span
-                    >
-                  </div>
+                    <path
+                      d="M20 60V30L35 20L50 30V60M50 30L65 20L80 30V60M20 60H80V90H20V60Z"
+                      stroke="#2563eb"
+                      stroke-width="4"
+                      fill="none"
+                    />
+                    <rect x="25" y="40" width="10" height="20" fill="#2563eb" />
+                    <rect x="45" y="40" width="10" height="20" fill="#2563eb" />
+                    <rect x="65" y="40" width="10" height="20" fill="#2563eb" />
+                  </svg>
+                  STADT
                 </div>
-                <div
-                  class="flex gap-2 justify-center items-center mt-2 timer-controls-animated"
-                >
-                  <button
-                    class="timer-btn-main"
-                    :class="{'timer-btn-glow': timerActive}"
-                    @click="toggleTimer"
-                    aria-label="Timer starten/stoppen"
+                <div class="dice-face">
+                  <!-- Land-Icon -->
+                  <svg
+                    width="38"
+                    height="38"
+                    viewBox="0 0 100 100"
+                    style="display: block; margin: 0 auto 2px auto"
                   >
-                    <span v-if="timerActive" class="timer-icon">
-                      <svg
-                        width="38"
-                        height="38"
-                        viewBox="0 0 38 38"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <rect
-                          x="8"
-                          y="7"
-                          width="7"
-                          height="24"
-                          rx="2.5"
-                          fill="white"
-                          filter="url(#shadow)"
-                        />
-                        <rect
-                          x="23"
-                          y="7"
-                          width="7"
-                          height="24"
-                          rx="2.5"
-                          fill="white"
-                          filter="url(#shadow)"
-                        />
-                        <defs>
-                          <filter
-                            id="shadow"
-                            x="0"
-                            y="0"
-                            width="38"
-                            height="38"
-                            filterUnits="userSpaceOnUse"
-                          >
-                            <feDropShadow
-                              dx="0"
-                              dy="1"
-                              stdDeviation="2"
-                              flood-color="#1e293b"
-                              flood-opacity="0.25"
-                            />
-                          </filter>
-                        </defs>
-                      </svg>
-                    </span>
-                    <span v-else class="timer-icon">
-                      <svg
-                        width="38"
-                        height="38"
-                        viewBox="0 0 38 38"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <polygon
-                          points="10,7 30,19 10,31"
-                          fill="white"
-                          filter="url(#shadow)"
-                        />
-                        <defs>
-                          <filter
-                            id="shadow"
-                            x="0"
-                            y="0"
-                            width="38"
-                            height="38"
-                            filterUnits="userSpaceOnUse"
-                          >
-                            <feDropShadow
-                              dx="0"
-                              dy="1"
-                              stdDeviation="2"
-                              flood-color="#1e293b"
-                              flood-opacity="0.25"
-                            />
-                          </filter>
-                        </defs>
-                      </svg>
-                    </span>
-                  </button>
-                  <button
-                    class="timer-btn-reset"
-                    @click="resetGameTimer"
-                    aria-label="Timer zurücksetzen"
+                    <path
+                      d="M20 60Q35 45 50 50Q65 55 80 40V80Q65 65 50 70Q35 75 20 60Z"
+                      fill="#16a34a"
+                      stroke="#166534"
+                      stroke-width="3"
+                    />
+                    <circle cx="40" cy="55" r="3" fill="#166534" />
+                    <circle cx="60" cy="50" r="3" fill="#166534" />
+                  </svg>
+                  LAND
+                </div>
+                <div class="dice-face">
+                  <!-- Fluss-Icon -->
+                  <svg
+                    width="38"
+                    height="38"
+                    viewBox="0 0 100 100"
+                    style="display: block; margin: 0 auto 2px auto"
                   >
-                    <span class="timer-icon-reset">
-                      <svg
-                        width="32"
-                        height="32"
-                        viewBox="0 0 32 32"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle
-                          cx="16"
-                          cy="16"
-                          r="13"
-                          stroke="white"
-                          stroke-width="3"
-                          filter="url(#resetshadow)"
-                          fill="none"
-                        />
-                        <path
-                          d="M16 5v5l4-4"
-                          stroke="white"
-                          stroke-width="3"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          filter="url(#resetshadow)"
-                        />
-                        <defs>
-                          <filter
-                            id="resetshadow"
-                            x="0"
-                            y="0"
-                            width="32"
-                            height="32"
-                            filterUnits="userSpaceOnUse"
-                          >
-                            <feDropShadow
-                              dx="0"
-                              dy="1"
-                              stdDeviation="2"
-                              flood-color="#1e293b"
-                              flood-opacity="0.25"
-                            />
-                          </filter>
-                        </defs>
-                      </svg>
-                    </span>
-                  </button>
+                    <path
+                      d="M20 50Q30 40 40 55Q50 70 60 55Q70 40 80 50V70Q70 60 60 70Q50 80 40 70Q30 60 20 70Z"
+                      fill="#38bdf8"
+                      stroke="#075985"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M30 55L35 60M50 60L55 55M70 55L65 60"
+                      stroke="#075985"
+                      stroke-width="2"
+                    />
+                  </svg>
+                  FLUSS
                 </div>
-                <!-- TIMER-ANZEIGE WIEDER EINFÜGEN -->
-                <div
-                  v-if="timerActive || timeLeft < timerDuration"
-                  class="timer-container"
-                >
-                  <div class="timer-display">{{ timeLeft }}s</div>
-                  <div class="timer-bar">
-                    <div
-                      class="timer-progress"
-                      :style="timerProgressStyle"
-                    ></div>
-                  </div>
-                </div>
-                <div class="player-controls flex gap-2 w-full justify-center">
-                  <button
-                    class="control-btn flex-1"
-                    @click="switchPlayer('prev')"
+                <div class="dice-face">
+                  <!-- Name-Icon -->
+                  <svg
+                    width="38"
+                    height="38"
+                    viewBox="0 0 100 100"
+                    style="display: block; margin: 0 auto 2px auto"
                   >
-                    ← Vorheriger
-                  </button>
-                  <button
-                    class="control-btn flex-1"
-                    @click="switchPlayer('next')"
+                    <rect
+                      x="30"
+                      y="30"
+                      width="40"
+                      height="40"
+                      rx="5"
+                      stroke="#9333ea"
+                      stroke-width="4"
+                      fill="none"
+                    />
+                    <path
+                      d="M40 45V65M40 50H55M45 55L55 65"
+                      stroke="#9333ea"
+                      stroke-width="3"
+                    />
+                    <circle cx="65" cy="40" r="3" fill="#9333ea" />
+                  </svg>
+                  NAME
+                </div>
+                <div class="dice-face">
+                  <!-- Tier-Icon -->
+                  <svg
+                    width="38"
+                    height="38"
+                    viewBox="0 0 100 100"
+                    style="display: block; margin: 0 auto 2px auto"
                   >
-                    Nächster →
-                  </button>
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="25"
+                      fill="#fbbf24"
+                      stroke="#d97706"
+                      stroke-width="3"
+                    />
+                    <circle cx="40" cy="45" r="3" fill="#d97706" />
+                    <circle cx="60" cy="45" r="3" fill="#d97706" />
+                    <path
+                      d="M45 60Q50 65 55 60"
+                      stroke="#d97706"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M35 40L25 35M65 40L75 35"
+                      stroke="#d97706"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  TIER
                 </div>
-                <div class="points-container flex gap-2 w-full justify-center">
-                  <button class="points-btn flex-1" @click="addPoints(1)">
-                    +1 Punkt
-                  </button>
-                  <button class="points-btn flex-1" @click="addPoints(2)">
-                    +2 Punkte
-                  </button>
-                  <button class="points-btn flex-1" @click="addPoints(-1)">
-                    -1 Punkt
-                  </button>
-                  <button class="points-btn flex-1" @click="resetPoints">
-                    Punkte zurücksetzen
-                  </button>
+                <div class="dice-face">
+                  <!-- Jackpot-Icon -->
+                  <svg
+                    width="38"
+                    height="38"
+                    viewBox="0 0 100 100"
+                    style="display: block; margin: 0 auto 2px auto"
+                  >
+                    <path
+                      d="M40 35L50 25L60 35V65L50 75L40 65V35Z"
+                      fill="#fde047"
+                      stroke="#ca8a04"
+                      stroke-width="3"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="10"
+                      fill="#facc15"
+                      stroke="#ca8a04"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M50 40L53 47L60 48L55 53L56 60L50 57L44 60L45 53L40 48L47 47L50 40Z"
+                      fill="#ca8a04"
+                    />
+                    <path
+                      d="M30 30L35 25M70 30L65 25"
+                      stroke="#facc15"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  JACKPOT
                 </div>
-              </div>
-            </div>
+              </template>
+              <template #player-controls> </template>
+              <template #points-controls> </template>
+              <template #result-card> </template>
+            </DiceArea>
           </div>
           <!-- Spielregeln -->
-          <div class="rules-card mt-8">
-            <h3>Spielregeln</h3>
-            <ul>
-              <li>
-                <strong>Würfle</strong> und beachte die angezeigte Kategorie
-              </li>
-              <li>
-                Bei <span class="jackpot-highlight">JACKPOT</span>: Wähle frei
-                Kategorie & Anfangsbuchstabe
-              </li>
-              <li>
-                Bei anderen Kategorien: Beginne mit dem letzten Buchstaben des
-                vorherigen Begriffs
-              </li>
-              <li>
-                Bei korrekter Antwort: Punkte erhalten (1 Punkt normal, 2 für
-                Jackpot)
-              </li>
-              <li>Nach deinem Zug: Klicke auf "Nächster Spieler"</li>
-              <li>
-                <span class="speed-info"
-                  >⚡ Bei Speed-Runden (10 oder 15 Sekunden) gibt es für jede
-                  richtige Antwort automatisch 2 Punkte!</span
-                >
-              </li>
-            </ul>
-          </div>
+          <RulesCard />
+          <!-- Spieler hinzufügen Dialog -->
+          <AddPlayerModal
+            :show="showAddPlayer"
+            :newPlayerName="newPlayerName"
+            @update:newPlayerName="(val) => (newPlayerName = val)"
+            @confirm="confirmAddPlayer"
+            @cancel="cancelAddPlayer"
+          />
+          <!-- Reset Button Floating -->
+          <button class="back-home-btn" @click="router.push('/')">
+            Zurück zur Startseite
+          </button>
         </div>
-        <!-- Spieler hinzufügen Dialog -->
-        <div v-if="showAddPlayer" class="add-player-modal">
-          <div class="add-player-card">
-            <label class="mb-2 font-semibold text-gray-700">Spielername:</label>
-            <input
-              v-model="newPlayerName"
-              @keyup.enter="confirmAddPlayer"
-              class="add-player-input"
-              placeholder="Name eingeben"
-              autofocus
-            />
-            <div class="flex gap-3 w-full mt-4">
-              <button class="points-btn flex-1" @click="confirmAddPlayer">
-                Hinzufügen
-              </button>
-              <button class="control-btn flex-1" @click="cancelAddPlayer">
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- Reset Button Floating -->
-        <button class="back-home-btn" @click="router.push('/')">
-          Zurück zur Startseite
-        </button>
       </div>
     </div>
   </div>
@@ -636,6 +260,12 @@
 <script setup lang="ts">
 import {ref, computed, watch, onMounted, onUnmounted} from 'vue';
 import {useRouter} from 'vue-router';
+import PlayerChips from './PlayerChips.vue';
+import DiceArea from './DiceArea.vue';
+import TimerSettings from './TimerSettings.vue';
+import ResetAllButton from './ResetAllButton.vue';
+import RulesCard from './RulesCard.vue';
+import AddPlayerModal from './AddPlayerModal.vue';
 const router = useRouter();
 
 // Typ für Spieler
@@ -703,124 +333,47 @@ const timerProgressStyle = computed(() => {
 function playSound(type: 'roll' | 'success' | 'jackpot' | 'timer') {
   // @ts-ignore
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
-
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(ctx.destination);
   switch (type) {
     case 'roll':
-      // Schöner Würfel-Sound mit mehreren harmonischen Tönen
-      const rollDuration = 0.8;
-      const rollGain = ctx.createGain();
-      rollGain.connect(ctx.destination);
-      rollGain.gain.setValueAtTime(0.15, ctx.currentTime);
-      rollGain.gain.exponentialRampToValueAtTime(
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(150, ctx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(
         0.001,
-        ctx.currentTime + rollDuration,
+        ctx.currentTime + 1,
       );
-
-      // Hauptton (sanfter Triangle-Wave)
-      const mainOsc = ctx.createOscillator();
-      mainOsc.type = 'triangle';
-      mainOsc.frequency.setValueAtTime(220, ctx.currentTime);
-      mainOsc.frequency.exponentialRampToValueAtTime(
-        110,
-        ctx.currentTime + rollDuration,
-      );
-      mainOsc.connect(rollGain);
-      mainOsc.start();
-      mainOsc.stop(ctx.currentTime + rollDuration);
-
-      // Harmonie-Ton (höher)
-      const harmonyOsc = ctx.createOscillator();
-      harmonyOsc.type = 'triangle';
-      harmonyOsc.frequency.setValueAtTime(330, ctx.currentTime);
-      harmonyOsc.frequency.exponentialRampToValueAtTime(
-        165,
-        ctx.currentTime + rollDuration,
-      );
-      harmonyOsc.connect(rollGain);
-      harmonyOsc.start();
-      harmonyOsc.stop(ctx.currentTime + rollDuration);
-
-      // Bass-Ton (tiefer)
-      const bassOsc = ctx.createOscillator();
-      bassOsc.type = 'triangle';
-      bassOsc.frequency.setValueAtTime(110, ctx.currentTime);
-      bassOsc.frequency.exponentialRampToValueAtTime(
-        55,
-        ctx.currentTime + rollDuration,
-      );
-      bassOsc.connect(rollGain);
-      bassOsc.start();
-      bassOsc.stop(ctx.currentTime + rollDuration);
+      gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
       break;
-
     case 'success':
-      // Angenehmer Erfolgs-Sound mit aufsteigender Melodie
-      const successGain = ctx.createGain();
-      successGain.connect(ctx.destination);
-      successGain.gain.setValueAtTime(0.2, ctx.currentTime);
-      successGain.gain.exponentialRampToValueAtTime(
-        0.001,
-        ctx.currentTime + 0.6,
-      );
-
-      // Aufsteigende Töne: C, E, G
-      const tones = [523.25, 659.25, 783.99]; // C5, E5, G5
-      tones.forEach((freq, index) => {
-        const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.1);
-        osc.connect(successGain);
-        osc.start(ctx.currentTime + index * 0.1);
-        osc.stop(ctx.currentTime + index * 0.1 + 0.3);
-      });
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(523.25, ctx.currentTime);
+      oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
       break;
-
     case 'jackpot':
-      // Spektakulärer Jackpot-Sound mit Glocken-Effekt
-      const jackpotGain = ctx.createGain();
-      jackpotGain.connect(ctx.destination);
-      jackpotGain.gain.setValueAtTime(0.25, ctx.currentTime);
-      jackpotGain.gain.exponentialRampToValueAtTime(
-        0.001,
-        ctx.currentTime + 1.2,
-      );
-
-      // Glocken-ähnliche Töne
-      const jackpotTones = [392.0, 523.25, 659.25, 830.61, 1046.5]; // G4, C5, E5, G#5, C6
-      jackpotTones.forEach((freq, index) => {
-        const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.15);
-
-        // Glocken-Effekt mit schneller Abnahme
-        const oscGain = ctx.createGain();
-        oscGain.gain.setValueAtTime(0.3, ctx.currentTime + index * 0.15);
-        oscGain.gain.exponentialRampToValueAtTime(
-          0.001,
-          ctx.currentTime + index * 0.15 + 0.4,
-        );
-
-        osc.connect(oscGain);
-        oscGain.connect(jackpotGain);
-        osc.start(ctx.currentTime + index * 0.15);
-        osc.stop(ctx.currentTime + index * 0.15 + 0.4);
-      });
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(392.0, ctx.currentTime);
+      oscillator.frequency.setValueAtTime(523.25, ctx.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+      oscillator.frequency.setValueAtTime(830.61, ctx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
       break;
-
     case 'timer':
-      // Sanfter Timer-Sound
-      const timerOsc = ctx.createOscillator();
-      const timerGain = ctx.createGain();
-      timerOsc.type = 'sine';
-      timerOsc.frequency.setValueAtTime(440, ctx.currentTime);
-      timerGain.gain.setValueAtTime(0.15, ctx.currentTime);
-      timerGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-      timerOsc.connect(timerGain);
-      timerGain.connect(ctx.destination);
-      timerOsc.start();
-      timerOsc.stop(ctx.currentTime + 0.2);
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(440, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
       break;
   }
+  oscillator.start();
+  oscillator.stop(ctx.currentTime + 0.5);
 }
 
 function switchPlayer(direction: 'next' | 'prev') {
@@ -911,13 +464,16 @@ function rollDice() {
   if (rolling.value) return;
   rolling.value = true;
   playSound('roll');
-  // Animation
-  const randomRotation = Math.floor(Math.random() * 6);
-  const result = Math.floor(Math.random() * 6);
-  const rot = rotations[randomRotation];
+  // Ergebnis und Animation werden mit EINEM Index synchronisiert
+  const result = Math.floor(Math.random() * 6); // EIN Index für alles
+  const rot = rotations[result]; // gleiche Seite wie Ergebnis
   diceRotation.value = {x: rot.x * 360, y: rot.y * 360, z: rot.z * 360};
+  // Ergebnisanzeige vorübergehend ausblenden
+  resultText.value = '';
+  subResult.value = '';
+  isJackpot.value = false;
   setTimeout(() => {
-    // Endposition setzen
+    // Endposition setzen (passend zum Ergebnis)
     switch (result) {
       case 0:
         diceRotation.value = {x: 0, y: 0, z: 0};
@@ -938,7 +494,7 @@ function rollDice() {
         diceRotation.value = {x: -90, y: 0, z: 0};
         break;
     }
-    // Ergebnis anzeigen
+    // Ergebnis anzeigen (synchron zum Würfel)
     const category = categories[result];
     resultText.value = category.name;
     subResult.value = category.description;
