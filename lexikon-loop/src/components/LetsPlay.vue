@@ -356,6 +356,7 @@
               </button>
               <!-- Ergebnis & Steuerung -->
               <div
+                v-if="!rolling && resultText !== 'Bereit zum Würfeln!'"
                 class="result-card flex flex-col items-center gap-4 w-full max-w-md"
               >
                 <div
@@ -665,21 +666,42 @@ const editingPlayerIndex = ref<number | null>(null);
 const editingPlayerName = ref('');
 
 const categories = [
-  {name: 'STADT', description: 'Nenne eine Stadt (z.B. Berlin)'},
-  {name: 'LAND', description: 'Nenne ein Land (z.B. Frankreich)'},
-  {name: 'FLUSS', description: 'Nenne einen Fluss (z.B. Rhein)'},
-  {name: 'NAME', description: 'Nenne einen Vornamen (z.B. Anna)'},
-  {name: 'TIER', description: 'Nenne ein Tier (z.B. Elefant)'},
-  {name: 'JACKPOT', description: 'Wähle KATEGORIE & BUCHSTABEN frei!'},
-];
-
-const rotations = [
-  {x: 4, y: 5, z: 3},
-  {x: -5, y: -4, z: -3},
-  {x: 6, y: -5, z: 4},
-  {x: -4, y: 6, z: -5},
-  {x: 5, y: 3, z: -6},
-  {x: -3, y: -6, z: 5},
+  {
+    name: 'STADT',
+    description: 'Nenne eine Stadt (z.B. Berlin)',
+    rotation: {x: 4, y: 5, z: 3},
+    endRotation: {x: 0, y: 0, z: 0},
+  },
+  {
+    name: 'LAND',
+    description: 'Nenne ein Land (z.B. Frankreich)',
+    rotation: {x: -5, y: -4, z: -3},
+    endRotation: {x: 180, y: 0, z: 0},
+  },
+  {
+    name: 'FLUSS',
+    description: 'Nenne einen Fluss (z.B. Rhein)',
+    rotation: {x: 6, y: -5, z: 4},
+    endRotation: {x: 0, y: -90, z: 0},
+  },
+  {
+    name: 'NAME',
+    description: 'Nenne einen Vornamen (z.B. Anna)',
+    rotation: {x: -4, y: 6, z: -5},
+    endRotation: {x: 0, y: 90, z: 0},
+  },
+  {
+    name: 'TIER',
+    description: 'Nenne ein Tier (z.B. Elefant)',
+    rotation: {x: 5, y: 3, z: -6},
+    endRotation: {x: -90, y: 0, z: 0},
+  },
+  {
+    name: 'JACKPOT',
+    description: 'Wähle KATEGORIE & BUCHSTABEN frei!',
+    rotation: {x: -3, y: -6, z: 5},
+    endRotation: {x: 90, y: 0, z: 0},
+  },
 ];
 
 const diceTransform = computed(() => {
@@ -911,50 +933,51 @@ function rollDice() {
   if (rolling.value) return;
   rolling.value = true;
   playSound('roll');
-  // Animation
-  const randomRotation = Math.floor(Math.random() * 6);
-  const result = Math.floor(Math.random() * 6);
-  const rot = rotations[randomRotation];
-  diceRotation.value = {x: rot.x * 360, y: rot.y * 360, z: rot.z * 360};
+
+  // Zufällige Kategorie auswählen
+  const result = Math.floor(Math.random() * categories.length);
+  const category = categories[result];
+
+  // Animation mit zufälliger Rotation
+  const randomRotation = Math.floor(Math.random() * categories.length);
+  const randomCategory = categories[randomRotation];
+  diceRotation.value = {
+    x: randomCategory.rotation.x * 360,
+    y: randomCategory.rotation.y * 360,
+    z: randomCategory.rotation.z * 360,
+  };
+
+  // Text während der Animation ausblenden
+  resultText.value = '';
+  subResult.value = '';
+  currentLetter.value = '-';
+
   setTimeout(() => {
-    // Endposition setzen
-    switch (result) {
-      case 0:
-        diceRotation.value = {x: 0, y: 0, z: 0};
-        break;
-      case 1:
-        diceRotation.value = {x: 180, y: 0, z: 0};
-        break;
-      case 2:
-        diceRotation.value = {x: 0, y: 90, z: 0};
-        break;
-      case 3:
-        diceRotation.value = {x: 0, y: -90, z: 0};
-        break;
-      case 4:
-        diceRotation.value = {x: 90, y: 0, z: 0};
-        break;
-      case 5:
-        diceRotation.value = {x: -90, y: 0, z: 0};
-        break;
-    }
-    // Ergebnis anzeigen
-    const category = categories[result];
-    resultText.value = category.name;
-    subResult.value = category.description;
-    isJackpot.value = result === 5;
-    if (isJackpot.value) {
-      resultText.value = '🎰 JACKPOT 🎰';
-      playSound('jackpot');
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      currentLetter.value = letters[Math.floor(Math.random() * 26)];
-    }
-    rolling.value = false;
-    // Timer ggf. neu starten
-    if (timerActive.value) {
-      resetGameTimer();
-      startTimer();
-    }
+    // Endposition setzen basierend auf der gewählten Kategorie
+    diceRotation.value = category.endRotation;
+
+    // Kurze Verzögerung für bessere Synchronisation
+    setTimeout(() => {
+      // Ergebnis anzeigen
+      resultText.value = category.name;
+      subResult.value = category.description;
+      isJackpot.value = result === 5; // JACKPOT ist immer Index 5
+
+      if (isJackpot.value) {
+        resultText.value = '🎰 JACKPOT 🎰';
+        playSound('jackpot');
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        currentLetter.value = letters[Math.floor(Math.random() * 26)];
+      }
+
+      rolling.value = false;
+
+      // Timer ggf. neu starten
+      if (timerActive.value) {
+        resetGameTimer();
+        startTimer();
+      }
+    }, 1100); // Zusätzliche 100ms Verzögerung für bessere Synchronisation
   }, 400);
 }
 
