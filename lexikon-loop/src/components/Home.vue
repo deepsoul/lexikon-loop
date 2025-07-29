@@ -1,13 +1,11 @@
-<script lang="ts" setup>
-import {useRouter} from 'vue-router';
-import Logo from './Logo.vue';
-const router = useRouter();
-</script>
 <template>
   <div class="home-container">
     <div class="main-wrapper">
       <header class="main-header">
         <Logo />
+        <button class="play-btn" @click="router.push('/lets-play')">
+          Jetzt spielen
+        </button>
       </header>
 
       <section class="card">
@@ -221,9 +219,6 @@ const router = useRouter();
         </p>
       </section>
       <section>
-        <button class="play-btn" @click="router.push('/lets-play')">
-          Jetzt spielen
-        </button>
         <div class="pdf-link-wrapper">
           <a
             href="/assets/Lexikon-Loop-Anleitung.pdf"
@@ -278,6 +273,28 @@ const router = useRouter();
             </svg>
             Würfel & Zubehör kaufen
           </a>
+          <button
+            class="icons-link-btn"
+            @click="router.push('/icons')"
+            title="Alle Icons anzeigen"
+          >
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <circle
+                cx="11"
+                cy="11"
+                r="10"
+                stroke="#2563eb"
+                stroke-width="2"
+              />
+              <path
+                d="M7 11h8M11 7v8"
+                stroke="#2563eb"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span class="icons-link-text">Icons</span>
+          </button>
         </div>
       </section>
       <footer class="main-footer">
@@ -287,6 +304,11 @@ const router = useRouter();
     </div>
   </div>
 </template>
+<script lang="ts" setup>
+import {useRouter} from 'vue-router';
+import Logo from './Logo.vue';
+const router = useRouter();
+</script>
 
 <style lang="scss" scoped>
 body,
@@ -441,14 +463,28 @@ p,
   font-weight: bold;
   color: #fff;
   background: linear-gradient(90deg, #2563eb 60%, #fbbf24 100%);
+  background-size: 200% 100%;
   border: none;
   border-radius: 2rem;
   box-shadow: 0 4px 24px #2563eb33, 0 0 0 0 #fbbf2444;
   cursor: pointer;
   transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
+  animation: gradient-shift 3s ease-in-out infinite;
 }
 .play-btn:active {
   transform: scale(0.97);
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 .pdf-link-wrapper {
   display: flex;
@@ -478,6 +514,32 @@ p,
   display: flex;
   justify-content: center;
   margin: 1.5rem 0 1.5rem 0;
+}
+
+.icons-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f1f5f9;
+  border: 1.5px solid #2563eb;
+  border-radius: 1.5rem;
+  padding: 0.4rem 1.1rem 0.4rem 0.7rem;
+  color: #2563eb;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #2563eb11;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.icons-link-btn:hover {
+  background: #e0e7ef;
+  box-shadow: 0 4px 16px #2563eb22;
+}
+
+.icons-link-text {
+  font-size: 1rem;
+  font-weight: 500;
 }
 .shop-link {
   display: inline-flex;
