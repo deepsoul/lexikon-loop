@@ -1,93 +1,3 @@
-<script lang="ts" setup>
-import {useRouter} from 'vue-router';
-import {ref} from 'vue';
-import emailjs from '@emailjs/browser';
-import Logo from './Logo.vue';
-
-const router = useRouter();
-
-// Formular-Daten
-const formData = ref({
-  name: '',
-  email: '',
-  address: '',
-  phone: '',
-  message: '',
-});
-
-const isSubmitting = ref(false);
-const submitStatus = ref<'idle' | 'success' | 'error'>('idle');
-const submitMessage = ref('');
-
-// EmailJS Konfiguration
-const EMAILJS_SERVICE_ID = 'service_936cf4s'; // Ersetze mit deiner Service ID
-const EMAILJS_TEMPLATE_ID = 'template_d872bjs'; // Ersetze mit deiner Template ID
-const EMAILJS_PUBLIC_KEY = '1caDskB4OK6Io6HxJ'; // Ersetze mit deinem Public Key
-
-const handleSubmit = async () => {
-  if (isSubmitting.value) return;
-
-  // Validierung
-  if (
-    !formData.value.name ||
-    !formData.value.email ||
-    !formData.value.address
-  ) {
-    submitStatus.value = 'error';
-    submitMessage.value = 'Bitte fülle alle Pflichtfelder aus.';
-    return;
-  }
-
-  isSubmitting.value = true;
-  submitStatus.value = 'idle';
-  submitMessage.value = '';
-
-  try {
-    const templateParams = {
-      from_name: formData.value.name,
-      from_email: formData.value.email,
-      from_address: formData.value.address,
-      from_phone: formData.value.phone,
-      message: formData.value.message || 'Bestellung: Lexikon-Loop Würfel-Set',
-      to_name: 'Lexikon-Loop Shop',
-      reply_to: formData.value.email,
-    };
-
-    await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      templateParams,
-      EMAILJS_PUBLIC_KEY,
-    );
-
-    submitStatus.value = 'success';
-    submitMessage.value =
-      'Bestellung erfolgreich versendet! Wir melden uns bald bei dir.';
-
-    // Formular zurücksetzen
-    formData.value = {
-      name: '',
-      email: '',
-      address: '',
-      phone: '',
-      message: '',
-    };
-  } catch (error) {
-    console.error('Email send error:', error);
-    submitStatus.value = 'error';
-    submitMessage.value =
-      'Fehler beim Versenden. Bitte versuche es später erneut.';
-  } finally {
-    isSubmitting.value = false;
-  }
-};
-
-const resetForm = () => {
-  submitStatus.value = 'idle';
-  submitMessage.value = '';
-};
-</script>
-
 <template>
   <div class="shop-container">
     <Logo />
@@ -243,6 +153,96 @@ const resetForm = () => {
     </button>
   </div>
 </template>
+
+<script lang="ts" setup>
+import {useRouter} from 'vue-router';
+import {ref} from 'vue';
+import emailjs from '@emailjs/browser';
+import Logo from './Logo.vue';
+
+const router = useRouter();
+
+// Formular-Daten
+const formData = ref({
+  name: '',
+  email: '',
+  address: '',
+  phone: '',
+  message: '',
+});
+
+const isSubmitting = ref(false);
+const submitStatus = ref<'idle' | 'success' | 'error'>('idle');
+const submitMessage = ref('');
+
+// EmailJS Konfiguration
+const EMAILJS_SERVICE_ID = 'service_936cf4s'; // Ersetze mit deiner Service ID
+const EMAILJS_TEMPLATE_ID = 'template_d872bjs'; // Ersetze mit deiner Template ID
+const EMAILJS_PUBLIC_KEY = '1caDskB4OK6Io6HxJ'; // Ersetze mit deinem Public Key
+
+const handleSubmit = async () => {
+  if (isSubmitting.value) return;
+
+  // Validierung
+  if (
+    !formData.value.name ||
+    !formData.value.email ||
+    !formData.value.address
+  ) {
+    submitStatus.value = 'error';
+    submitMessage.value = 'Bitte fülle alle Pflichtfelder aus.';
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitStatus.value = 'idle';
+  submitMessage.value = '';
+
+  try {
+    const templateParams = {
+      from_name: formData.value.name,
+      from_email: formData.value.email,
+      from_address: formData.value.address,
+      from_phone: formData.value.phone,
+      message: formData.value.message || 'Bestellung: Lexikon-Loop Würfel-Set',
+      to_name: 'Lexikon-Loop Shop',
+      reply_to: formData.value.email,
+    };
+
+    await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams,
+      EMAILJS_PUBLIC_KEY,
+    );
+
+    submitStatus.value = 'success';
+    submitMessage.value =
+      'Bestellung erfolgreich versendet! Wir melden uns bald bei dir.';
+
+    // Formular zurücksetzen
+    formData.value = {
+      name: '',
+      email: '',
+      address: '',
+      phone: '',
+      message: '',
+    };
+  } catch (error) {
+    console.error('Email send error:', error);
+    submitStatus.value = 'error';
+    submitMessage.value =
+      'Fehler beim Versenden. Bitte versuche es später erneut.';
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+const resetForm = () => {
+  submitStatus.value = 'idle';
+  submitMessage.value = '';
+};
+</script>
 
 <style lang="scss">
 .shop-container {
@@ -498,16 +498,30 @@ const resetForm = () => {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 700px) {
   .shop-container {
-    margin: 1.5rem 0.5rem 2rem 0.5rem;
-    padding: 2rem 1rem 2rem 1rem;
-    gap: 1.5rem;
+    margin: 0.5rem auto 0.5rem auto;
+    max-width: 100%;
+    width: 100%;
+    padding: 1.2rem 0.7rem 2.5rem 0.7rem;
+    gap: 1.7rem;
+    border-radius: 18px;
+    box-sizing: border-box;
   }
 
   .shop-title {
-    font-size: 1.8rem;
+    font-size: 1.45rem;
     margin-bottom: 1.5rem;
+  }
+
+  .shop-product-card,
+  .shop-order-form {
+    max-width: 100%;
+    width: 100%;
+    padding: 1.2rem 0.8rem 1.1rem 0.8rem;
+    border-radius: 14px;
+    font-size: 0.98rem;
+    box-sizing: border-box;
   }
 
   .shop-product-card {
@@ -541,8 +555,8 @@ const resetForm = () => {
   }
 
   .shop-order-btn {
-    font-size: 1rem;
-    padding: 0.9rem 1.5rem;
+    font-size: 1.08rem;
+    padding: 1.1rem 1.7rem;
   }
 
   .back-home-btn {
@@ -551,21 +565,28 @@ const resetForm = () => {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 430px) {
   .shop-container {
-    margin: 1rem 0.3rem 1.5rem 0.3rem;
-    padding: 1.5rem 0.8rem 1.5rem 0.8rem;
-    gap: 1rem;
+    max-width: 100%;
+    width: 100%;
+    padding: 0.7rem 0rem 1.2rem 0rem;
+    border-radius: 10px;
+    box-sizing: border-box;
   }
 
   .shop-title {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     margin-bottom: 1rem;
   }
 
   .shop-product-card,
   .shop-order-form {
-    padding: 1.5rem 1rem 1.2rem 1rem;
+    max-width: 100%;
+    width: 100%;
+    padding: 0.7rem 0.3rem 0.7rem 0.3rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
   }
 
   .shop-product-img {
@@ -593,8 +614,8 @@ const resetForm = () => {
   }
 
   .shop-order-btn {
-    font-size: 0.95rem;
-    padding: 0.8rem 1.2rem;
+    font-size: 0.98rem;
+    padding: 0.8rem 1.1rem;
   }
 
   .back-home-btn {
