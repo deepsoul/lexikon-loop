@@ -4,7 +4,7 @@
       <header class="main-header">
         <Logo />
         <button class="play-btn" @click="router.push('/lets-play')">
-          Jetzt spielen
+          Jetzt online ausprobieren
         </button>
       </header>
 
