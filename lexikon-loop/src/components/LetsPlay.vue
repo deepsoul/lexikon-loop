@@ -693,7 +693,9 @@ const newPlayerName = ref('');
 const editingPlayerIndex = ref<number | null>(null);
 const editingPlayerName = ref('');
 
+// Multiplayer Variables
 // Multiplayer Variables - already defined later in the file
+// Speech Recognition Variables - already defined later in the file
 
 const categories = [
   {
