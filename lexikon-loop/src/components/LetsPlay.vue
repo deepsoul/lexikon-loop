@@ -1560,11 +1560,15 @@ async function startMultiplayerHost() {
 
 function joinMultiplayerGame() {
   try {
+    console.log('🔗 Starting client join process...');
     const playerName =
       joinPlayerName.value.trim() ||
       `Spieler ${Math.floor(Math.random() * 1000)}`;
+    console.log('👤 Player name:', playerName);
+    console.log('🏠 Host ID:', hostId.value);
 
     // Initialize WebSocket connection
+    console.log('🔌 Creating socket connection for client...');
     socket = createSocket();
 
     socket.on('connect', () => {

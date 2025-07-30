@@ -87,6 +87,8 @@
 <script setup lang="ts">
 import {ref, onMounted} from 'vue';
 import {useRouter, useRoute} from 'vue-router';
+import {createSocket} from '../utils/socket';
+import {Socket} from 'socket.io-client';
 
 const router = useRouter();
 const route = useRoute();
@@ -97,6 +99,7 @@ const isConnected = ref(false);
 const joinError = ref('');
 const playerName = ref('');
 const hostId = ref('');
+let socket: Socket | null = null;
 
 // Extract host ID from URL parameters
 onMounted(() => {
@@ -125,17 +128,47 @@ async function joinGame() {
   joinError.value = '';
 
   try {
-    // Store player data in localStorage for the main game
-    localStorage.setItem('multiplayer_player_name', playerName.value);
-    localStorage.setItem('multiplayer_host_id', hostId.value);
-    localStorage.setItem('multiplayer_connected', 'true');
+    console.log('🔌 Creating socket connection for client...');
+    socket = createSocket();
 
-    isConnected.value = true;
-    console.log('Successfully joined game as:', playerName.value);
+    socket.on('connect', () => {
+      console.log('✅ Client connected to server');
+      console.log('🆔 Client Socket ID:', socket!.id);
+
+      // Join room as client
+      console.log('👥 Joining room as client:', hostId.value);
+      socket!.emit('joinRoom', {
+        roomId: hostId.value,
+        playerName: playerName.value,
+        isHost: false,
+      });
+    });
+
+    socket.on('playerJoined', (data) => {
+      console.log('👥 Client: Player joined event received:', data);
+      console.log('📊 All players:', data.allPlayers);
+
+      // Store player data in localStorage for the main game
+      localStorage.setItem('multiplayer_player_name', playerName.value);
+      localStorage.setItem('multiplayer_host_id', hostId.value);
+      localStorage.setItem('multiplayer_connected', 'true');
+
+      isConnected.value = true;
+      console.log('✅ Successfully joined game as:', playerName.value);
+    });
+
+    socket.on('error', (error) => {
+      console.error('❌ Socket error:', error);
+      joinError.value = 'Verbindung zum Server fehlgeschlagen.';
+      isLoading.value = false;
+    });
+
+    socket.on('disconnect', () => {
+      console.log('🔌 Client disconnected from server');
+    });
   } catch (error) {
-    console.error('Join game error:', error);
+    console.error('❌ Join game error:', error);
     joinError.value = 'Verbindung zum Host fehlgeschlagen.';
-  } finally {
     isLoading.value = false;
   }
 }

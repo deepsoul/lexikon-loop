@@ -11,6 +11,7 @@ const io = socketIo(server, {
       'https://lexikon-loop.vercel.app',
       'https://lexikon-loop-git-main.vercel.app',
       'https://lexikon-loop-git-dev.vercel.app',
+      'https://lexikon-loop.de/',
       'http://localhost:5173',
       'http://localhost:3000',
     ],
