@@ -125,9 +125,6 @@ async function joinGame() {
   joinError.value = '';
 
   try {
-    // Simulate connection delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
     // Store player data in localStorage for the main game
     localStorage.setItem('multiplayer_player_name', playerName.value);
     localStorage.setItem('multiplayer_host_id', hostId.value);

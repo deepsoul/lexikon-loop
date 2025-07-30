@@ -663,6 +663,8 @@ import {ref, computed, watch, onMounted, onUnmounted, nextTick} from 'vue';
 import {useRouter} from 'vue-router';
 import QRCode from 'qrcode';
 import {Html5QrcodeScanner, Html5QrcodeScanType} from 'html5-qrcode';
+import {Socket} from 'socket.io-client';
+import {createSocket} from '../utils/socket';
 const router = useRouter();
 
 // Typ für Spieler
@@ -960,6 +962,13 @@ function rollDice() {
   rolling.value = true;
   playSound('roll');
 
+  // Send dice roll to server if in multiplayer
+  if (socket && roomId.value) {
+    socket.emit('rollDice', {roomId: roomId.value});
+    return; // Server will handle the result
+  }
+
+  // Single player mode
   // Zufällige Kategorie auswählen
   const result = Math.floor(Math.random() * categories.length);
   const category = categories[result];
@@ -1119,6 +1128,12 @@ const scannerStatus = ref('');
 const testQRCode = ref('');
 const testQRCodeRef = ref<HTMLElement | null>(null);
 let qrScanner: Html5QrcodeScanner | null = null;
+
+// WebSocket connection
+let socket: Socket | null = null;
+const isConnected = ref(false);
+const roomId = ref('');
+const playerId = ref('');
 
 function startSpeechRecognition() {
   if (
@@ -1426,23 +1441,94 @@ function validateGermanWord(
   return {isValid: true, reason: 'Fallback-Validierung: Wort akzeptiert'};
 }
 
-// Multiplayer Functions (iOS & Android compatible)
+// Multiplayer Functions with WebSocket
 async function startMultiplayerHost() {
   try {
     multiplayerStatusText.value = 'Starte Multiplayer Host...';
     multiplayerStatusClass.value = 'status-connecting';
 
-    // Generate unique host ID
-    const hostId = `host_${Date.now()}_${Math.random()
+    // Generate unique room ID
+    const generatedRoomId = `room_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}`;
 
     // Create connection URL
-    const connectionUrl = `${window.location.origin}/join?host=${hostId}`;
+    const connectionUrl = `${window.location.origin}/join?host=${generatedRoomId}`;
 
-    // Start hosting first
+    // Initialize WebSocket connection
+    socket = createSocket();
+
+    socket.on('connect', () => {
+      console.log('Connected to server');
+      isConnected.value = true;
+      playerId.value = socket!.id || '';
+
+      // Join room as host
+      socket!.emit('joinRoom', {
+        roomId: generatedRoomId,
+        playerName: 'Host',
+        isHost: true,
+      });
+    });
+
+    socket.on('playerJoined', (data) => {
+      console.log('Player joined:', data);
+      multiplayerPlayers.value = data.allPlayers;
+      multiplayerGameState.value = data.gameState;
+    });
+
+    socket.on('diceRolled', (gameState) => {
+      console.log('Dice rolled:', gameState);
+      resultText.value = gameState.resultText;
+      subResult.value = gameState.subResult;
+      isJackpot.value = gameState.isJackpot;
+      rolling.value = gameState.rolling;
+      currentLetter.value = gameState.currentLetter;
+    });
+
+    socket.on('diceStopped', (gameState) => {
+      console.log('Dice stopped:', gameState);
+      rolling.value = false;
+    });
+
+    socket.on('scoreUpdated', (data) => {
+      console.log('Score updated:', data);
+      multiplayerPlayers.value = data.allPlayers;
+    });
+
+    socket.on('playerTurnChanged', (data) => {
+      console.log('Player turn changed:', data);
+      currentPlayer.value = data.currentPlayer;
+      multiplayerGameState.value = data.gameState;
+    });
+
+    socket.on('speechRecognized', (data) => {
+      console.log('Speech recognized:', data);
+      recognizedWord.value = data.word;
+      recognizedLastLetter.value = data.lastLetter;
+      currentLetter.value = data.lastLetter;
+    });
+
+    socket.on('timerUpdated', (data) => {
+      console.log('Timer updated:', data);
+      timeLeft.value = data.timeLeft;
+      timerActive.value = data.timerActive;
+    });
+
+    socket.on('playerLeft', (data) => {
+      console.log('Player left:', data);
+      multiplayerPlayers.value = data.allPlayers;
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+      isConnected.value = false;
+    });
+
+    // Start hosting
     isMultiplayerHost.value = true;
     isMultiplayerConnected.value = true;
+    roomId.value = generatedRoomId;
     multiplayerStatusText.value = 'Host aktiv - Warte auf Spieler...';
     multiplayerStatusClass.value = 'status-connected';
 
@@ -1454,12 +1540,6 @@ async function startMultiplayerHost() {
 
     // Generate QR Code after DOM is updated
     await generateQRCode(connectionUrl);
-
-    // Simulate connected players
-    multiplayerPlayers.value = [
-      {id: '1', name: 'Spieler 1', score: 0},
-      {id: '2', name: 'Spieler 2', score: 0},
-    ];
 
     playSound('success');
   } catch (error) {
@@ -1476,18 +1556,83 @@ function joinMultiplayerGame() {
       joinPlayerName.value.trim() ||
       `Spieler ${Math.floor(Math.random() * 1000)}`;
 
+    // Initialize WebSocket connection
+    socket = createSocket();
+
+    socket.on('connect', () => {
+      console.log('Connected to server as client');
+      isConnected.value = true;
+      playerId.value = socket!.id || '';
+
+      // Join room as client
+      socket!.emit('joinRoom', {
+        roomId: hostId.value,
+        playerName: playerName,
+        isHost: false,
+      });
+    });
+
+    socket.on('playerJoined', (data) => {
+      console.log('Joined room:', data);
+      multiplayerPlayers.value = data.allPlayers;
+      multiplayerGameState.value = data.gameState;
+    });
+
+    socket.on('diceRolled', (gameState) => {
+      console.log('Dice rolled:', gameState);
+      resultText.value = gameState.resultText;
+      subResult.value = gameState.subResult;
+      isJackpot.value = gameState.isJackpot;
+      rolling.value = gameState.rolling;
+      currentLetter.value = gameState.currentLetter;
+    });
+
+    socket.on('diceStopped', (gameState) => {
+      console.log('Dice stopped:', gameState);
+      rolling.value = false;
+    });
+
+    socket.on('scoreUpdated', (data) => {
+      console.log('Score updated:', data);
+      multiplayerPlayers.value = data.allPlayers;
+    });
+
+    socket.on('playerTurnChanged', (data) => {
+      console.log('Player turn changed:', data);
+      currentPlayer.value = data.currentPlayer;
+      multiplayerGameState.value = data.gameState;
+    });
+
+    socket.on('speechRecognized', (data) => {
+      console.log('Speech recognized:', data);
+      recognizedWord.value = data.word;
+      recognizedLastLetter.value = data.lastLetter;
+      currentLetter.value = data.lastLetter;
+    });
+
+    socket.on('timerUpdated', (data) => {
+      console.log('Timer updated:', data);
+      timeLeft.value = data.timeLeft;
+      timerActive.value = data.timerActive;
+    });
+
+    socket.on('playerLeft', (data) => {
+      console.log('Player left:', data);
+      multiplayerPlayers.value = data.allPlayers;
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+      isConnected.value = false;
+    });
+
     // Join as client
     isMultiplayerHost.value = false;
     isMultiplayerConnected.value = true;
     multiplayerPlayerName.value = playerName;
+    roomId.value = hostId.value;
     multiplayerStatusText.value = 'Verbunden mit Host';
     multiplayerStatusClass.value = 'status-connected';
-
-    // Simulate game state
-    multiplayerGameState.value = {
-      category: 'STADT',
-      currentLetter: 'B',
-    };
 
     showJoinModal.value = false;
     playSound('success');
@@ -1500,12 +1645,21 @@ function joinMultiplayerGame() {
 }
 
 function disconnectMultiplayer() {
+  // Disconnect WebSocket
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+
   isMultiplayerHost.value = false;
   isMultiplayerConnected.value = false;
+  isConnected.value = false;
   multiplayerPlayers.value = [];
   multiplayerPlayerName.value = '';
   multiplayerGameState.value = null;
   hostQRCode.value = '';
+  roomId.value = '';
+  playerId.value = '';
   showJoinModal.value = false;
 
   multiplayerStatusText.value = 'Multiplayer verfügbar';
