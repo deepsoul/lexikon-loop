@@ -1578,18 +1578,27 @@ async function startMultiplayerHost() {
       console.log('🛑 Host: Dice stopped event received:', gameState);
       rolling.value = false;
 
-      // Set final dice position for host
+      // Set final dice position for host with error handling
       if (gameState.category) {
-        const categoryIndex = categories.findIndex(
-          (cat) => cat.name === gameState.category,
-        );
-        if (categoryIndex !== -1) {
-          const category = categories[categoryIndex];
-          diceRotation.value = category.endRotation;
-          console.log(
-            '🎯 Host: Set dice to final position for:',
-            gameState.category,
+        try {
+          const categoryIndex = categories.findIndex(
+            (cat) => cat.name === gameState.category,
           );
+          if (categoryIndex !== -1) {
+            const category = categories[categoryIndex];
+            // Use nextTick to ensure DOM is ready
+            nextTick(() => {
+              diceRotation.value = category.endRotation;
+              console.log(
+                '🎯 Host: Set dice to final position for:',
+                gameState.category,
+              );
+            });
+          } else {
+            console.log('⚠️ Category not found:', gameState.category);
+          }
+        } catch (error) {
+          console.error('❌ Error setting dice position:', error);
         }
       }
     });
@@ -1711,18 +1720,27 @@ function joinMultiplayerGame() {
       console.log('🛑 Client: Dice stopped event received:', gameState);
       rolling.value = false;
 
-      // Set final dice position for client
+      // Set final dice position for client with error handling
       if (gameState.category) {
-        const categoryIndex = categories.findIndex(
-          (cat) => cat.name === gameState.category,
-        );
-        if (categoryIndex !== -1) {
-          const category = categories[categoryIndex];
-          diceRotation.value = category.endRotation;
-          console.log(
-            '🎯 Client: Set dice to final position for:',
-            gameState.category,
+        try {
+          const categoryIndex = categories.findIndex(
+            (cat) => cat.name === gameState.category,
           );
+          if (categoryIndex !== -1) {
+            const category = categories[categoryIndex];
+            // Use nextTick to ensure DOM is ready
+            nextTick(() => {
+              diceRotation.value = category.endRotation;
+              console.log(
+                '🎯 Client: Set dice to final position for:',
+                gameState.category,
+              );
+            });
+          } else {
+            console.log('⚠️ Category not found:', gameState.category);
+          }
+        } catch (error) {
+          console.error('❌ Error setting dice position:', error);
         }
       }
     });
