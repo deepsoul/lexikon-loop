@@ -693,6 +693,8 @@ const newPlayerName = ref('');
 const editingPlayerIndex = ref<number | null>(null);
 const editingPlayerName = ref('');
 
+// Multiplayer Variables - already defined later in the file
+
 const categories = [
   {
     name: 'STADT',
@@ -1913,6 +1915,19 @@ onMounted(() => {
 
     console.log('Multiplayer connection restored:', storedPlayerName);
   }
+
+  // Ensure all template variables are properly initialized
+  if (!resultText.value) resultText.value = 'Bereit zum Würfeln!';
+  if (!subResult.value) subResult.value = 'Klicke auf den Würfeln-Button';
+  if (!currentLetter.value) currentLetter.value = '-';
+  if (!rolling.value) rolling.value = false;
+  if (!isJackpot.value) isJackpot.value = false;
+  if (!timerActive.value) timerActive.value = false;
+  if (!timeLeft.value) timeLeft.value = timerDuration.value;
+  if (!isMultiplayerHost.value) isMultiplayerHost.value = false;
+  if (!isMultiplayerConnected.value) isMultiplayerConnected.value = false;
+  if (!showJoinModal.value) showJoinModal.value = false;
+  if (!showAddPlayer.value) showAddPlayer.value = false;
 });
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
