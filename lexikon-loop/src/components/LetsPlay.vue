@@ -973,7 +973,31 @@ function rollDice() {
   // Send dice roll to server if in multiplayer
   if (socket && roomId.value) {
     console.log('📡 Sending dice roll to server...');
+    console.log('🔌 Socket connected:', socket.connected);
+    console.log('🏠 Room ID:', roomId.value);
+    console.log('🆔 Socket ID:', socket.id);
+
     socket.emit('rollDice', {roomId: roomId.value});
+
+    // Add fallback for debugging
+    setTimeout(() => {
+      if (rolling.value) {
+        console.log('⚠️ Server did not respond, using fallback...');
+        rolling.value = false;
+        // Fallback to single player mode
+        const result = Math.floor(Math.random() * categories.length);
+        const category = categories[result];
+        resultText.value = category.name;
+        subResult.value = category.description;
+        isJackpot.value = result === 5;
+        if (isJackpot.value) {
+          resultText.value = '🎰 JACKPOT 🎰';
+          const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          currentLetter.value = letters[Math.floor(Math.random() * 26)];
+        }
+      }
+    }, 3000); // 3 second timeout
+
     return; // Server will handle the result
   }
 
@@ -1496,17 +1520,44 @@ async function startMultiplayerHost() {
     });
 
     socket.on('diceRolled', (gameState) => {
-      console.log('Dice rolled:', gameState);
+      console.log('🎲 Host: Dice rolled event received:', gameState);
       resultText.value = gameState.resultText;
       subResult.value = gameState.subResult;
       isJackpot.value = gameState.isJackpot;
       rolling.value = gameState.rolling;
       currentLetter.value = gameState.currentLetter;
+
+      // Start dice animation for host
+      if (gameState.rolling) {
+        console.log('🎬 Host: Starting dice animation...');
+        const randomRotation = Math.floor(Math.random() * categories.length);
+        const randomCategory = categories[randomRotation];
+        diceRotation.value = {
+          x: randomCategory.rotation.x * 360,
+          y: randomCategory.rotation.y * 360,
+          z: randomCategory.rotation.z * 360,
+        };
+      }
     });
 
     socket.on('diceStopped', (gameState) => {
-      console.log('Dice stopped:', gameState);
+      console.log('🛑 Host: Dice stopped event received:', gameState);
       rolling.value = false;
+
+      // Set final dice position for host
+      if (gameState.category) {
+        const categoryIndex = categories.findIndex(
+          (cat) => cat.name === gameState.category,
+        );
+        if (categoryIndex !== -1) {
+          const category = categories[categoryIndex];
+          diceRotation.value = category.endRotation;
+          console.log(
+            '🎯 Host: Set dice to final position for:',
+            gameState.category,
+          );
+        }
+      }
     });
 
     socket.on('scoreUpdated', (data) => {
