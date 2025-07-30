@@ -6,6 +6,7 @@ import NotFound from './components/NotFound.vue';
 const LetsPlay = () => import('./components/LetsPlay.vue');
 const IconsPage = () => import('./components/IconsPage.vue');
 const Shop = () => import('./components/Shop.vue');
+const JoinGame = () => import('./components/JoinGame.vue');
 
 const routes = [
   {
@@ -26,6 +27,7 @@ const routes = [
   },
   {path: '/icons', name: 'Icons', component: IconsPage},
   {path: '/shop', name: 'Shop', component: Shop},
+  {path: '/join', name: 'JoinGame', component: JoinGame},
   {path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound},
 ];
 

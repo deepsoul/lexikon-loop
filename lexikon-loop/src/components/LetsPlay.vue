@@ -1691,6 +1691,28 @@ watch(players, savePlayers, {deep: true});
 onMounted(() => {
   loadPlayers();
   window.addEventListener('keydown', handleKeydown);
+
+  // Check for multiplayer connection from /join page
+  const storedMultiplayerConnected =
+    localStorage.getItem('multiplayer_connected') === 'true';
+  const storedPlayerName = localStorage.getItem('multiplayer_player_name');
+  const storedHostId = localStorage.getItem('multiplayer_host_id');
+
+  if (storedMultiplayerConnected && storedPlayerName && storedHostId) {
+    // Set multiplayer state
+    isMultiplayerConnected.value = true;
+    multiplayerPlayerName.value = storedPlayerName;
+    hostId.value = storedHostId;
+    multiplayerStatusText.value = 'Verbunden mit Host';
+    multiplayerStatusClass.value = 'status-connected';
+
+    // Clear localStorage after reading
+    localStorage.removeItem('multiplayer_connected');
+    localStorage.removeItem('multiplayer_player_name');
+    localStorage.removeItem('multiplayer_host_id');
+
+    console.log('Multiplayer connection restored:', storedPlayerName);
+  }
 });
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
