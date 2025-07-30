@@ -972,10 +972,41 @@ function rollDice() {
 
   // Send dice roll to server if in multiplayer
   if (socket && roomId.value) {
+    console.log('🔌 Socket:', socket);
     console.log('📡 Sending dice roll to server...');
     console.log('🔌 Socket connected:', socket.connected);
     console.log('🏠 Room ID:', roomId.value);
     console.log('🆔 Socket ID:', socket.id);
+
+    // Check if socket is properly connected
+    if (!socket.connected || !socket.id) {
+      console.log('⚠️ Socket not properly connected, reconnecting...');
+      socket.connect();
+
+      // Wait for connection and retry
+      setTimeout(() => {
+        if (socket.connected && socket.id) {
+          console.log('✅ Socket reconnected, retrying dice roll...');
+          socket.emit('rollDice', {roomId: roomId.value});
+        } else {
+          console.log('❌ Socket still not connected, using fallback...');
+          rolling.value = false;
+          // Fallback to single player mode
+          const result = Math.floor(Math.random() * categories.length);
+          const category = categories[result];
+          resultText.value = category.name;
+          subResult.value = category.description;
+          isJackpot.value = result === 5;
+          if (isJackpot.value) {
+            resultText.value = '🎰 JACKPOT 🎰';
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            currentLetter.value = letters[Math.floor(Math.random() * 26)];
+          }
+        }
+      }, 1000);
+
+      return;
+    }
 
     socket.emit('rollDice', {roomId: roomId.value});
 
@@ -1502,13 +1533,16 @@ async function startMultiplayerHost() {
       isConnected.value = true;
       playerId.value = socket!.id || '';
 
-      // Join room as host
-      console.log('🏠 Joining room as host:', generatedRoomId);
-      socket!.emit('joinRoom', {
-        roomId: generatedRoomId,
-        playerName: 'Host',
-        isHost: true,
-      });
+      // Wait a bit for socket to be fully ready
+      setTimeout(() => {
+        // Join room as host
+        console.log('🏠 Joining room as host:', generatedRoomId);
+        socket!.emit('joinRoom', {
+          roomId: generatedRoomId,
+          playerName: 'Host',
+          isHost: true,
+        });
+      }, 100);
     });
 
     socket.on('playerJoined', (data) => {
