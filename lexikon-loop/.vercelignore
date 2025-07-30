@@ -1,0 +1,23 @@
+# Development files
+node_modules
+.env
+.env.local
+.env.development
+.env.test
+
+# Build artifacts
+dist
+.vercel
+
+# Server files (separate deployment)
+lexikon-loop-server/
+server.js
+server-package.json
+render.yaml
+
+# Documentation
+*.md
+DEPLOYMENT_*.md
+VERCEL_*.md
+RENDER_*.md
+SIMPLE_*.md 
