@@ -1444,6 +1444,7 @@ function validateGermanWord(
 // Multiplayer Functions with WebSocket
 async function startMultiplayerHost() {
   try {
+    console.log('🚀 Starting Multiplayer Host...');
     multiplayerStatusText.value = 'Starte Multiplayer Host...';
     multiplayerStatusClass.value = 'status-connecting';
 
@@ -1451,19 +1452,24 @@ async function startMultiplayerHost() {
     const generatedRoomId = `room_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}`;
+    console.log('📋 Generated Room ID:', generatedRoomId);
 
     // Create connection URL
     const connectionUrl = `${window.location.origin}/join?host=${generatedRoomId}`;
+    console.log('🔗 Connection URL:', connectionUrl);
 
     // Initialize WebSocket connection
+    console.log('🔌 Creating socket connection...');
     socket = createSocket();
 
     socket.on('connect', () => {
-      console.log('Connected to server');
+      console.log('✅ Connected to server');
+      console.log('🆔 Socket ID:', socket!.id);
       isConnected.value = true;
       playerId.value = socket!.id || '';
 
       // Join room as host
+      console.log('🏠 Joining room as host:', generatedRoomId);
       socket!.emit('joinRoom', {
         roomId: generatedRoomId,
         playerName: 'Host',
@@ -1472,7 +1478,9 @@ async function startMultiplayerHost() {
     });
 
     socket.on('playerJoined', (data) => {
-      console.log('Player joined:', data);
+      console.log('👥 Player joined:', data);
+      console.log('📊 All players:', data.allPlayers);
+      console.log('🎮 Game state:', data.gameState);
       multiplayerPlayers.value = data.allPlayers;
       multiplayerGameState.value = data.gameState;
     });

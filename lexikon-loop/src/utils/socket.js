@@ -7,10 +7,8 @@ export function getSocketUrl() {
     typeof window !== 'undefined' &&
     window.location.hostname !== 'localhost'
   ) {
-    // In production, use environment variable or fallback
-    return (
-      process.env.VITE_SOCKET_URL || 'https://your-socket-service.herokuapp.com'
-    );
+    // In production, use Render server
+    return 'https://lexikon-loop-server.onrender.com';
   } else {
     // In development, use localhost
     return 'http://localhost:3001';
