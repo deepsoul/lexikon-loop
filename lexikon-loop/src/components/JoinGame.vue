@@ -155,6 +155,12 @@ async function joinGame() {
 
       isConnected.value = true;
       console.log('✅ Successfully joined game as:', playerName.value);
+
+      // Automatically redirect to game after successful join
+      setTimeout(() => {
+        console.log('🔄 Redirecting to game...');
+        router.push('/lets-play');
+      }, 1500); // 1.5 second delay to show success message
     });
 
     socket.on('error', (error) => {

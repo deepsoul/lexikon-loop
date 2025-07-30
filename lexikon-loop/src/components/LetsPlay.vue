@@ -962,12 +962,18 @@ function rollDice() {
   rolling.value = true;
   playSound('roll');
 
+  console.log('🎲 Rolling dice...');
+  console.log('🔌 Socket active:', !!socket);
+  console.log('🏠 Room ID:', roomId.value);
+
   // Send dice roll to server if in multiplayer
   if (socket && roomId.value) {
+    console.log('📡 Sending dice roll to server...');
     socket.emit('rollDice', {roomId: roomId.value});
     return; // Server will handle the result
   }
 
+  console.log('🎮 Single player mode - local dice roll');
   // Single player mode
   // Zufällige Kategorie auswählen
   const result = Math.floor(Math.random() * categories.length);
