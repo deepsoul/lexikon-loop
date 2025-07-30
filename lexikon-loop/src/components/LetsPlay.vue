@@ -1591,23 +1591,51 @@ function joinMultiplayerGame() {
     });
 
     socket.on('playerJoined', (data) => {
-      console.log('Joined room:', data);
+      console.log('👥 Client: Joined room:', data);
       multiplayerPlayers.value = data.allPlayers;
       multiplayerGameState.value = data.gameState;
     });
 
     socket.on('diceRolled', (gameState) => {
-      console.log('Dice rolled:', gameState);
+      console.log('🎲 Client: Dice rolled event received:', gameState);
       resultText.value = gameState.resultText;
       subResult.value = gameState.subResult;
       isJackpot.value = gameState.isJackpot;
       rolling.value = gameState.rolling;
       currentLetter.value = gameState.currentLetter;
+
+      // Start dice animation for client
+      if (gameState.rolling) {
+        console.log('🎬 Client: Starting dice animation...');
+        // Animation mit zufälliger Rotation
+        const randomRotation = Math.floor(Math.random() * categories.length);
+        const randomCategory = categories[randomRotation];
+        diceRotation.value = {
+          x: randomCategory.rotation.x * 360,
+          y: randomCategory.rotation.y * 360,
+          z: randomCategory.rotation.z * 360,
+        };
+      }
     });
 
     socket.on('diceStopped', (gameState) => {
-      console.log('Dice stopped:', gameState);
+      console.log('🛑 Client: Dice stopped event received:', gameState);
       rolling.value = false;
+
+      // Set final dice position for client
+      if (gameState.category) {
+        const categoryIndex = categories.findIndex(
+          (cat) => cat.name === gameState.category,
+        );
+        if (categoryIndex !== -1) {
+          const category = categories[categoryIndex];
+          diceRotation.value = category.endRotation;
+          console.log(
+            '🎯 Client: Set dice to final position for:',
+            gameState.category,
+          );
+        }
+      }
     });
 
     socket.on('scoreUpdated', (data) => {
