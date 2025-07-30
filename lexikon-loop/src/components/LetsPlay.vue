@@ -74,9 +74,16 @@
                 <p>Andere Spieler können sich über QR-Code verbinden</p>
 
                 <!-- QR Code für Verbindung -->
-                <div v-if="hostQRCode" class="qr-code-container">
+                <div class="qr-code-container">
                   <h4>QR-Code für Spieler:</h4>
-                  <div class="qr-code" ref="qrCodeRef"></div>
+                  <div class="qr-code" ref="qrCodeRef">
+                    <div
+                      v-if="!hostQRCode"
+                      style="padding: 20px; text-align: center; color: #64748b"
+                    >
+                      QR-Code wird generiert...
+                    </div>
+                  </div>
                   <p class="qr-instruction">
                     Spieler scannen diesen QR-Code mit ihrem Handy
                   </p>
@@ -1442,6 +1449,9 @@ async function startMultiplayerHost() {
     // Wait for DOM update
     await nextTick();
 
+    // Additional delay to ensure DOM is ready
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Generate QR Code after DOM is updated
     await generateQRCode(connectionUrl);
 
@@ -1507,6 +1517,9 @@ function disconnectMultiplayer() {
 // Generate QR Code for connection
 async function generateQRCode(data: string) {
   try {
+    console.log('Generating QR code for:', data);
+    console.log('qrCodeRef.value:', qrCodeRef.value);
+
     if (qrCodeRef.value) {
       // Clear previous QR code
       qrCodeRef.value.innerHTML = '';
@@ -1526,7 +1539,9 @@ async function generateQRCode(data: string) {
 
       // Store the data for reference
       hostQRCode.value = data;
-      console.log('QR Code generated for:', data);
+      console.log('QR Code generated successfully for:', data);
+    } else {
+      console.error('qrCodeRef.value is null - DOM element not found');
     }
   } catch (error) {
     console.error('QR Code generation error:', error);
