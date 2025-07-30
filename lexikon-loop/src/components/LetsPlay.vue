@@ -33,53 +33,61 @@
             </div>
           </div>
 
-          <!-- Bluetooth Multiplayer Section -->
-          <div class="bluetooth-section">
-            <div class="bluetooth-header">
-              <h3 class="section-title">📱 Bluetooth Multiplayer</h3>
-              <div class="bluetooth-status" :class="bluetoothStatusClass">
-                {{ bluetoothStatusText }}
+          <!-- Multiplayer Section -->
+          <div class="multiplayer-section">
+            <div class="multiplayer-header">
+              <h3 class="section-title">📱 Multiplayer (iOS & Android)</h3>
+              <div class="multiplayer-status" :class="multiplayerStatusClass">
+                {{ multiplayerStatusText }}
               </div>
             </div>
 
-            <div class="bluetooth-controls">
+            <div class="multiplayer-controls">
               <button
-                v-if="!isBluetoothHost && !isBluetoothConnected"
-                class="bluetooth-btn host"
-                @click="startBluetoothHost"
-                :disabled="!isBluetoothSupported"
+                v-if="!isMultiplayerHost && !isMultiplayerConnected"
+                class="multiplayer-btn host"
+                @click="startMultiplayerHost"
               >
                 🏠 Als Host starten
               </button>
 
               <button
-                v-if="!isBluetoothHost && !isBluetoothConnected"
-                class="bluetooth-btn join"
-                @click="joinBluetoothGame"
-                :disabled="!isBluetoothSupported"
+                v-if="!isMultiplayerHost && !isMultiplayerConnected"
+                class="multiplayer-btn join"
+                @click="showJoinModal = true"
               >
                 🔗 Spiel beitreten
               </button>
 
               <button
-                v-if="isBluetoothHost || isBluetoothConnected"
-                class="bluetooth-btn disconnect"
-                @click="disconnectBluetooth"
+                v-if="isMultiplayerHost || isMultiplayerConnected"
+                class="multiplayer-btn disconnect"
+                @click="disconnectMultiplayer"
               >
                 🔌 Verbindung trennen
               </button>
             </div>
 
-            <div v-if="isBluetoothHost" class="bluetooth-host-info">
+            <div v-if="isMultiplayerHost" class="multiplayer-host-info">
               <div class="host-info">
                 <strong>🏠 Du bist der Host</strong>
-                <p>Andere Spieler können sich über Bluetooth verbinden</p>
+                <p>Andere Spieler können sich über QR-Code verbinden</p>
+
+                <!-- QR Code für Verbindung -->
+                <div v-if="hostQRCode" class="qr-code-container">
+                  <h4>QR-Code für Spieler:</h4>
+                  <div class="qr-code" ref="qrCodeRef"></div>
+                  <p class="qr-instruction">
+                    Spieler scannen diesen QR-Code mit ihrem Handy
+                  </p>
+                </div>
+
                 <div class="connected-players">
                   <h4>Verbundene Spieler:</h4>
                   <div
-                    v-for="player in bluetoothPlayers"
+                    v-for="player in multiplayerPlayers"
                     :key="player.id"
-                    class="bluetooth-player"
+                    class="multiplayer-player"
                   >
                     <span class="player-avatar">{{
                       player.name.charAt(0).toUpperCase()
@@ -92,18 +100,19 @@
             </div>
 
             <div
-              v-if="isBluetoothConnected && !isBluetoothHost"
-              class="bluetooth-client-info"
+              v-if="isMultiplayerConnected && !isMultiplayerHost"
+              class="multiplayer-client-info"
             >
               <div class="client-info">
                 <strong>📱 Verbunden mit Host</strong>
-                <p>Du spielst als: {{ bluetoothPlayerName }}</p>
+                <p>Du spielst als: {{ multiplayerPlayerName }}</p>
                 <div class="game-status">
-                  <p v-if="bluetoothGameState">
-                    Aktuelle Kategorie: {{ bluetoothGameState.category }}
+                  <p v-if="multiplayerGameState">
+                    Aktuelle Kategorie: {{ multiplayerGameState.category }}
                   </p>
-                  <p v-if="bluetoothGameState">
-                    Aktueller Buchstabe: {{ bluetoothGameState.currentLetter }}
+                  <p v-if="multiplayerGameState">
+                    Aktueller Buchstabe:
+                    {{ multiplayerGameState.currentLetter }}
                   </p>
                 </div>
               </div>
@@ -561,6 +570,56 @@
           </div>
         </div>
 
+        <!-- Multiplayer Join Modal -->
+        <div v-if="showJoinModal" class="add-player-modal">
+          <div class="add-player-card">
+            <h3 class="modal-title">🎮 Multiplayer beitreten</h3>
+
+            <div class="qr-scanner-section">
+              <h4>QR-Code scannen:</h4>
+              <div class="qr-scanner-container">
+                <div class="qr-scanner" ref="qrScannerRef"></div>
+                <p class="scanner-instruction">
+                  Richte die Kamera auf den QR-Code des Hosts
+                </p>
+              </div>
+            </div>
+
+            <div class="manual-join-section">
+              <h4>Oder manuell verbinden:</h4>
+              <div class="form-group">
+                <label class="modal-label">Spielername:</label>
+                <input
+                  v-model="joinPlayerName"
+                  class="modal-input"
+                  placeholder="Dein Name"
+                  autofocus
+                />
+              </div>
+              <div class="form-group">
+                <label class="modal-label">Host-ID:</label>
+                <input
+                  v-model="hostId"
+                  class="modal-input"
+                  placeholder="Host-ID eingeben"
+                />
+              </div>
+            </div>
+
+            <div class="modal-buttons">
+              <button class="modal-btn primary" @click="joinMultiplayerGame">
+                Beitreten
+              </button>
+              <button
+                class="modal-btn secondary"
+                @click="showJoinModal = false"
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Zurück zur Startseite -->
         <button class="back-home-btn" @click="router.push('/')">
           Zurück zur Startseite
@@ -1005,21 +1064,25 @@ const isValidating = ref(false);
 let recognition: any = null;
 
 // Bluetooth Multiplayer Variables
-const isBluetoothSupported = ref(false);
-const isBluetoothHost = ref(false);
-const isBluetoothConnected = ref(false);
-const bluetoothStatusText = ref('Bluetooth nicht verfügbar');
-const bluetoothStatusClass = ref('status-disconnected');
-const bluetoothPlayers = ref<Array<{id: string; name: string; score: number}>>(
-  [],
-);
-const bluetoothPlayerName = ref('');
-const bluetoothGameState = ref<{
+// Multiplayer Variables (iOS & Android compatible)
+const isMultiplayerHost = ref(false);
+const isMultiplayerConnected = ref(false);
+const multiplayerStatusText = ref('Multiplayer verfügbar');
+const multiplayerStatusClass = ref('status-available');
+const multiplayerPlayers = ref<
+  Array<{id: string; name: string; score: number}>
+>([]);
+const multiplayerPlayerName = ref('');
+const multiplayerGameState = ref<{
   category: string;
   currentLetter: string;
 } | null>(null);
-let bluetoothDevice: any = null;
-let bluetoothServer: any = null;
+const showJoinModal = ref(false);
+const joinPlayerName = ref('');
+const hostId = ref('');
+const hostQRCode = ref('');
+const qrCodeRef = ref<HTMLElement | null>(null);
+const qrScannerRef = ref<HTMLElement | null>(null);
 
 function startSpeechRecognition() {
   if (
@@ -1327,114 +1390,99 @@ function validateGermanWord(
   return {isValid: true, reason: 'Fallback-Validierung: Wort akzeptiert'};
 }
 
-// Bluetooth Multiplayer Functions
-function checkBluetoothSupport() {
-  if ('bluetooth' in navigator) {
-    isBluetoothSupported.value = true;
-    bluetoothStatusText.value = 'Bluetooth verfügbar';
-    bluetoothStatusClass.value = 'status-available';
-  } else {
-    isBluetoothSupported.value = false;
-    bluetoothStatusText.value = 'Bluetooth nicht unterstützt';
-    bluetoothStatusClass.value = 'status-disconnected';
-  }
-}
-
-async function startBluetoothHost() {
+// Multiplayer Functions (iOS & Android compatible)
+function startMultiplayerHost() {
   try {
-    bluetoothStatusText.value = 'Starte Bluetooth Host...';
-    bluetoothStatusClass.value = 'status-connecting';
+    multiplayerStatusText.value = 'Starte Multiplayer Host...';
+    multiplayerStatusClass.value = 'status-connecting';
 
-    // Request Bluetooth device
-    bluetoothDevice = await navigator.bluetooth.requestDevice({
-      filters: [],
-      optionalServices: ['lexikon-loop-game'],
-    });
+    // Generate unique host ID
+    const hostId = `host_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
 
-    // Connect to GATT server
-    const server = await bluetoothDevice.gatt.connect();
-    bluetoothServer = server;
+    // Create connection URL
+    const connectionUrl = `${window.location.origin}/join?host=${hostId}`;
 
-    // Start advertising (simulated)
-    isBluetoothHost.value = true;
-    isBluetoothConnected.value = true;
-    bluetoothStatusText.value = 'Host aktiv - Warte auf Spieler...';
-    bluetoothStatusClass.value = 'status-connected';
+    // Generate QR Code
+    generateQRCode(connectionUrl);
+
+    // Start hosting
+    isMultiplayerHost.value = true;
+    isMultiplayerConnected.value = true;
+    multiplayerStatusText.value = 'Host aktiv - Warte auf Spieler...';
+    multiplayerStatusClass.value = 'status-connected';
 
     // Simulate connected players
-    bluetoothPlayers.value = [
+    multiplayerPlayers.value = [
       {id: '1', name: 'Spieler 1', score: 0},
       {id: '2', name: 'Spieler 2', score: 0},
     ];
 
     playSound('success');
   } catch (error) {
-    console.error('Bluetooth Host Error:', error);
-    bluetoothStatusText.value = 'Bluetooth Host Fehler';
-    bluetoothStatusClass.value = 'status-error';
+    console.error('Multiplayer Host Error:', error);
+    multiplayerStatusText.value = 'Multiplayer Host Fehler';
+    multiplayerStatusClass.value = 'status-error';
     playSound('timer');
   }
 }
 
-async function joinBluetoothGame() {
+function joinMultiplayerGame() {
   try {
-    bluetoothStatusText.value = 'Suche nach Host...';
-    bluetoothStatusClass.value = 'status-connecting';
-
-    // Request Bluetooth device
-    bluetoothDevice = await navigator.bluetooth.requestDevice({
-      filters: [],
-      optionalServices: ['lexikon-loop-game'],
-    });
-
-    // Connect to GATT server
-    const server = await bluetoothDevice.gatt.connect();
-    bluetoothServer = server;
+    const playerName =
+      joinPlayerName.value.trim() ||
+      `Spieler ${Math.floor(Math.random() * 1000)}`;
 
     // Join as client
-    isBluetoothHost.value = false;
-    isBluetoothConnected.value = true;
-    bluetoothPlayerName.value = `Spieler ${Math.floor(Math.random() * 1000)}`;
-    bluetoothStatusText.value = 'Verbunden mit Host';
-    bluetoothStatusClass.value = 'status-connected';
+    isMultiplayerHost.value = false;
+    isMultiplayerConnected.value = true;
+    multiplayerPlayerName.value = playerName;
+    multiplayerStatusText.value = 'Verbunden mit Host';
+    multiplayerStatusClass.value = 'status-connected';
 
     // Simulate game state
-    bluetoothGameState.value = {
+    multiplayerGameState.value = {
       category: 'STADT',
       currentLetter: 'B',
     };
 
+    showJoinModal.value = false;
     playSound('success');
   } catch (error) {
-    console.error('Bluetooth Join Error:', error);
-    bluetoothStatusText.value = 'Verbindung fehlgeschlagen';
-    bluetoothStatusClass.value = 'status-error';
+    console.error('Multiplayer Join Error:', error);
+    multiplayerStatusText.value = 'Verbindung fehlgeschlagen';
+    multiplayerStatusClass.value = 'status-error';
     playSound('timer');
   }
 }
 
-function disconnectBluetooth() {
-  if (bluetoothDevice && bluetoothDevice.gatt.connected) {
-    bluetoothDevice.gatt.disconnect();
-  }
+function disconnectMultiplayer() {
+  isMultiplayerHost.value = false;
+  isMultiplayerConnected.value = false;
+  multiplayerPlayers.value = [];
+  multiplayerPlayerName.value = '';
+  multiplayerGameState.value = null;
+  hostQRCode.value = '';
+  showJoinModal.value = false;
 
-  isBluetoothHost.value = false;
-  isBluetoothConnected.value = false;
-  bluetoothPlayers.value = [];
-  bluetoothPlayerName.value = '';
-  bluetoothGameState.value = null;
-  bluetoothDevice = null;
-  bluetoothServer = null;
-
-  bluetoothStatusText.value = 'Bluetooth verfügbar';
-  bluetoothStatusClass.value = 'status-available';
+  multiplayerStatusText.value = 'Multiplayer verfügbar';
+  multiplayerStatusClass.value = 'status-available';
 
   playSound('timer');
 }
 
-// Sync game state with Bluetooth players
-function syncGameStateWithBluetooth() {
-  if (isBluetoothHost.value && bluetoothPlayers.value.length > 0) {
+// Generate QR Code for connection
+function generateQRCode(data: string) {
+  // In a real implementation, you would use a QR code library
+  // For now, we'll simulate it
+  hostQRCode.value = data;
+  console.log('QR Code generated for:', data);
+}
+
+// Sync game state with multiplayer players
+function syncGameStateWithMultiplayer() {
+  if (isMultiplayerHost.value && multiplayerPlayers.value.length > 0) {
     // Send current game state to all connected players
     const gameState = {
       category: resultText.value,
@@ -1443,7 +1491,7 @@ function syncGameStateWithBluetooth() {
       players: players.value,
     };
 
-    // In a real implementation, this would send via Bluetooth
+    // In a real implementation, this would send via WebRTC or WebSocket
     console.log('Syncing game state:', gameState);
   }
 }
@@ -1452,7 +1500,6 @@ watch(players, savePlayers, {deep: true});
 onMounted(() => {
   loadPlayers();
   window.addEventListener('keydown', handleKeydown);
-  checkBluetoothSupport();
 });
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
@@ -1595,8 +1642,8 @@ function handleKeydown(e: KeyboardEvent) {
   display: inline-block;
 }
 
-/* Bluetooth Section */
-.bluetooth-section {
+/* Multiplayer Section */
+.multiplayer-section {
   margin-bottom: 2rem;
   background: #f8fafc;
   border-radius: 16px;
@@ -1604,14 +1651,14 @@ function handleKeydown(e: KeyboardEvent) {
   box-shadow: 0 2px 12px rgba(30, 41, 59, 0.1);
 }
 
-.bluetooth-header {
+.multiplayer-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.bluetooth-status {
+.multiplayer-status {
   padding: 0.5rem 1rem;
   border-radius: 12px;
   font-size: 0.9rem;
@@ -1643,13 +1690,13 @@ function handleKeydown(e: KeyboardEvent) {
   color: #64748b;
 }
 
-.bluetooth-controls {
+.multiplayer-controls {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.bluetooth-btn {
+.multiplayer-btn {
   flex: 1;
   padding: 0.75rem 1rem;
   border: none;
@@ -1660,40 +1707,40 @@ function handleKeydown(e: KeyboardEvent) {
   transition: all 0.2s;
 }
 
-.bluetooth-btn.host {
+.multiplayer-btn.host {
   background: #2563eb;
   color: #fff;
 }
 
-.bluetooth-btn.host:hover {
+.multiplayer-btn.host:hover {
   background: #1d4ed8;
 }
 
-.bluetooth-btn.join {
+.multiplayer-btn.join {
   background: #16a34a;
   color: #fff;
 }
 
-.bluetooth-btn.join:hover {
+.multiplayer-btn.join:hover {
   background: #15803d;
 }
 
-.bluetooth-btn.disconnect {
+.multiplayer-btn.disconnect {
   background: #ef4444;
   color: #fff;
 }
 
-.bluetooth-btn.disconnect:hover {
+.multiplayer-btn.disconnect:hover {
   background: #dc2626;
 }
 
-.bluetooth-btn:disabled {
+.multiplayer-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.bluetooth-host-info,
-.bluetooth-client-info {
+.multiplayer-host-info,
+.multiplayer-client-info {
   background: #fff;
   border-radius: 12px;
   padding: 1rem;
@@ -1705,6 +1752,31 @@ function handleKeydown(e: KeyboardEvent) {
   text-align: center;
 }
 
+.qr-code-container {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.qr-code {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  background: #f1f5f9;
+  border: 2px solid #e0e7ff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.qr-instruction {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
 .connected-players {
   margin-top: 1rem;
 }
@@ -1714,7 +1786,7 @@ function handleKeydown(e: KeyboardEvent) {
   color: #1e293b;
 }
 
-.bluetooth-player {
+.multiplayer-player {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1735,6 +1807,51 @@ function handleKeydown(e: KeyboardEvent) {
   margin: 0.25rem 0;
   font-size: 0.9rem;
   color: #64748b;
+}
+
+/* QR Scanner Styles */
+.qr-scanner-section {
+  margin: 1rem 0;
+}
+
+.qr-scanner-container {
+  text-align: center;
+}
+
+.qr-scanner {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  background: #f1f5f9;
+  border: 2px solid #e0e7ff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.scanner-instruction {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.manual-join-section {
+  margin: 1rem 0;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.modal-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 /* Players Section */
@@ -2610,22 +2727,28 @@ function handleKeydown(e: KeyboardEvent) {
     margin-bottom: 0.5rem;
   }
 
-  /* Bluetooth responsive */
-  .bluetooth-section {
+  /* Multiplayer responsive */
+  .multiplayer-section {
     padding: 1rem;
   }
 
-  .bluetooth-controls {
+  .multiplayer-controls {
     flex-direction: column;
   }
 
-  .bluetooth-btn {
+  .multiplayer-btn {
     font-size: 0.9rem;
     padding: 0.6rem 0.8rem;
   }
 
-  .bluetooth-player {
+  .multiplayer-player {
     font-size: 0.9rem;
+  }
+
+  .qr-code,
+  .qr-scanner {
+    width: 150px;
+    height: 150px;
   }
 
   .game-status p {
