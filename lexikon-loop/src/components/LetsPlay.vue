@@ -578,10 +578,20 @@
             <div class="qr-scanner-section">
               <h4>QR-Code scannen:</h4>
               <div class="qr-scanner-container">
-                <div class="qr-scanner" ref="qrScannerRef"></div>
+                <div id="qr-scanner" class="qr-scanner"></div>
                 <p class="scanner-instruction">
                   Richte die Kamera auf den QR-Code des Hosts
                 </p>
+                <div class="scanner-status" v-if="scannerStatus">
+                  {{ scannerStatus }}
+                </div>
+                <button
+                  v-if="!scannerActive"
+                  class="scanner-start-btn"
+                  @click="startQRScanner"
+                >
+                  📷 Scanner starten
+                </button>
               </div>
             </div>
 
@@ -603,6 +613,18 @@
                   class="modal-input"
                   placeholder="Host-ID eingeben"
                 />
+              </div>
+
+              <!-- Test QR Code -->
+              <div class="test-qr-section">
+                <h4>Test QR-Code:</h4>
+                <button class="test-qr-btn" @click="generateTestQRCode">
+                  🧪 Test QR-Code generieren
+                </button>
+                <div v-if="testQRCode" class="test-qr-container">
+                  <div class="test-qr-code" ref="testQRCodeRef"></div>
+                  <p class="test-qr-info">Scanne diesen QR-Code zum Testen</p>
+                </div>
               </div>
             </div>
 
@@ -630,8 +652,10 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, watch, onMounted, onUnmounted} from 'vue';
+import {ref, computed, watch, onMounted, onUnmounted, nextTick} from 'vue';
 import {useRouter} from 'vue-router';
+import QRCode from 'qrcode';
+import {Html5QrcodeScanner, Html5QrcodeScanType} from 'html5-qrcode';
 const router = useRouter();
 
 // Typ für Spieler
@@ -1083,6 +1107,11 @@ const hostId = ref('');
 const hostQRCode = ref('');
 const qrCodeRef = ref<HTMLElement | null>(null);
 const qrScannerRef = ref<HTMLElement | null>(null);
+const scannerActive = ref(false);
+const scannerStatus = ref('');
+const testQRCode = ref('');
+const testQRCodeRef = ref<HTMLElement | null>(null);
+let qrScanner: Html5QrcodeScanner | null = null;
 
 function startSpeechRecognition() {
   if (
@@ -1391,7 +1420,7 @@ function validateGermanWord(
 }
 
 // Multiplayer Functions (iOS & Android compatible)
-function startMultiplayerHost() {
+async function startMultiplayerHost() {
   try {
     multiplayerStatusText.value = 'Starte Multiplayer Host...';
     multiplayerStatusClass.value = 'status-connecting';
@@ -1404,14 +1433,17 @@ function startMultiplayerHost() {
     // Create connection URL
     const connectionUrl = `${window.location.origin}/join?host=${hostId}`;
 
-    // Generate QR Code
-    generateQRCode(connectionUrl);
-
-    // Start hosting
+    // Start hosting first
     isMultiplayerHost.value = true;
     isMultiplayerConnected.value = true;
     multiplayerStatusText.value = 'Host aktiv - Warte auf Spieler...';
     multiplayerStatusClass.value = 'status-connected';
+
+    // Wait for DOM update
+    await nextTick();
+
+    // Generate QR Code after DOM is updated
+    await generateQRCode(connectionUrl);
 
     // Simulate connected players
     multiplayerPlayers.value = [
@@ -1473,12 +1505,156 @@ function disconnectMultiplayer() {
 }
 
 // Generate QR Code for connection
-function generateQRCode(data: string) {
-  // In a real implementation, you would use a QR code library
-  // For now, we'll simulate it
-  hostQRCode.value = data;
-  console.log('QR Code generated for:', data);
+async function generateQRCode(data: string) {
+  try {
+    if (qrCodeRef.value) {
+      // Clear previous QR code
+      qrCodeRef.value.innerHTML = '';
+
+      // Generate QR code as canvas
+      const canvas = await QRCode.toCanvas(data, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#2563eb',
+          light: '#ffffff',
+        },
+      });
+
+      // Add canvas to the QR code container
+      qrCodeRef.value.appendChild(canvas);
+
+      // Store the data for reference
+      hostQRCode.value = data;
+      console.log('QR Code generated for:', data);
+    }
+  } catch (error) {
+    console.error('QR Code generation error:', error);
+    // Fallback: show data as text
+    if (qrCodeRef.value) {
+      qrCodeRef.value.innerHTML = `<div style="padding: 20px; text-align: center; color: #64748b;">
+        <strong>Verbindungs-URL:</strong><br>
+        <code style="word-break: break-all; font-size: 0.8rem;">${data}</code>
+      </div>`;
+    }
+  }
 }
+
+// QR Scanner Functions
+function startQRScanner() {
+  if (!qrScanner) {
+    scannerActive.value = true;
+    scannerStatus.value = 'Scanner wird gestartet...';
+
+    qrScanner = new Html5QrcodeScanner(
+      'qr-scanner',
+      {
+        fps: 10,
+        qrbox: {width: 200, height: 200},
+        aspectRatio: 1.0,
+        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+        showTorchButtonIfSupported: true,
+        showZoomSliderIfSupported: true,
+      },
+      false,
+    );
+
+    qrScanner.render(
+      (decodedText: string) => {
+        // Handle scanned QR code
+        console.log('QR Code scanned:', decodedText);
+        scannerStatus.value = 'QR-Code erkannt!';
+
+        try {
+          // Extract host ID from URL
+          const url = new URL(decodedText);
+          const extractedHostId = url.searchParams.get('host');
+
+          if (extractedHostId) {
+            hostId.value = extractedHostId;
+            scannerStatus.value = 'Verbinde mit Host...';
+            // Auto-join the game
+            joinMultiplayerGame();
+          } else {
+            scannerStatus.value = 'QR-Code enthält keine Host-ID';
+            console.log('No host ID found in QR code');
+          }
+        } catch (error) {
+          scannerStatus.value = 'Ungültiger QR-Code Format';
+          console.log('Invalid QR code format:', error);
+        }
+
+        // Stop scanner after successful scan
+        setTimeout(() => {
+          stopQRScanner();
+        }, 2000);
+      },
+      (error: any) => {
+        // Only log actual errors, not "no QR code detected" messages
+        if (
+          error &&
+          !error.toString().includes('No barcode or QR code detected')
+        ) {
+          console.log('QR Scanner error:', error);
+          scannerStatus.value = 'Scanner Fehler: ' + error.toString();
+        }
+      },
+    );
+
+    scannerStatus.value = 'Scanner bereit - QR-Code scannen';
+  }
+}
+
+function stopQRScanner() {
+  if (qrScanner) {
+    qrScanner.clear();
+    qrScanner = null;
+  }
+  scannerActive.value = false;
+  scannerStatus.value = '';
+}
+
+// Generate test QR code for testing
+async function generateTestQRCode() {
+  try {
+    const testUrl = `${window.location.origin}/join?host=test_host_123`;
+    testQRCode.value = testUrl;
+
+    await nextTick();
+
+    if (testQRCodeRef.value) {
+      testQRCodeRef.value.innerHTML = '';
+
+      const canvas = await QRCode.toCanvas(testUrl, {
+        width: 150,
+        margin: 2,
+        color: {
+          dark: '#16a34a',
+          light: '#ffffff',
+        },
+      });
+
+      testQRCodeRef.value.appendChild(canvas);
+    }
+  } catch (error) {
+    console.error('Test QR Code generation error:', error);
+  }
+}
+
+// Watch for modal opening to start scanner
+watch(showJoinModal, (newValue) => {
+  if (newValue) {
+    // Start QR scanner when modal opens
+    nextTick(() => {
+      setTimeout(() => {
+        startQRScanner();
+      }, 100);
+    });
+  } else {
+    // Stop QR scanner when modal closes
+    stopQRScanner();
+  }
+});
 
 // Sync game state with multiplayer players
 function syncGameStateWithMultiplayer() {
@@ -1833,6 +2009,81 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 .scanner-instruction {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.scanner-status {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.scanner-start-btn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.scanner-start-btn:hover {
+  background: #1d4ed8;
+}
+
+.test-qr-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px solid #e0e7ff;
+}
+
+.test-qr-btn {
+  padding: 0.75rem 1.5rem;
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.test-qr-btn:hover {
+  background: #15803d;
+}
+
+.test-qr-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.test-qr-code {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+  background: #fff;
+  border: 2px solid #16a34a;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.test-qr-info {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   color: #64748b;
