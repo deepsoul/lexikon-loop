@@ -781,10 +781,24 @@ const categories = [
 ];
 
 const diceTransform = computed(() => {
-  const {x, y, z} = diceRotation.value;
-  return {
-    transform: `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`,
-  };
+  try {
+    // Ensure diceRotation.value exists and has valid properties
+    if (!diceRotation.value || typeof diceRotation.value !== 'object') {
+      diceRotation.value = {x: 0, y: 0, z: 0};
+    }
+
+    const {x = 0, y = 0, z = 0} = diceRotation.value;
+
+    return {
+      transform: `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`,
+    };
+  } catch (error) {
+    console.error('❌ Error in diceTransform computed:', error);
+    // Fallback to safe default
+    return {
+      transform: 'rotateX(0deg) rotateY(0deg) rotateZ(0deg)',
+    };
+  }
 });
 
 const timerProgressStyle = computed(() => {
@@ -2036,33 +2050,6 @@ function stopQRScanner() {
   }
   scannerActive.value = false;
   scannerStatus.value = '';
-}
-
-// Generate test QR code for testing
-async function generateTestQRCode() {
-  try {
-    const testUrl = `${window.location.origin}/join?host=test_host_123`;
-    testQRCode.value = testUrl;
-
-    await nextTick();
-
-    if (testQRCodeRef.value) {
-      testQRCodeRef.value.innerHTML = '';
-
-      const canvas = await QRCode.toCanvas(testUrl, {
-        width: 150,
-        margin: 2,
-        color: {
-          dark: '#16a34a',
-          light: '#ffffff',
-        },
-      });
-
-      testQRCodeRef.value.appendChild(canvas);
-    }
-  } catch (error) {
-    console.error('Test QR Code generation error:', error);
-  }
 }
 
 // Watch for modal opening to start scanner
