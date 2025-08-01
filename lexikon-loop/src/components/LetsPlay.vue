@@ -1040,23 +1040,33 @@ function rollDice() {
 
       // Wait for connection and retry
       setTimeout(() => {
-        if (socket?.connected && socket.id) {
-          console.log('✅ Socket reconnected, retrying dice roll...');
-          socket.emit('rollDice', {roomId: roomId.value});
-        } else {
-          console.log('❌ Socket still not connected, using fallback...');
-          rolling.value = false;
-          // Fallback to single player mode
-          const result = Math.floor(Math.random() * categories.length);
-          const category = categories[result];
-          resultText.value = category.name;
-          subResult.value = category.description;
-          isJackpot.value = result === 5;
-          if (isJackpot.value) {
-            resultText.value = '🎰 JACKPOT 🎰';
-            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            currentLetter.value = letters[Math.floor(Math.random() * 26)];
+        try {
+          if (socket?.connected && socket.id) {
+            console.log('✅ Socket reconnected, retrying dice roll...');
+            socket.emit('rollDice', {roomId: roomId.value});
+          } else {
+            console.log('❌ Socket still not connected, using fallback...');
+            // Use nextTick to ensure Vue reactivity
+            nextTick(() => {
+              rolling.value = false;
+              // Fallback to single player mode
+              const result = Math.floor(Math.random() * categories.length);
+              const category = categories[result];
+              resultText.value = category.name;
+              subResult.value = category.description;
+              isJackpot.value = result === 5;
+              if (isJackpot.value) {
+                resultText.value = '🎰 JACKPOT 🎰';
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                currentLetter.value = letters[Math.floor(Math.random() * 26)];
+              }
+            });
           }
+        } catch (error) {
+          console.error('❌ Error in socket retry timeout:', error);
+          nextTick(() => {
+            rolling.value = false;
+          });
         }
       }, 1000);
 
@@ -1067,20 +1077,30 @@ function rollDice() {
 
     // Add fallback for debugging
     setTimeout(() => {
-      if (rolling.value) {
-        console.log('⚠️ Server did not respond, using fallback...');
-        rolling.value = false;
-        // Fallback to single player mode
-        const result = Math.floor(Math.random() * categories.length);
-        const category = categories[result];
-        resultText.value = category.name;
-        subResult.value = category.description;
-        isJackpot.value = result === 5;
-        if (isJackpot.value) {
-          resultText.value = '🎰 JACKPOT 🎰';
-          const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-          currentLetter.value = letters[Math.floor(Math.random() * 26)];
+      try {
+        if (rolling.value) {
+          console.log('⚠️ Server did not respond, using fallback...');
+          // Use nextTick to ensure Vue reactivity
+          nextTick(() => {
+            rolling.value = false;
+            // Fallback to single player mode
+            const result = Math.floor(Math.random() * categories.length);
+            const category = categories[result];
+            resultText.value = category.name;
+            subResult.value = category.description;
+            isJackpot.value = result === 5;
+            if (isJackpot.value) {
+              resultText.value = '🎰 JACKPOT 🎰';
+              const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+              currentLetter.value = letters[Math.floor(Math.random() * 26)];
+            }
+          });
         }
+      } catch (error) {
+        console.error('❌ Error in server timeout fallback:', error);
+        nextTick(() => {
+          rolling.value = false;
+        });
       }
     }, 3000); // 3 second timeout
 
