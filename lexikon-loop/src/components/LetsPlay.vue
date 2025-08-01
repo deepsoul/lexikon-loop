@@ -1620,6 +1620,11 @@ async function startMultiplayerHost() {
       if (gameState.rolling) {
         console.log('🎬 Host: Starting dice animation...');
         try {
+          // Ensure diceRotation.value exists
+          if (!diceRotation.value) {
+            diceRotation.value = {x: 0, y: 0, z: 0};
+          }
+
           const randomRotation = Math.floor(Math.random() * categories.length);
           const randomCategory = categories[randomRotation];
           diceRotation.value = {
@@ -1648,6 +1653,11 @@ async function startMultiplayerHost() {
             // Use nextTick to ensure DOM is ready
             nextTick(() => {
               try {
+                // Ensure diceRotation.value exists
+                if (!diceRotation.value) {
+                  diceRotation.value = {x: 0, y: 0, z: 0};
+                }
+
                 diceRotation.value = {
                   x: category.endRotation.x || 0,
                   y: category.endRotation.y || 0,
@@ -1773,6 +1783,11 @@ function joinMultiplayerGame() {
       if (gameState.rolling) {
         console.log('🎬 Client: Starting dice animation...');
         try {
+          // Ensure diceRotation.value exists
+          if (!diceRotation.value) {
+            diceRotation.value = {x: 0, y: 0, z: 0};
+          }
+
           // Animation mit zufälliger Rotation
           const randomRotation = Math.floor(Math.random() * categories.length);
           const randomCategory = categories[randomRotation];
@@ -1805,6 +1820,11 @@ function joinMultiplayerGame() {
             // Use nextTick to ensure DOM is ready
             nextTick(() => {
               try {
+                // Ensure diceRotation.value exists
+                if (!diceRotation.value) {
+                  diceRotation.value = {x: 0, y: 0, z: 0};
+                }
+
                 diceRotation.value = {
                   x: category.endRotation.x || 0,
                   y: category.endRotation.y || 0,
