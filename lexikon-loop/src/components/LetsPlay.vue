@@ -68,7 +68,7 @@
               </button>
             </div>
 
-            <div v-if="isMultiplayerHost" class="multiplayer-host-info">
+            <div v-show="isMultiplayerHost" class="multiplayer-host-info">
               <div class="host-info">
                 <strong>🏠 Du bist der Host</strong>
                 <p>Andere Spieler können sich über QR-Code verbinden</p>
@@ -134,7 +134,7 @@
             </div>
 
             <div
-              v-if="isMultiplayerConnected && !isMultiplayerHost"
+              v-show="isMultiplayerConnected && !isMultiplayerHost"
               class="multiplayer-client-info"
             >
               <div class="client-info">
@@ -445,7 +445,7 @@
 
             <!-- Ergebnis-Bereich -->
             <div
-              v-if="!rolling && resultText !== 'Bereit zum Würfeln!'"
+              v-show="!rolling && resultText !== 'Bereit zum Würfeln!'"
               class="result-section"
             >
               <div class="result-display">
@@ -594,7 +594,7 @@
         </div>
 
         <!-- Spieler hinzufügen Dialog -->
-        <div v-if="showAddPlayer" class="add-player-modal">
+        <div v-show="showAddPlayer" class="add-player-modal">
           <div class="add-player-card">
             <label class="modal-label">Spielername:</label>
             <input
@@ -616,7 +616,7 @@
         </div>
 
         <!-- Multiplayer Join Modal -->
-        <div v-if="showJoinModal" class="add-player-modal">
+        <div v-show="showJoinModal" class="add-player-modal">
           <div class="add-player-card">
             <h3 class="modal-title">🎮 Multiplayer beitreten</h3>
 
@@ -659,8 +659,6 @@
                   placeholder="Host-ID eingeben"
                 />
               </div>
-
-              <!-- Test QR Code -->
             </div>
 
             <div class="modal-buttons">
@@ -992,6 +990,7 @@ function toggleTimer() {
 }
 
 function startTimer() {
+  console.log('startTimer');
   stopTimer();
   timeLeft.value = timerDuration.value;
   timerActive.value = true;
