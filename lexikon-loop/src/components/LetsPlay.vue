@@ -68,7 +68,7 @@
               </button>
             </div>
 
-            <div v-show="isMultiplayerHost" class="multiplayer-host-info">
+            <div v-if="isMultiplayerHost" class="multiplayer-host-info">
               <div class="host-info">
                 <strong>🏠 Du bist der Host</strong>
                 <p>Andere Spieler können sich über QR-Code verbinden</p>
@@ -134,7 +134,7 @@
             </div>
 
             <div
-              v-show="isMultiplayerConnected && !isMultiplayerHost"
+              v-if="isMultiplayerConnected && !isMultiplayerHost"
               class="multiplayer-client-info"
             >
               <div class="client-info">
@@ -430,7 +430,7 @@
                 </div>
               </div>
 
-              <button class="roll-btn" :disabled="rolling" @click="simpleTest">
+              <button class="roll-btn" :disabled="rolling" @click="rollDice">
                 <span v-if="rolling">🎲 Würfelt...</span>
                 <span v-else-if="resultText === 'Bereit zum Würfeln!'"
                   >🎲 WÜRFELN</span
@@ -590,7 +590,7 @@
         </div>
 
         <!-- Spieler hinzufügen Dialog -->
-        <div v-show="showAddPlayer" class="add-player-modal">
+        <div v-if="showAddPlayer" class="add-player-modal">
           <div class="add-player-card">
             <label class="modal-label">Spielername:</label>
             <input
@@ -612,7 +612,7 @@
         </div>
 
         <!-- Multiplayer Join Modal -->
-        <div v-show="showJoinModal" class="add-player-modal">
+        <div v-if="showJoinModal" class="add-player-modal">
           <div class="add-player-card">
             <h3 class="modal-title">🎮 Multiplayer beitreten</h3>
 
@@ -1015,9 +1015,144 @@ function resetGameTimer() {
   timeLeft.value = timerDuration.value;
 }
 
-function simpleTest() {
-  console.log('🧪 ULTRA-SIMPLE TEST');
-  alert('Button clicked! No Vue errors!');
+function rollDice() {
+  if (rolling.value) return;
+  rolling.value = true;
+  playSound('roll');
+
+  console.log('🎲 Rolling dice...');
+  console.log('🔌 Socket active:', !!socket);
+  console.log('🏠 Room ID:', roomId.value);
+
+  // Send dice roll to server if in multiplayer
+  if (socket && roomId.value) {
+    console.log('🔌 Socket:', socket);
+    console.log('📡 Sending dice roll to server...');
+    console.log('🔌 Socket connected:', socket.connected);
+    console.log('🏠 Room ID:', roomId.value);
+    console.log('🆔 Socket ID:', socket.id);
+
+    // Check if socket is properly connected
+    if (!socket.connected || !socket.id) {
+      console.log('⚠️ Socket not properly connected, reconnecting...');
+      socket.connect();
+
+      // Wait for connection and retry
+      setTimeout(() => {
+        try {
+          if (socket?.connected && socket.id) {
+            console.log('✅ Socket reconnected, retrying dice roll...');
+            socket.emit('rollDice', {roomId: roomId.value});
+          } else {
+            console.log('❌ Socket still not connected, using fallback...');
+            // Use nextTick to ensure Vue reactivity
+            nextTick(() => {
+              rolling.value = false;
+              // Fallback to single player mode
+              const result = Math.floor(Math.random() * categories.length);
+              const category = categories[result];
+              resultText.value = category.name;
+              subResult.value = category.description;
+              isJackpot.value = result === 5;
+              if (isJackpot.value) {
+                resultText.value = '🎰 JACKPOT 🎰';
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                currentLetter.value = letters[Math.floor(Math.random() * 26)];
+              }
+            });
+          }
+        } catch (error) {
+          console.error('❌ Error in socket retry timeout:', error);
+          nextTick(() => {
+            rolling.value = false;
+          });
+        }
+      }, 1000);
+
+      return;
+    }
+
+    socket.emit('rollDice', {roomId: roomId.value});
+
+    // Add fallback for debugging
+    setTimeout(() => {
+      try {
+        if (rolling.value) {
+          console.log('⚠️ Server did not respond, using fallback...');
+          // Use nextTick to ensure Vue reactivity
+          nextTick(() => {
+            rolling.value = false;
+            // Fallback to single player mode
+            const result = Math.floor(Math.random() * categories.length);
+            const category = categories[result];
+            resultText.value = category.name;
+            subResult.value = category.description;
+            isJackpot.value = result === 5;
+            if (isJackpot.value) {
+              resultText.value = '🎰 JACKPOT 🎰';
+              const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+              currentLetter.value = letters[Math.floor(Math.random() * 26)];
+            }
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error in server timeout fallback:', error);
+        nextTick(() => {
+          rolling.value = false;
+        });
+      }
+    }, 3000); // 3 second timeout
+
+    return; // Server will handle the result
+  }
+
+  console.log('🎮 Single player mode - local dice roll');
+  // Single player mode
+  // Zufällige Kategorie auswählen
+  const result = Math.floor(Math.random() * categories.length);
+  const category = categories[result];
+
+  // Animation mit zufälliger Rotation
+  const randomRotation = Math.floor(Math.random() * categories.length);
+  const randomCategory = categories[randomRotation];
+  diceRotation.value = {
+    x: randomCategory.rotation.x * 360,
+    y: randomCategory.rotation.y * 360,
+    z: randomCategory.rotation.z * 360,
+  };
+
+  // Text während der Animation ausblenden
+  resultText.value = '';
+  subResult.value = '';
+  currentLetter.value = '-';
+
+  setTimeout(() => {
+    // Endposition setzen basierend auf der gewählten Kategorie
+    diceRotation.value = category.endRotation;
+
+    // Kurze Verzögerung für bessere Synchronisation
+    setTimeout(() => {
+      // Ergebnis anzeigen
+      resultText.value = category.name;
+      subResult.value = category.description;
+      isJackpot.value = result === 5; // JACKPOT ist immer Index 5
+
+      if (isJackpot.value) {
+        resultText.value = '🎰 JACKPOT 🎰';
+        playSound('jackpot');
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        currentLetter.value = letters[Math.floor(Math.random() * 26)];
+      }
+
+      rolling.value = false;
+
+      // Timer ggf. neu starten
+      if (timerActive.value) {
+        resetGameTimer();
+        startTimer();
+      }
+    }, 1100); // Zusätzliche 100ms Verzögerung für bessere Synchronisation
+  }, 400);
 }
 
 // LocalStorage: Spieler speichern und laden
@@ -1503,18 +1638,103 @@ async function startMultiplayerHost() {
       console.log('👥 Player joined:', data);
       console.log('📊 All players:', data.allPlayers);
       console.log('🎮 Game state:', data.gameState);
-      // TEMPORARILY DISABLED: multiplayerPlayers.value = data.allPlayers;
-      // TEMPORARILY DISABLED: multiplayerGameState.value = data.gameState;
+      try {
+        nextTick(() => {
+          multiplayerPlayers.value = data.allPlayers;
+          multiplayerGameState.value = data.gameState;
+        });
+      } catch (error) {
+        console.error('❌ Error in playerJoined event handler:', error);
+      }
     });
 
     socket.on('diceRolled', (gameState) => {
       console.log('🎲 Host: Dice rolled event received:', gameState);
-      // TEMPORARILY DISABLED: All dice roll handling
+      try {
+        nextTick(() => {
+          resultText.value = gameState.resultText;
+          subResult.value = gameState.subResult;
+          isJackpot.value = gameState.isJackpot;
+          rolling.value = gameState.rolling;
+          currentLetter.value = gameState.currentLetter;
+
+          // Start dice animation for host
+          if (gameState.rolling) {
+            console.log('🎬 Host: Starting dice animation...');
+            try {
+              // Ensure diceRotation.value exists
+              if (!diceRotation.value) {
+                diceRotation.value = {x: 0, y: 0, z: 0};
+              }
+
+              const randomRotation = Math.floor(
+                Math.random() * categories.length,
+              );
+              const randomCategory = categories[randomRotation];
+              diceRotation.value = {
+                x: (randomCategory.rotation.x || 0) * 360,
+                y: (randomCategory.rotation.y || 0) * 360,
+                z: (randomCategory.rotation.z || 0) * 360,
+              };
+            } catch (animationError) {
+              console.error(
+                '❌ Error starting dice animation:',
+                animationError,
+              );
+            }
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error in diceRolled event handler:', error);
+      }
     });
 
     socket.on('diceStopped', (gameState) => {
       console.log('🛑 Host: Dice stopped event received:', gameState);
-      // TEMPORARILY DISABLED: All dice stop handling
+      try {
+        nextTick(() => {
+          rolling.value = false;
+
+          // Set final dice position for host with error handling
+          if (gameState.category) {
+            try {
+              const categoryIndex = categories.findIndex(
+                (cat) => cat.name === gameState.category,
+              );
+              if (categoryIndex !== -1) {
+                const category = categories[categoryIndex];
+                // Use nextTick to ensure DOM is ready
+                nextTick(() => {
+                  try {
+                    // Ensure diceRotation.value exists
+                    if (!diceRotation.value) {
+                      diceRotation.value = {x: 0, y: 0, z: 0};
+                    }
+
+                    diceRotation.value = {
+                      x: category.endRotation.x || 0,
+                      y: category.endRotation.y || 0,
+                      z: category.endRotation.z || 0,
+                    };
+                    console.log(
+                      '🎯 Host: Set dice to final position for:',
+                      gameState.category,
+                    );
+                  } catch (diceError) {
+                    console.error('❌ Error setting dice rotation:', diceError);
+                  }
+                });
+              } else {
+                console.log('⚠️ Category not found:', gameState.category);
+              }
+            } catch (error) {
+              console.error('❌ Error setting dice position:', error);
+            }
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error in diceStopped event handler:', error);
+      }
     });
 
     socket.on('scoreUpdated', (data) => {
