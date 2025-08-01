@@ -89,6 +89,33 @@
                   </p>
                 </div>
 
+                <!-- Share Game Section -->
+                <div class="share-game-section">
+                  <h4>Spiel einladen:</h4>
+                  <div class="share-buttons">
+                    <button
+                      class="share-btn whatsapp"
+                      @click="shareViaWhatsApp"
+                    >
+                      📱 WhatsApp
+                    </button>
+                    <button class="share-btn email" @click="shareViaEmail">
+                      📧 Email
+                    </button>
+                    <button class="share-btn copy" @click="copyJoinLink">
+                      📋 Link kopieren
+                    </button>
+                  </div>
+                  <div class="join-link-info">
+                    <p>
+                      <strong>Join-ID:</strong> <code>{{ roomId }}</code>
+                    </p>
+                    <p>
+                      <strong>Link:</strong> <code>{{ joinLink }}</code>
+                    </p>
+                  </div>
+                </div>
+
                 <div class="connected-players">
                   <h4>Verbundene Spieler:</h4>
                   <div
@@ -1176,6 +1203,47 @@ function setTimerDuration(val: number) {
 }
 
 const isSpeedRound = computed(() => timerDuration.value <= 15);
+
+// Computed join link
+const joinLink = computed(() => {
+  if (!roomId.value) return '';
+  return `${window.location.origin}/join?host=${roomId.value}`;
+});
+
+// Share via WhatsApp
+function shareViaWhatsApp() {
+  const text = `🎮 Lexikon-Loop Multiplayer!\n\nSpiel beitreten:\n${joinLink.value}\n\nHost-ID: ${roomId.value}\n\nViel Spaß beim Spielen! 🎲`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(whatsappUrl, '_blank');
+}
+
+// Share via Email
+function shareViaEmail() {
+  const subject = '🎮 Lexikon-Loop Multiplayer Einladung';
+  const body = `Hallo!\n\nDu wurdest zu einem Lexikon-Loop Multiplayer-Spiel eingeladen!\n\nSpiel beitreten:\n${joinLink.value}\n\nHost-ID: ${roomId.value}\n\nViel Spaß beim Spielen! 🎲`;
+  const mailtoUrl = `mailto:?subject=${encodeURIComponent(
+    subject,
+  )}&body=${encodeURIComponent(body)}`;
+  window.open(mailtoUrl);
+}
+
+// Copy join link to clipboard
+async function copyJoinLink() {
+  try {
+    await navigator.clipboard.writeText(joinLink.value);
+    alert('✅ Link wurde in die Zwischenablage kopiert!');
+  } catch (error) {
+    console.error('Failed to copy link:', error);
+    // Fallback: select and copy
+    const textArea = document.createElement('textarea');
+    textArea.value = joinLink.value;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    alert('✅ Link wurde in die Zwischenablage kopiert!');
+  }
+}
 
 // Spracherkennung (SpeechRecognition API)
 const isListening = ref(false);
@@ -3348,6 +3416,87 @@ function handleKeydown(e: KeyboardEvent) {
 
   .game-status p {
     font-size: 0.85rem;
+  }
+
+  /* Share Game Section */
+  .share-game-section {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px solid #e0e7ff;
+  }
+
+  .share-game-section h4 {
+    margin-bottom: 0.75rem;
+    color: #1e293b;
+    font-size: 1rem;
+  }
+
+  .share-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .share-btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 100px;
+  }
+
+  .share-btn.whatsapp {
+    background: #25d366;
+    color: #fff;
+  }
+
+  .share-btn.whatsapp:hover {
+    background: #128c7e;
+  }
+
+  .share-btn.email {
+    background: #ea4335;
+    color: #fff;
+  }
+
+  .share-btn.email:hover {
+    background: #d32f2f;
+  }
+
+  .share-btn.copy {
+    background: #64748b;
+    color: #fff;
+  }
+
+  .share-btn.copy:hover {
+    background: #475569;
+  }
+
+  .join-link-info {
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .join-link-info p {
+    margin: 0.25rem 0;
+    word-break: break-all;
+  }
+
+  .join-link-info code {
+    background: #e2e8f0;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
   }
 }
 
