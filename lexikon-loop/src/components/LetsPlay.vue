@@ -1980,27 +1980,45 @@ function disconnectMultiplayer() {
   playSound('timer');
 }
 
-// Generate QR Code for connection
+// Generate QR Code for connection with robust error handling
 async function generateQRCode(data: string) {
-  console.log('generateQRCode', data);
+  console.log('🔍 generateQRCode called with:', data);
+
+  // Safety check: ensure data is valid
+  if (!data || typeof data !== 'string') {
+    console.error('❌ Invalid data for QR code generation:', data);
+    return;
+  }
+
   try {
-    console.log('Generating QR code for:', data);
-    console.log('qrCodeRef.value:', qrCodeRef.value);
+    // Wait for DOM to be ready
+    await nextTick();
 
-    if (qrCodeRef.value) {
-      // Use nextTick to ensure DOM is ready
-      await nextTick();
+    // Check if QRCode library is available
+    if (typeof QRCode === 'undefined') {
+      console.error('❌ QRCode library not available');
+      showTextFallback(data);
+      return;
+    }
 
-      // Double-check that element still exists
-      if (!qrCodeRef.value) {
-        console.error('qrCodeRef.value is null after nextTick');
-        return;
-      }
+    // Check if DOM element exists
+    if (!qrCodeRef.value) {
+      console.error('❌ qrCodeRef.value is null');
+      return;
+    }
 
-      // Clear previous QR code
+    console.log('✅ Starting QR code generation...');
+
+    // Clear previous content safely
+    try {
       qrCodeRef.value.innerHTML = '';
+    } catch (clearError) {
+      console.error('❌ Error clearing QR code container:', clearError);
+    }
 
-      // Generate QR code as data URL instead of canvas
+    // Method 1: Try toDataURL first (most reliable)
+    try {
+      console.log('🔄 Attempting QRCode.toDataURL...');
       const qrDataUrl = await QRCode.toDataURL(data, {
         width: 200,
         margin: 2,
@@ -2010,38 +2028,131 @@ async function generateQRCode(data: string) {
         },
       });
 
-      // Double-check that element still exists before setting innerHTML
-      if (qrCodeRef.value && qrCodeRef.value.parentNode) {
-        // Use nextTick to ensure Vue reactivity before DOM manipulation
-        await nextTick();
-
-        // Add QR code as image instead of canvas
-        qrCodeRef.value.innerHTML = `<img src="${qrDataUrl}" alt="QR Code" style="width: 200px; height: 200px;">`;
-
-        // Store the data for reference
-        hostQRCode.value = data;
-        console.log('QR Code generated successfully for:', data);
-      } else {
-        console.error(
-          'qrCodeRef.value or parent is null - cannot set innerHTML',
-        );
+      // Verify the data URL is valid
+      if (!qrDataUrl || !qrDataUrl.startsWith('data:image/')) {
+        throw new Error('Invalid QR code data URL generated');
       }
-    } else {
-      console.error('qrCodeRef.value is null - DOM element not found');
+
+      // Set the QR code safely
+      await setQRCodeSafely(qrDataUrl, data);
+    } catch (toDataURLError) {
+      console.warn(
+        '⚠️ QRCode.toDataURL failed, trying canvas method:',
+        toDataURLError,
+      );
+
+      // Method 2: Try canvas approach
+      try {
+        console.log('🔄 Attempting QRCode.toCanvas...');
+        const canvas = await QRCode.toCanvas(data, {
+          width: 200,
+          margin: 2,
+          color: {
+            dark: '#2563eb',
+            light: '#ffffff',
+          },
+        });
+
+        // Set canvas safely
+        await setCanvasSafely(canvas, data);
+      } catch (canvasError) {
+        console.warn('⚠️ QRCode.toCanvas also failed:', canvasError);
+
+        // Method 3: Text fallback
+        showTextFallback(data);
+      }
     }
   } catch (error) {
-    console.error('QR Code generation error:', error);
-    // Fallback: show data as text
-    try {
-      if (qrCodeRef.value && qrCodeRef.value.parentNode) {
-        qrCodeRef.value.innerHTML = `<div style="padding: 20px; text-align: center; color: #64748b;">
-          <strong>Verbindungs-URL:</strong><br>
-          <code style="word-break: break-all; font-size: 0.8rem;">${data}</code>
-        </div>`;
-      }
-    } catch (fallbackError) {
-      console.error('Fallback QR code display also failed:', fallbackError);
+    console.error('❌ QR Code generation completely failed:', error);
+    showTextFallback(data);
+  }
+}
+
+// Helper function to set QR code image safely
+async function setQRCodeSafely(qrDataUrl: string, data: string) {
+  try {
+    await nextTick();
+
+    if (!qrCodeRef.value) {
+      console.error('❌ qrCodeRef.value is null in setQRCodeSafely');
+      return;
     }
+
+    // Create image element
+    const img = document.createElement('img');
+    img.src = qrDataUrl;
+    img.alt = 'QR Code';
+    img.style.width = '200px';
+    img.style.height = '200px';
+    img.style.display = 'block';
+    img.style.margin = '0 auto';
+
+    // Clear and append safely
+    qrCodeRef.value.innerHTML = '';
+    qrCodeRef.value.appendChild(img);
+
+    // Store reference
+    hostQRCode.value = data;
+    console.log('✅ QR Code generated successfully with image method');
+  } catch (error) {
+    console.error('❌ Error in setQRCodeSafely:', error);
+    showTextFallback(data);
+  }
+}
+
+// Helper function to set canvas safely
+async function setCanvasSafely(canvas: HTMLCanvasElement, data: string) {
+  try {
+    await nextTick();
+
+    if (!qrCodeRef.value) {
+      console.error('❌ qrCodeRef.value is null in setCanvasSafely');
+      return;
+    }
+
+    // Clear and append canvas safely
+    qrCodeRef.value.innerHTML = '';
+    qrCodeRef.value.appendChild(canvas);
+
+    // Store reference
+    hostQRCode.value = data;
+    console.log('✅ QR Code generated successfully with canvas method');
+  } catch (error) {
+    console.error('❌ Error in setCanvasSafely:', error);
+    showTextFallback(data);
+  }
+}
+
+// Helper function to show text fallback
+function showTextFallback(data: string) {
+  try {
+    if (!qrCodeRef.value) {
+      console.error('❌ qrCodeRef.value is null in showTextFallback');
+      return;
+    }
+
+    qrCodeRef.value.innerHTML = `
+      <div style="padding: 20px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <div style="margin-bottom: 10px;">
+          <strong>📱 QR-Code nicht verfügbar</strong>
+        </div>
+        <div style="font-size: 0.9rem; margin-bottom: 10px;">
+          <strong>Verbindungs-URL:</strong>
+        </div>
+        <code style="word-break: break-all; font-size: 0.8rem; background: #f1f5f9; padding: 8px; border-radius: 4px; display: block;">
+          ${data}
+        </code>
+        <div style="margin-top: 10px; font-size: 0.8rem; color: #64748b;">
+          📋 Kopiere diese URL und sende sie an andere Spieler
+        </div>
+      </div>
+    `;
+
+    // Store reference
+    hostQRCode.value = data;
+    console.log('✅ Text fallback displayed successfully');
+  } catch (error) {
+    console.error('❌ Error in showTextFallback:', error);
   }
 }
 
