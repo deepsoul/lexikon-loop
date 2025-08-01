@@ -1498,6 +1498,10 @@ function validateGermanWord(
 async function startMultiplayerHost() {
   try {
     console.log('🚀 Starting Multiplayer Host...');
+
+    // Use nextTick to ensure Vue reactivity before changing variables
+    await nextTick();
+
     multiplayerStatusText.value = 'Starte Multiplayer Host...';
     multiplayerStatusClass.value = 'status-connecting';
 
@@ -1537,8 +1541,14 @@ async function startMultiplayerHost() {
       console.log('👥 Player joined:', data);
       console.log('📊 All players:', data.allPlayers);
       console.log('🎮 Game state:', data.gameState);
-      multiplayerPlayers.value = data.allPlayers;
-      multiplayerGameState.value = data.gameState;
+      try {
+        nextTick(() => {
+          multiplayerPlayers.value = data.allPlayers;
+          multiplayerGameState.value = data.gameState;
+        });
+      } catch (error) {
+        console.error('❌ Error in playerJoined event handler:', error);
+      }
     });
 
     socket.on('diceRolled', (gameState) => {
