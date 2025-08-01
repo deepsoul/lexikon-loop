@@ -430,7 +430,11 @@
                 </div>
               </div>
 
-              <button class="roll-btn" :disabled="rolling" @click="rollDice">
+              <button
+                class="roll-btn"
+                :disabled="rolling"
+                @click="testRollDice"
+              >
                 <span v-if="rolling">🎲 Würfelt...</span>
                 <span v-else-if="resultText === 'Bereit zum Würfeln!'"
                   >🎲 WÜRFELN</span
@@ -1016,144 +1020,42 @@ function resetGameTimer() {
   timeLeft.value = timerDuration.value;
 }
 
-function rollDice() {
-  if (rolling.value) return;
-  rolling.value = true;
-  playSound('roll');
+function testRollDice() {
+  console.log('🧪 TEST: Simple dice roll without animation');
 
-  console.log('🎲 Rolling dice...');
-  console.log('🔌 Socket active:', !!socket);
-  console.log('🏠 Room ID:', roomId.value);
+  if (rolling.value) {
+    console.log('⚠️ Already rolling, ignoring click');
+    return;
+  }
 
-  // Send dice roll to server if in multiplayer
-  if (socket && roomId.value) {
-    console.log('🔌 Socket:', socket);
-    console.log('📡 Sending dice roll to server...');
-    console.log('🔌 Socket connected:', socket.connected);
-    console.log('🏠 Room ID:', roomId.value);
-    console.log('🆔 Socket ID:', socket.id);
+  try {
+    console.log('🎲 Starting test roll...');
+    rolling.value = true;
 
-    // Check if socket is properly connected
-    if (!socket.connected || !socket.id) {
-      console.log('⚠️ Socket not properly connected, reconnecting...');
-      socket.connect();
-
-      // Wait for connection and retry
-      setTimeout(() => {
-        try {
-          if (socket?.connected && socket.id) {
-            console.log('✅ Socket reconnected, retrying dice roll...');
-            socket.emit('rollDice', {roomId: roomId.value});
-          } else {
-            console.log('❌ Socket still not connected, using fallback...');
-            // Use nextTick to ensure Vue reactivity
-            nextTick(() => {
-              rolling.value = false;
-              // Fallback to single player mode
-              const result = Math.floor(Math.random() * categories.length);
-              const category = categories[result];
-              resultText.value = category.name;
-              subResult.value = category.description;
-              isJackpot.value = result === 5;
-              if (isJackpot.value) {
-                resultText.value = '🎰 JACKPOT 🎰';
-                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                currentLetter.value = letters[Math.floor(Math.random() * 26)];
-              }
-            });
-          }
-        } catch (error) {
-          console.error('❌ Error in socket retry timeout:', error);
-          nextTick(() => {
-            rolling.value = false;
-          });
-        }
-      }, 1000);
-
-      return;
-    }
-
-    socket.emit('rollDice', {roomId: roomId.value});
-
-    // Add fallback for debugging
+    // Simple delay to simulate roll
     setTimeout(() => {
       try {
-        if (rolling.value) {
-          console.log('⚠️ Server did not respond, using fallback...');
-          // Use nextTick to ensure Vue reactivity
-          nextTick(() => {
-            rolling.value = false;
-            // Fallback to single player mode
-            const result = Math.floor(Math.random() * categories.length);
-            const category = categories[result];
-            resultText.value = category.name;
-            subResult.value = category.description;
-            isJackpot.value = result === 5;
-            if (isJackpot.value) {
-              resultText.value = '🎰 JACKPOT 🎰';
-              const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-              currentLetter.value = letters[Math.floor(Math.random() * 26)];
-            }
-          });
-        }
+        console.log('✅ Test roll completed');
+        nextTick(() => {
+          rolling.value = false;
+          resultText.value = 'TEST KATEGORIE';
+          subResult.value = 'Test erfolgreich!';
+          currentLetter.value = 'T';
+          isJackpot.value = false;
+        });
       } catch (error) {
-        console.error('❌ Error in server timeout fallback:', error);
+        console.error('❌ Error in test roll completion:', error);
         nextTick(() => {
           rolling.value = false;
         });
       }
-    }, 3000); // 3 second timeout
-
-    return; // Server will handle the result
-  }
-
-  console.log('🎮 Single player mode - local dice roll');
-  // Single player mode
-  // Zufällige Kategorie auswählen
-  const result = Math.floor(Math.random() * categories.length);
-  const category = categories[result];
-
-  // Animation mit zufälliger Rotation
-  const randomRotation = Math.floor(Math.random() * categories.length);
-  const randomCategory = categories[randomRotation];
-  diceRotation.value = {
-    x: randomCategory.rotation.x * 360,
-    y: randomCategory.rotation.y * 360,
-    z: randomCategory.rotation.z * 360,
-  };
-
-  // Text während der Animation ausblenden
-  resultText.value = '';
-  subResult.value = '';
-  currentLetter.value = '-';
-
-  setTimeout(() => {
-    // Endposition setzen basierend auf der gewählten Kategorie
-    diceRotation.value = category.endRotation;
-
-    // Kurze Verzögerung für bessere Synchronisation
-    setTimeout(() => {
-      // Ergebnis anzeigen
-      resultText.value = category.name;
-      subResult.value = category.description;
-      isJackpot.value = result === 5; // JACKPOT ist immer Index 5
-
-      if (isJackpot.value) {
-        resultText.value = '🎰 JACKPOT 🎰';
-        playSound('jackpot');
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        currentLetter.value = letters[Math.floor(Math.random() * 26)];
-      }
-
+    }, 1000);
+  } catch (error) {
+    console.error('❌ Error in test roll start:', error);
+    nextTick(() => {
       rolling.value = false;
-
-      // Timer ggf. neu starten
-      if (timerActive.value) {
-        resetGameTimer();
-        startTimer();
-      }
-    }, 1100); // Zusätzliche 100ms Verzögerung für bessere Synchronisation
-  }, 400);
+    });
+  }
 }
 
 // LocalStorage: Spieler speichern und laden
