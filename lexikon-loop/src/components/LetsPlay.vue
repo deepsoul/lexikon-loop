@@ -1762,6 +1762,7 @@ function disconnectMultiplayer() {
 
 // Generate QR Code for connection
 async function generateQRCode(data: string) {
+  console.log('generateQRCode', data);
   try {
     console.log('Generating QR code for:', data);
     console.log('qrCodeRef.value:', qrCodeRef.value);
@@ -1791,6 +1792,9 @@ async function generateQRCode(data: string) {
 
       // Double-check that element still exists before appending
       if (qrCodeRef.value && qrCodeRef.value.parentNode) {
+        // Use nextTick to ensure Vue reactivity before DOM manipulation
+        await nextTick();
+
         // Add canvas to the QR code container
         qrCodeRef.value.appendChild(canvas);
 
