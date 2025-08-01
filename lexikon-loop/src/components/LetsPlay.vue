@@ -1880,6 +1880,15 @@ async function generateQRCode(data: string) {
     console.log('qrCodeRef.value:', qrCodeRef.value);
 
     if (qrCodeRef.value) {
+      // Use nextTick to ensure DOM is ready
+      await nextTick();
+
+      // Double-check that element still exists
+      if (!qrCodeRef.value) {
+        console.error('qrCodeRef.value is null after nextTick');
+        return;
+      }
+
       // Clear previous QR code
       qrCodeRef.value.innerHTML = '';
 
@@ -1893,23 +1902,34 @@ async function generateQRCode(data: string) {
         },
       });
 
-      // Add canvas to the QR code container
-      qrCodeRef.value.appendChild(canvas);
+      // Double-check that element still exists before appending
+      if (qrCodeRef.value && qrCodeRef.value.parentNode) {
+        // Add canvas to the QR code container
+        qrCodeRef.value.appendChild(canvas);
 
-      // Store the data for reference
-      hostQRCode.value = data;
-      console.log('QR Code generated successfully for:', data);
+        // Store the data for reference
+        hostQRCode.value = data;
+        console.log('QR Code generated successfully for:', data);
+      } else {
+        console.error(
+          'qrCodeRef.value or parent is null - cannot append canvas',
+        );
+      }
     } else {
       console.error('qrCodeRef.value is null - DOM element not found');
     }
   } catch (error) {
     console.error('QR Code generation error:', error);
     // Fallback: show data as text
-    if (qrCodeRef.value) {
-      qrCodeRef.value.innerHTML = `<div style="padding: 20px; text-align: center; color: #64748b;">
-        <strong>Verbindungs-URL:</strong><br>
-        <code style="word-break: break-all; font-size: 0.8rem;">${data}</code>
-      </div>`;
+    try {
+      if (qrCodeRef.value && qrCodeRef.value.parentNode) {
+        qrCodeRef.value.innerHTML = `<div style="padding: 20px; text-align: center; color: #64748b;">
+          <strong>Verbindungs-URL:</strong><br>
+          <code style="word-break: break-all; font-size: 0.8rem;">${data}</code>
+        </div>`;
+      }
+    } catch (fallbackError) {
+      console.error('Fallback QR code display also failed:', fallbackError);
     }
   }
 }
