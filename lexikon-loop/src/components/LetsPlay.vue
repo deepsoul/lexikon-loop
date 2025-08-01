@@ -623,16 +623,6 @@
               </div>
 
               <!-- Test QR Code -->
-              <div class="test-qr-section">
-                <h4>Test QR-Code:</h4>
-                <button class="test-qr-btn" @click="generateTestQRCode">
-                  🧪 Test QR-Code generieren
-                </button>
-                <div v-if="testQRCode" class="test-qr-container">
-                  <div class="test-qr-code" ref="testQRCodeRef"></div>
-                  <p class="test-qr-info">Scanne diesen QR-Code zum Testen</p>
-                </div>
-              </div>
             </div>
 
             <div class="modal-buttons">
@@ -694,8 +684,35 @@ const editingPlayerIndex = ref<number | null>(null);
 const editingPlayerName = ref('');
 
 // Multiplayer Variables
-// Multiplayer Variables - already defined later in the file
-// Speech Recognition Variables - already defined later in the file
+const isMultiplayerHost = ref(false);
+const isMultiplayerConnected = ref(false);
+const multiplayerStatusText = ref('Multiplayer verfügbar');
+const multiplayerStatusClass = ref('status-available');
+const multiplayerPlayers = ref<
+  Array<{id: string; name: string; score: number}>
+>([]);
+const multiplayerPlayerName = ref('');
+const multiplayerGameState = ref<{
+  category: string;
+  currentLetter: string;
+} | null>(null);
+const showJoinModal = ref(false);
+const joinPlayerName = ref('');
+const hostId = ref('');
+const hostQRCode = ref('');
+const qrCodeRef = ref<HTMLElement | null>(null);
+const qrScannerRef = ref<HTMLElement | null>(null);
+const scannerActive = ref(false);
+const scannerStatus = ref('');
+const testQRCode = ref('');
+const testQRCodeRef = ref<HTMLElement | null>(null);
+let qrScanner: Html5QrcodeScanner | null = null;
+
+// WebSocket connection
+let socket: Socket | null = null;
+const isConnected = ref(false);
+const roomId = ref('');
+const playerId = ref('');
 
 const categories = [
   {
@@ -985,7 +1002,7 @@ function rollDice() {
 
       // Wait for connection and retry
       setTimeout(() => {
-        if (socket.connected && socket.id) {
+        if (socket?.connected && socket.id) {
           console.log('✅ Socket reconnected, retrying dice roll...');
           socket.emit('rollDice', {roomId: roomId.value});
         } else {
@@ -1168,37 +1185,7 @@ const validationResult = ref('');
 const isValidating = ref(false);
 let recognition: any = null;
 
-// Bluetooth Multiplayer Variables
-// Multiplayer Variables (iOS & Android compatible)
-const isMultiplayerHost = ref(false);
-const isMultiplayerConnected = ref(false);
-const multiplayerStatusText = ref('Multiplayer verfügbar');
-const multiplayerStatusClass = ref('status-available');
-const multiplayerPlayers = ref<
-  Array<{id: string; name: string; score: number}>
->([]);
-const multiplayerPlayerName = ref('');
-const multiplayerGameState = ref<{
-  category: string;
-  currentLetter: string;
-} | null>(null);
-const showJoinModal = ref(false);
-const joinPlayerName = ref('');
-const hostId = ref('');
-const hostQRCode = ref('');
-const qrCodeRef = ref<HTMLElement | null>(null);
-const qrScannerRef = ref<HTMLElement | null>(null);
-const scannerActive = ref(false);
-const scannerStatus = ref('');
-const testQRCode = ref('');
-const testQRCodeRef = ref<HTMLElement | null>(null);
-let qrScanner: Html5QrcodeScanner | null = null;
-
-// WebSocket connection
-let socket: Socket | null = null;
-const isConnected = ref(false);
-const roomId = ref('');
-const playerId = ref('');
+// Speech Recognition Variables
 
 function startSpeechRecognition() {
   if (
