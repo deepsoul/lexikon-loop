@@ -2070,33 +2070,62 @@ async function generateQRCode(data: string) {
 
 // Helper function to set QR code image safely
 async function setQRCodeSafely(qrDataUrl: string, data: string) {
+  console.log(
+    '🔍 setQRCodeSafely called with:',
+    qrDataUrl.substring(0, 50) + '...',
+    data,
+  );
+
   try {
+    // Wait for Vue to be ready
     await nextTick();
 
+    // Double-check DOM element exists
     if (!qrCodeRef.value) {
       console.error('❌ qrCodeRef.value is null in setQRCodeSafely');
       return;
     }
 
-    // Create image element
-    const img = document.createElement('img');
-    img.src = qrDataUrl;
-    img.alt = 'QR Code';
-    img.style.width = '200px';
-    img.style.height = '200px';
-    img.style.display = 'block';
-    img.style.margin = '0 auto';
+    // Verify element is still in DOM
+    if (!qrCodeRef.value.parentNode) {
+      console.error(
+        '❌ qrCodeRef.value has no parent - element removed from DOM',
+      );
+      return;
+    }
 
-    // Clear and append safely
-    qrCodeRef.value.innerHTML = '';
-    qrCodeRef.value.appendChild(img);
+    console.log('✅ DOM element verified, creating image...');
 
-    // Store reference
-    hostQRCode.value = data;
+    // Use innerHTML instead of appendChild to avoid DOM manipulation issues
+    const imgHtml = `<img src="${qrDataUrl}" alt="QR Code" style="width: 200px; height: 200px; display: block; margin: 0 auto;">`;
+
+    // Set innerHTML safely with error handling
+    try {
+      qrCodeRef.value.innerHTML = imgHtml;
+      console.log('✅ Image HTML set successfully');
+    } catch (innerHTMLError) {
+      console.error('❌ Error setting innerHTML:', innerHTMLError);
+      throw innerHTMLError;
+    }
+
+    // Store reference safely
+    try {
+      hostQRCode.value = data;
+      console.log('✅ Reference stored successfully');
+    } catch (refError) {
+      console.error('❌ Error storing reference:', refError);
+      // Don't throw here, the image is already set
+    }
+
     console.log('✅ QR Code generated successfully with image method');
   } catch (error) {
     console.error('❌ Error in setQRCodeSafely:', error);
-    showTextFallback(data);
+    // Try text fallback as last resort
+    try {
+      showTextFallback(data);
+    } catch (fallbackError) {
+      console.error('❌ Even text fallback failed:', fallbackError);
+    }
   }
 }
 
