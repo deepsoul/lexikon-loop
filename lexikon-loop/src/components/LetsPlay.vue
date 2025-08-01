@@ -243,7 +243,14 @@
             <!-- Würfel-Bereich -->
             <div class="dice-section">
               <div class="dice-container">
-                <div class="dice" :style="diceTransform">
+                <div
+                  class="dice"
+                  :style="{
+                    transform: `rotateX(${diceRotation?.x || 0}deg) rotateY(${
+                      diceRotation?.y || 0
+                    }deg) rotateZ(${diceRotation?.z || 0}deg)`,
+                  }"
+                >
                   <div class="dice-face">
                     <!-- Stadt-Icon -->
                     <svg
@@ -704,6 +711,17 @@ const resultText = ref('Bereit zum Würfeln!');
 const subResult = ref('Klicke auf den Würfeln-Button');
 const isJackpot = ref(false);
 const diceRotation = ref({x: 0, y: 0, z: 0});
+
+// Ensure diceRotation is always a valid object
+watch(
+  diceRotation,
+  (newValue) => {
+    if (!newValue || typeof newValue !== 'object') {
+      diceRotation.value = {x: 0, y: 0, z: 0};
+    }
+  },
+  {deep: true},
+);
 const scorePulse = ref(false);
 const showAddPlayer = ref(false);
 const newPlayerName = ref('');
@@ -779,27 +797,6 @@ const categories = [
     endRotation: {x: 90, y: 0, z: 0},
   },
 ];
-
-const diceTransform = computed(() => {
-  try {
-    // Ensure diceRotation.value exists and has valid properties
-    if (!diceRotation.value || typeof diceRotation.value !== 'object') {
-      diceRotation.value = {x: 0, y: 0, z: 0};
-    }
-
-    const {x = 0, y = 0, z = 0} = diceRotation.value;
-
-    return {
-      transform: `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`,
-    };
-  } catch (error) {
-    console.error('❌ Error in diceTransform computed:', error);
-    // Fallback to safe default
-    return {
-      transform: 'rotateX(0deg) rotateY(0deg) rotateZ(0deg)',
-    };
-  }
-});
 
 const timerProgressStyle = computed(() => {
   const percent = (timeLeft.value / timerDuration.value) * 100;
