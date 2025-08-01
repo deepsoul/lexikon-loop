@@ -1619,13 +1619,17 @@ async function startMultiplayerHost() {
       // Start dice animation for host
       if (gameState.rolling) {
         console.log('🎬 Host: Starting dice animation...');
-        const randomRotation = Math.floor(Math.random() * categories.length);
-        const randomCategory = categories[randomRotation];
-        diceRotation.value = {
-          x: randomCategory.rotation.x * 360,
-          y: randomCategory.rotation.y * 360,
-          z: randomCategory.rotation.z * 360,
-        };
+        try {
+          const randomRotation = Math.floor(Math.random() * categories.length);
+          const randomCategory = categories[randomRotation];
+          diceRotation.value = {
+            x: (randomCategory.rotation.x || 0) * 360,
+            y: (randomCategory.rotation.y || 0) * 360,
+            z: (randomCategory.rotation.z || 0) * 360,
+          };
+        } catch (animationError) {
+          console.error('❌ Error starting dice animation:', animationError);
+        }
       }
     });
 
@@ -1643,11 +1647,19 @@ async function startMultiplayerHost() {
             const category = categories[categoryIndex];
             // Use nextTick to ensure DOM is ready
             nextTick(() => {
-              diceRotation.value = category.endRotation;
-              console.log(
-                '🎯 Host: Set dice to final position for:',
-                gameState.category,
-              );
+              try {
+                diceRotation.value = {
+                  x: category.endRotation.x || 0,
+                  y: category.endRotation.y || 0,
+                  z: category.endRotation.z || 0,
+                };
+                console.log(
+                  '🎯 Host: Set dice to final position for:',
+                  gameState.category,
+                );
+              } catch (diceError) {
+                console.error('❌ Error setting dice rotation:', diceError);
+              }
             });
           } else {
             console.log('⚠️ Category not found:', gameState.category);
@@ -1760,14 +1772,21 @@ function joinMultiplayerGame() {
       // Start dice animation for client
       if (gameState.rolling) {
         console.log('🎬 Client: Starting dice animation...');
-        // Animation mit zufälliger Rotation
-        const randomRotation = Math.floor(Math.random() * categories.length);
-        const randomCategory = categories[randomRotation];
-        diceRotation.value = {
-          x: randomCategory.rotation.x * 360,
-          y: randomCategory.rotation.y * 360,
-          z: randomCategory.rotation.z * 360,
-        };
+        try {
+          // Animation mit zufälliger Rotation
+          const randomRotation = Math.floor(Math.random() * categories.length);
+          const randomCategory = categories[randomRotation];
+          diceRotation.value = {
+            x: (randomCategory.rotation.x || 0) * 360,
+            y: (randomCategory.rotation.y || 0) * 360,
+            z: (randomCategory.rotation.z || 0) * 360,
+          };
+        } catch (animationError) {
+          console.error(
+            '❌ Error starting client dice animation:',
+            animationError,
+          );
+        }
       }
     });
 
@@ -1785,11 +1804,19 @@ function joinMultiplayerGame() {
             const category = categories[categoryIndex];
             // Use nextTick to ensure DOM is ready
             nextTick(() => {
-              diceRotation.value = category.endRotation;
-              console.log(
-                '🎯 Client: Set dice to final position for:',
-                gameState.category,
-              );
+              try {
+                diceRotation.value = {
+                  x: category.endRotation.x || 0,
+                  y: category.endRotation.y || 0,
+                  z: category.endRotation.z || 0,
+                };
+                console.log(
+                  '🎯 Client: Set dice to final position for:',
+                  gameState.category,
+                );
+              } catch (diceError) {
+                console.error('❌ Error setting dice rotation:', diceError);
+              }
             });
           } else {
             console.log('⚠️ Category not found:', gameState.category);
