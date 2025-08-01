@@ -1780,8 +1780,8 @@ async function generateQRCode(data: string) {
       // Clear previous QR code
       qrCodeRef.value.innerHTML = '';
 
-      // Generate QR code as canvas
-      const canvas = await QRCode.toCanvas(data, {
+      // Generate QR code as data URL instead of canvas
+      const qrDataUrl = await QRCode.toDataURL(data, {
         width: 200,
         margin: 2,
         color: {
@@ -1790,20 +1790,20 @@ async function generateQRCode(data: string) {
         },
       });
 
-      // Double-check that element still exists before appending
+      // Double-check that element still exists before setting innerHTML
       if (qrCodeRef.value && qrCodeRef.value.parentNode) {
         // Use nextTick to ensure Vue reactivity before DOM manipulation
         await nextTick();
 
-        // Add canvas to the QR code container
-        qrCodeRef.value.appendChild(canvas);
+        // Add QR code as image instead of canvas
+        qrCodeRef.value.innerHTML = `<img src="${qrDataUrl}" alt="QR Code" style="width: 200px; height: 200px;">`;
 
         // Store the data for reference
         hostQRCode.value = data;
         console.log('QR Code generated successfully for:', data);
       } else {
         console.error(
-          'qrCodeRef.value or parent is null - cannot append canvas',
+          'qrCodeRef.value or parent is null - cannot set innerHTML',
         );
       }
     } else {
