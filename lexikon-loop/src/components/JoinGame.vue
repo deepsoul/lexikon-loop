@@ -35,9 +35,11 @@
             <p>
               Host-ID: <code>{{ hostId }}</code>
             </p>
-            <button class="play-btn" @click="startPlaying">
-              🎮 Jetzt spielen
-            </button>
+            <div class="auto-redirect-info">
+              <p>
+                🔄 Automatische Weiterleitung in {{ redirectCountdown }}s...
+              </p>
+            </div>
           </div>
 
           <div v-else class="join-form">
@@ -98,6 +100,8 @@ const isLoading = ref(false);
 const isConnected = ref(false);
 const joinError = ref('');
 const playerName = ref('');
+const redirectCountdown = ref(3);
+let redirectTimer: number | null = null;
 const hostId = ref('');
 let socket: Socket | null = null;
 
@@ -156,11 +160,8 @@ async function joinGame() {
       isConnected.value = true;
       console.log('✅ Successfully joined game as:', playerName.value);
 
-      // Automatically redirect to game after successful join
-      setTimeout(() => {
-        console.log('🔄 Redirecting to game...');
-        router.push('/lets-play');
-      }, 1500); // 1.5 second delay to show success message
+      // Start automatic redirect countdown
+      startAutoRedirect();
     });
 
     socket.on('error', (error) => {
@@ -183,6 +184,24 @@ async function joinGame() {
 function retryJoin() {
   joinError.value = '';
   joinGame();
+}
+
+// Start automatic redirect countdown
+function startAutoRedirect() {
+  redirectCountdown.value = 3;
+
+  redirectTimer = window.setInterval(() => {
+    redirectCountdown.value--;
+
+    if (redirectCountdown.value <= 0) {
+      if (redirectTimer) {
+        clearInterval(redirectTimer);
+        redirectTimer = null;
+      }
+      console.log('🔄 Redirecting to game...');
+      router.push('/lets-play');
+    }
+  }, 1000);
 }
 
 // Start playing
@@ -485,50 +504,88 @@ function startPlaying() {
   }
 }
 
+/* Mobile-optimierte Styles */
+.auto-redirect-info {
+  background: #f0f9ff;
+  border: 2px solid #0ea5e9;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.auto-redirect-info p {
+  color: #0c4a6e;
+  font-weight: 500;
+  margin: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-card {
-    padding: 24px 16px 20px 16px;
-    margin: 0 8px;
-  }
-
-  .game-title-animated {
-    font-size: 1.8rem;
-  }
-
-  .subtitle-animated {
-    font-size: 1rem;
-  }
-
-  .join-form,
-  .loading-state,
-  .error-state,
-  .success-state {
-    padding: 1.5rem;
-  }
-
-  .play-btn,
-  .join-btn {
-    font-size: 1.1rem;
-    padding: 0.8rem 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-card {
     padding: 20px 12px 16px 12px;
     margin: 0 4px;
+    border-radius: 16px;
   }
 
   .game-title-animated {
     font-size: 1.6rem;
   }
 
-  .join-form,
+  .subtitle-animated {
+    font-size: 0.9rem;
+  }
+
+  .join-form h3 {
+    font-size: 1.2rem;
+  }
+
+  .form-input {
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .join-btn {
+    font-size: 1rem;
+    padding: 0.8rem 1.5rem;
+    width: 100%;
+  }
+
   .loading-state,
   .error-state,
   .success-state {
-    padding: 1rem;
+    padding: 1.5rem;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+
+  .error-icon,
+  .success-icon {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-card {
+    padding: 16px 8px 12px 8px;
+    margin: 0 2px;
+  }
+
+  .game-title-animated {
+    font-size: 1.4rem;
+  }
+
+  .form-input {
+    font-size: 0.9rem;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .join-btn {
+    font-size: 0.9rem;
+    padding: 0.7rem 1.2rem;
   }
 }
 </style>
