@@ -141,12 +141,10 @@
                 <strong>📱 Verbunden mit Host</strong>
                 <p>Du spielst als: {{ multiplayerPlayerName }}</p>
                 <div class="game-status">
-                  <p v-if="multiplayerGameState">
-                    Aktuelle Kategorie: {{ multiplayerGameState.category }}
-                  </p>
-                  <p v-if="multiplayerGameState">
+                  <p v-if="resultText">Aktuelle Kategorie: {{ resultText }}</p>
+                  <p v-if="currentLetter">
                     Aktueller Buchstabe:
-                    {{ multiplayerGameState.currentLetter }}
+                    {{ currentLetter }}
                   </p>
                 </div>
               </div>
