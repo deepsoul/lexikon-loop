@@ -289,8 +289,6 @@
                 </div>
               </div>
             </div>
-              </div>
-            </div>
 
             <!-- Nur im Singleplayer: Reset-Button -->
             <button
