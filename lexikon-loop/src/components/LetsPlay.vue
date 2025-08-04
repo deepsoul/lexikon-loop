@@ -757,6 +757,122 @@ const isConnected = ref(false);
 const roomId = ref('');
 const playerId = ref('');
 
+// Check if we already have a socket connection from JoinGame
+onMounted(() => {
+  // Check if we have multiplayer data from JoinGame
+  const multiplayerConnected = localStorage.getItem('multiplayer_connected');
+  const multiplayerPlayerName = localStorage.getItem('multiplayer_player_name');
+  const multiplayerHostId = localStorage.getItem('multiplayer_host_id');
+
+  if (
+    multiplayerConnected === 'true' &&
+    multiplayerPlayerName &&
+    multiplayerHostId
+  ) {
+    console.log('🔌 Found existing multiplayer connection from JoinGame');
+    console.log('👤 Player name:', multiplayerPlayerName);
+    console.log('🏠 Host ID:', multiplayerHostId);
+
+    // Set up the existing connection
+    isMultiplayerConnected.value = true;
+    isMultiplayerHost.value = false;
+    multiplayerPlayerName.value = multiplayerPlayerName;
+    hostId.value = multiplayerHostId;
+    roomId.value = multiplayerHostId;
+
+    // Initialize socket if not already connected
+    if (!socket || !socket.connected) {
+      console.log('🔌 Initializing socket for existing connection...');
+      socket = createSocket();
+      // Setup client handlers
+      socket.on('connect', () => {
+        console.log('🔌 Connected to server as client');
+        isConnected.value = true;
+        playerId.value = socket!.id || '';
+
+        // Join room as client
+        socket!.emit('joinRoom', {
+          roomId: multiplayerHostId,
+          playerName: multiplayerPlayerName,
+          isHost: false,
+        });
+      });
+
+      socket.on('playerJoined', (data) => {
+        console.log('👥 Client: Joined room:', data);
+        multiplayerPlayers.value = data.allPlayers;
+        multiplayerGameState.value = data.gameState;
+      });
+
+      socket.on('diceRolled', (gameState) => {
+        console.log('🎲 === CLIENT DICE ROLLED EVENT ===');
+        console.log('📊 Game state:', gameState);
+
+        // Clear previous results
+        resultText.value = '';
+        subResult.value = '';
+        currentLetter.value = '-';
+
+        // Set rolling state
+        rolling.value = gameState.rolling;
+        isJackpot.value = gameState.isJackpot;
+
+        // Start dice animation
+        if (gameState.rolling) {
+          console.log('🎬 Client: Starting dice animation...');
+          const randomRotation = Math.floor(Math.random() * categories.length);
+          const randomCategory = categories[randomRotation];
+          diceRotation.value = {
+            x: (randomCategory.rotation.x || 0) * 360,
+            y: (randomCategory.rotation.y || 0) * 360,
+            z: (randomCategory.rotation.z || 0) * 360,
+          };
+        }
+      });
+
+      socket.on('diceStopped', (gameState) => {
+        console.log('🛑 === CLIENT DICE STOPPED EVENT ===');
+        console.log('📊 Final game state:', gameState);
+
+        rolling.value = false;
+
+        // Set final results
+        resultText.value = gameState.resultText;
+        subResult.value = gameState.subResult;
+        currentLetter.value = gameState.currentLetter;
+        isJackpot.value = gameState.isJackpot;
+
+        // Set final dice position
+        if (gameState.category) {
+          const categoryIndex = categories.findIndex(
+            (cat) => cat.name === gameState.category,
+          );
+          if (categoryIndex !== -1) {
+            const category = categories[categoryIndex];
+            diceRotation.value = {
+              x: category.endRotation.x || 0,
+              y: category.endRotation.y || 0,
+              z: category.endRotation.z || 0,
+            };
+            console.log(
+              '🎯 Client: Set dice to final position for:',
+              gameState.category,
+            );
+          }
+        }
+      });
+
+      socket.on('disconnect', () => {
+        console.log('🔌 Disconnected from server');
+        isConnected.value = false;
+      });
+    }
+
+    multiplayerStatusText.value = 'Verbunden mit Host';
+    multiplayerStatusClass.value = 'status-connected';
+  }
+});
+
 const categories = [
   {
     name: 'STADT',
