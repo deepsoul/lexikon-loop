@@ -868,6 +868,12 @@ onMounted(() => {
         }));
       });
 
+      socket.on('playerTurnChanged', (data) => {
+        console.log('🔄 Client: Player turn changed:', data);
+        currentPlayer.value = data.currentPlayer;
+        multiplayerGameState.value = data.gameState;
+      });
+
       socket.on('scoreUpdated', (data) => {
         console.log('📊 Client: Score updated:', data);
         // Update local player score
@@ -1075,6 +1081,8 @@ function playSound(type: 'roll' | 'success' | 'jackpot' | 'timer') {
 
 function switchPlayer(direction: 'next' | 'prev') {
   if (players.value.length === 0) return;
+
+  // Update local current player
   if (direction === 'next') {
     currentPlayer.value = (currentPlayer.value + 1) % players.value.length;
   } else {
@@ -1083,6 +1091,16 @@ function switchPlayer(direction: 'next' | 'prev') {
         ? players.value.length - 1
         : currentPlayer.value - 1;
   }
+
+  // Send to server if in multiplayer
+  if (socket && roomId.value && isMultiplayerConnected.value) {
+    console.log('📡 Sending player switch to server:', direction);
+    socket.emit('switchPlayer', {
+      roomId: roomId.value,
+      direction: direction,
+    });
+  }
+
   playSound('success');
 }
 
@@ -1968,6 +1986,12 @@ async function startMultiplayerHost() {
         name: p.name,
         score: p.score,
       }));
+    });
+
+    socket.on('playerTurnChanged', (data) => {
+      console.log('🔄 Host: Player turn changed:', data);
+      currentPlayer.value = data.currentPlayer;
+      multiplayerGameState.value = data.gameState;
     });
 
     socket.on('scoreUpdated', (data) => {
