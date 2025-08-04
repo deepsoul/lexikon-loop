@@ -519,6 +519,19 @@
                   </div>
                   <div v-else class="validation-message">
                     {{ validationResult }}
+                    <!-- "Ist trotzdem richtig" Button für Fehler -->
+                    <div
+                      v-if="validationResult.includes('❌')"
+                      class="manual-approval"
+                    >
+                      <button
+                        class="approval-btn"
+                        @click="approveWordManually"
+                        title="Punkte trotzdem geben"
+                      >
+                        ✅ Ist trotzdem richtig
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1158,6 +1171,29 @@ function confirmAddPlayer() {
 function cancelAddPlayer() {
   showAddPlayer.value = false;
   newPlayerName.value = '';
+}
+
+// Manuelle Wort-Genehmigung
+function approveWordManually() {
+  if (recognizedWord.value) {
+    console.log('✅ Manuelle Genehmigung für:', recognizedWord.value);
+
+    // Punkte geben
+    addPoints(1);
+
+    // Erfolgsmeldung anzeigen
+    validationResult.value = `✅ "${recognizedWord.value}" wurde manuell genehmigt!`;
+
+    // Sound abspielen
+    playSound('success');
+
+    // Nach 3 Sekunden zurücksetzen
+    setTimeout(() => {
+      validationResult.value = '';
+      recognizedWord.value = '';
+      recognizedLastLetter.value = '';
+    }, 3000);
+  }
 }
 
 function addPoints(points: number) {
@@ -3976,6 +4012,32 @@ function handleKeydown(e: KeyboardEvent) {
     border-radius: 4px;
     font-family: monospace;
     font-size: 0.8rem;
+  }
+
+  /* Manuelle Genehmigung Button */
+  .manual-approval {
+    margin-top: 0.75rem;
+  }
+
+  .approval-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .approval-btn:hover {
+    background: #059669;
+    transform: translateY(-1px);
+  }
+
+  .approval-btn:active {
+    transform: translateY(0);
   }
 }
 
