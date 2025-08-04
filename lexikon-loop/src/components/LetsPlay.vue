@@ -802,6 +802,14 @@ const showMultiplayerPanel = ref(false);
 // Multiplayer Variables
 const isMultiplayerHost = ref(false);
 const isMultiplayerConnected = ref(false);
+
+// Panel standardmäßig öffnen wenn Host startet
+watch(isMultiplayerHost, (newValue) => {
+  if (newValue) {
+    showMultiplayerPanel.value = true;
+    console.log('🏠 Host gestartet - Panel wird geöffnet');
+  }
+});
 const multiplayerStatusText = ref('Multiplayer verfügbar');
 const multiplayerStatusClass = ref('status-available');
 const multiplayerPlayers = ref<
