@@ -228,11 +228,28 @@
 
             <!-- Spieler-Liste -->
             <div class="players-list">
+              <!-- Multiplayer-Spieler -->
               <div
-                v-for="(p, i) in isMultiplayerConnected
-                  ? multiplayerPlayers
-                  : players"
-                :key="p.id || i"
+                v-if="isMultiplayerConnected"
+                v-for="(p, i) in multiplayerPlayers"
+                :key="p.id"
+                class="player-item"
+                :class="{'player-active': i === currentPlayer}"
+              >
+                <div class="player-info">
+                  <span class="player-avatar">{{
+                    p.name.charAt(0).toUpperCase()
+                  }}</span>
+                  <span class="player-name">{{ p.name }}</span>
+                  <span class="player-score">{{ p.score }}</span>
+                </div>
+              </div>
+
+              <!-- Lokale Spieler (nur im Singleplayer) -->
+              <div
+                v-if="!isMultiplayerConnected"
+                v-for="(p, i) in players"
+                :key="i"
                 class="player-item"
                 :class="{'player-active': i === currentPlayer}"
               >
@@ -245,7 +262,7 @@
                 </div>
 
                 <!-- Nur im Singleplayer: Spieler-Aktionen -->
-                <div class="player-actions" v-if="!isMultiplayerConnected">
+                <div class="player-actions">
                   <button
                     class="action-btn"
                     @click="deletePlayer(i)"
@@ -270,6 +287,8 @@
                     ▼
                   </button>
                 </div>
+              </div>
+            </div>
               </div>
             </div>
 
