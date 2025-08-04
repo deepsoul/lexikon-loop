@@ -68,84 +68,112 @@
               </button>
             </div>
 
-            <div v-if="isMultiplayerHost" class="multiplayer-host-info">
-              <div class="host-info">
-                <strong>🏠 Du bist der Host</strong>
-                <p>Andere Spieler können sich über QR-Code verbinden</p>
+            <!-- Multiplayer Toggle Button -->
+            <div class="multiplayer-toggle">
+              <button
+                class="toggle-btn"
+                @click="toggleMultiplayerPanel"
+                :class="{expanded: showMultiplayerPanel}"
+              >
+                <span v-if="isMultiplayerHost">🏠 Host-Panel</span>
+                <span v-else>📱 Client-Panel</span>
+                <span class="toggle-icon">{{
+                  showMultiplayerPanel ? '▼' : '▶'
+                }}</span>
+              </button>
+            </div>
 
-                <!-- QR Code für Verbindung -->
-                <div class="qr-code-container">
-                  <h4>QR-Code für Spieler:</h4>
-                  <div class="qr-code" ref="qrCodeRef">
-                    <div
-                      v-if="!hostQRCode"
-                      style="padding: 20px; text-align: center; color: #64748b"
-                    >
-                      QR-Code wird generiert...
+            <!-- Ausklappbares Multiplayer Panel -->
+            <div
+              v-if="showMultiplayerPanel"
+              class="multiplayer-panel"
+              :class="{expanded: showMultiplayerPanel}"
+            >
+              <div v-if="isMultiplayerHost" class="multiplayer-host-info">
+                <div class="host-info">
+                  <strong>🏠 Du bist der Host</strong>
+                  <p>Andere Spieler können sich über QR-Code verbinden</p>
+
+                  <!-- QR Code für Verbindung -->
+                  <div class="qr-code-container">
+                    <h4>QR-Code für Spieler:</h4>
+                    <div class="qr-code" ref="qrCodeRef">
+                      <div
+                        v-if="!hostQRCode"
+                        style="
+                          padding: 20px;
+                          text-align: center;
+                          color: #64748b;
+                        "
+                      >
+                        QR-Code wird generiert...
+                      </div>
+                    </div>
+                    <p class="qr-instruction">
+                      Spieler scannen diesen QR-Code mit ihrem Handy
+                    </p>
+                  </div>
+
+                  <!-- Share Game Section -->
+                  <div class="share-game-section">
+                    <h4>Spiel einladen:</h4>
+                    <div class="share-buttons">
+                      <button
+                        class="share-btn whatsapp"
+                        @click="shareViaWhatsApp"
+                      >
+                        📱 WhatsApp
+                      </button>
+                      <button class="share-btn email" @click="shareViaEmail">
+                        📧 Email
+                      </button>
+                      <button class="share-btn copy" @click="copyJoinLink">
+                        📋 Link kopieren
+                      </button>
+                    </div>
+                    <div class="join-link-info">
+                      <p>
+                        <strong>Join-ID:</strong> <code>{{ roomId }}</code>
+                      </p>
+                      <p>
+                        <strong>Link:</strong> <code>{{ joinLink }}</code>
+                      </p>
                     </div>
                   </div>
-                  <p class="qr-instruction">
-                    Spieler scannen diesen QR-Code mit ihrem Handy
-                  </p>
-                </div>
 
-                <!-- Share Game Section -->
-                <div class="share-game-section">
-                  <h4>Spiel einladen:</h4>
-                  <div class="share-buttons">
-                    <button
-                      class="share-btn whatsapp"
-                      @click="shareViaWhatsApp"
+                  <div class="connected-players">
+                    <h4>Verbundene Spieler:</h4>
+                    <div
+                      v-for="player in multiplayerPlayers"
+                      :key="player.id"
+                      class="multiplayer-player"
                     >
-                      📱 WhatsApp
-                    </button>
-                    <button class="share-btn email" @click="shareViaEmail">
-                      📧 Email
-                    </button>
-                    <button class="share-btn copy" @click="copyJoinLink">
-                      📋 Link kopieren
-                    </button>
-                  </div>
-                  <div class="join-link-info">
-                    <p>
-                      <strong>Join-ID:</strong> <code>{{ roomId }}</code>
-                    </p>
-                    <p>
-                      <strong>Link:</strong> <code>{{ joinLink }}</code>
-                    </p>
-                  </div>
-                </div>
-
-                <div class="connected-players">
-                  <h4>Verbundene Spieler:</h4>
-                  <div
-                    v-for="player in multiplayerPlayers"
-                    :key="player.id"
-                    class="multiplayer-player"
-                  >
-                    <span class="player-avatar">{{
-                      player.name.charAt(0).toUpperCase()
-                    }}</span>
-                    <span class="player-name">{{ player.name }}</span>
-                    <span class="player-score">{{ player.score }}</span>
+                      <span class="player-avatar">{{
+                        player.name.charAt(0).toUpperCase()
+                      }}</span>
+                      <span class="player-name">{{ player.name }}</span>
+                      <span class="player-score">{{ player.score }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div
-              v-if="isMultiplayerConnected && !isMultiplayerHost"
-              class="multiplayer-client-info"
-            >
-              <div class="client-info">
-                <strong>📱 Verbunden mit Host</strong>
-                <p>Du spielst als: {{ multiplayerPlayerName }}</p>
-                <div class="game-status">
-                  <p v-if="resultText">Aktuelle Kategorie: {{ resultText }}</p>
-                  <p v-if="currentLetter">
-                    Aktueller Buchstabe:
-                    {{ currentLetter }}
-                  </p>
+              <div
+                v-if="isMultiplayerConnected && !isMultiplayerHost"
+                class="multiplayer-client-info"
+              >
+                <div class="client-info">
+                  <strong>📱 Verbunden mit Host</strong>
+                  <p>Du spielst als: {{ multiplayerPlayerName }}</p>
+                  <div class="game-status">
+                    <p v-if="resultText">
+                      Aktuelle Kategorie: {{ resultText }}
+                    </p>
+                    <p v-if="currentLetter">
+                      Aktueller Buchstabe:
+                      {{ currentLetter }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -763,6 +791,7 @@ const showAddPlayer = ref(false);
 const newPlayerName = ref('');
 const editingPlayerIndex = ref<number | null>(null);
 const editingPlayerName = ref('');
+const showMultiplayerPanel = ref(false);
 
 // Multiplayer Variables
 const isMultiplayerHost = ref(false);
@@ -1194,6 +1223,15 @@ function approveWordManually() {
       recognizedLastLetter.value = '';
     }, 3000);
   }
+}
+
+// Multiplayer Panel Toggle
+function toggleMultiplayerPanel() {
+  showMultiplayerPanel.value = !showMultiplayerPanel.value;
+  console.log(
+    '🔄 Multiplayer Panel:',
+    showMultiplayerPanel.value ? 'geöffnet' : 'geschlossen',
+  );
 }
 
 function addPoints(points: number) {
@@ -4038,6 +4076,66 @@ function handleKeydown(e: KeyboardEvent) {
 
   .approval-btn:active {
     transform: translateY(0);
+  }
+
+  /* Multiplayer Toggle Button */
+  .multiplayer-toggle {
+    margin-bottom: 1rem;
+  }
+
+  .toggle-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .toggle-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  .toggle-btn.expanded {
+    background: #1d4ed8;
+  }
+
+  .toggle-icon {
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+  }
+
+  .toggle-btn.expanded .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  /* Multiplayer Panel */
+  .multiplayer-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
