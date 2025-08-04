@@ -761,24 +761,20 @@ const playerId = ref('');
 onMounted(() => {
   // Check if we have multiplayer data from JoinGame
   const multiplayerConnected = localStorage.getItem('multiplayer_connected');
-  const multiplayerPlayerName = localStorage.getItem('multiplayer_player_name');
-  const multiplayerHostId = localStorage.getItem('multiplayer_host_id');
+  const storedPlayerName = localStorage.getItem('multiplayer_player_name');
+  const storedHostId = localStorage.getItem('multiplayer_host_id');
 
-  if (
-    multiplayerConnected === 'true' &&
-    multiplayerPlayerName &&
-    multiplayerHostId
-  ) {
+  if (multiplayerConnected === 'true' && storedPlayerName && storedHostId) {
     console.log('🔌 Found existing multiplayer connection from JoinGame');
-    console.log('👤 Player name:', multiplayerPlayerName);
-    console.log('🏠 Host ID:', multiplayerHostId);
+    console.log('👤 Player name:', storedPlayerName);
+    console.log('🏠 Host ID:', storedHostId);
 
     // Set up the existing connection
     isMultiplayerConnected.value = true;
     isMultiplayerHost.value = false;
-    multiplayerPlayerName.value = multiplayerPlayerName;
-    hostId.value = multiplayerHostId;
-    roomId.value = multiplayerHostId;
+    multiplayerPlayerName.value = storedPlayerName;
+    hostId.value = storedHostId;
+    roomId.value = storedHostId;
 
     // Initialize socket if not already connected
     if (!socket || !socket.connected) {
@@ -792,8 +788,8 @@ onMounted(() => {
 
         // Join room as client
         socket!.emit('joinRoom', {
-          roomId: multiplayerHostId,
-          playerName: multiplayerPlayerName,
+          roomId: storedHostId,
+          playerName: storedPlayerName,
           isHost: false,
         });
       });
