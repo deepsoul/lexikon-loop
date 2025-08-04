@@ -1612,7 +1612,180 @@ async function startMultiplayerHost() {
     const connectionUrl = `${window.location.origin}/join?host=${generatedRoomId}`;
     console.log('🔗 Connection URL:', connectionUrl);
 
-    // OLD SOCKET HANDLERS REMOVED - Using new multiplayer object instead
+    // Initialize WebSocket connection
+    console.log('🔌 Creating socket connection...');
+    socket = createSocket();
+
+    socket.on('connect', () => {
+      console.log('✅ Connected to server');
+      console.log('🆔 Socket ID:', socket!.id);
+      isConnected.value = true;
+      playerId.value = socket!.id || '';
+
+      // Wait a bit for socket to be fully ready
+      setTimeout(() => {
+        // Join room as host
+        console.log('🏠 Joining room as host:', generatedRoomId);
+        socket!.emit('joinRoom', {
+          roomId: generatedRoomId,
+          playerName: 'Host',
+          isHost: true,
+        });
+      }, 100);
+    });
+
+    socket.on('playerJoined', (data) => {
+      console.log('👥 Player joined:', data);
+      console.log('📊 All players:', data.allPlayers);
+      console.log('🎮 Game state:', data.gameState);
+      try {
+        nextTick(() => {
+          multiplayerPlayers.value = data.allPlayers;
+          multiplayerGameState.value = data.gameState;
+        });
+      } catch (error) {
+        console.error('❌ Error in playerJoined event handler:', error);
+      }
+    });
+
+    socket.on('diceRolled', (gameState) => {
+      console.log('🎲 === HOST DICE ROLLED EVENT ===');
+      console.log('📊 Game state received:', gameState);
+      console.log('🎯 Category:', gameState.category);
+      console.log('📝 Result text:', gameState.resultText);
+      console.log('🔄 Rolling:', gameState.rolling);
+      try {
+        nextTick(() => {
+          // Clear previous results
+          resultText.value = '';
+          subResult.value = '';
+          currentLetter.value = '-';
+
+          // Set rolling state
+          rolling.value = gameState.rolling;
+          isJackpot.value = gameState.isJackpot;
+
+          // Start dice animation for host
+          if (gameState.rolling) {
+            console.log('🎬 Host: Starting dice animation...');
+            try {
+              // Ensure diceRotation.value exists
+              if (!diceRotation.value) {
+                diceRotation.value = {x: 0, y: 0, z: 0};
+              }
+
+              const randomRotation = Math.floor(
+                Math.random() * categories.length,
+              );
+              const randomCategory = categories[randomRotation];
+              diceRotation.value = {
+                x: (randomCategory.rotation.x || 0) * 360,
+                y: (randomCategory.rotation.y || 0) * 360,
+                z: (randomCategory.rotation.z || 0) * 360,
+              };
+            } catch (animationError) {
+              console.error(
+                '❌ Error starting dice animation:',
+                animationError,
+              );
+            }
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error in diceRolled event handler:', error);
+      }
+    });
+
+    socket.on('diceStopped', (gameState) => {
+      console.log('🛑 === HOST DICE STOPPED EVENT ===');
+      console.log('📊 Final game state:', gameState);
+      console.log('🎯 Final category:', gameState.category);
+      console.log('📝 Final result text:', gameState.resultText);
+      try {
+        nextTick(() => {
+          rolling.value = false;
+
+          // Set final results
+          resultText.value = gameState.resultText;
+          subResult.value = gameState.subResult;
+          currentLetter.value = gameState.currentLetter;
+          isJackpot.value = gameState.isJackpot;
+
+          // Set final dice position for host with error handling
+          if (gameState.category) {
+            try {
+              const categoryIndex = categories.findIndex(
+                (cat) => cat.name === gameState.category,
+              );
+              if (categoryIndex !== -1) {
+                const category = categories[categoryIndex];
+                // Use nextTick to ensure DOM is ready
+                nextTick(() => {
+                  try {
+                    // Ensure diceRotation.value exists
+                    if (!diceRotation.value) {
+                      diceRotation.value = {x: 0, y: 0, z: 0};
+                    }
+
+                    diceRotation.value = {
+                      x: category.endRotation.x || 0,
+                      y: category.endRotation.y || 0,
+                      z: category.endRotation.z || 0,
+                    };
+                    console.log(
+                      '🎯 Host: Set dice to final position for:',
+                      gameState.category,
+                    );
+                  } catch (diceError) {
+                    console.error('❌ Error setting dice rotation:', diceError);
+                  }
+                });
+              } else {
+                console.log('⚠️ Category not found:', gameState.category);
+              }
+            } catch (error) {
+              console.error('❌ Error setting dice position:', error);
+            }
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error in diceStopped event handler:', error);
+      }
+    });
+
+    socket.on('scoreUpdated', (data) => {
+      console.log('Score updated:', data);
+      multiplayerPlayers.value = data.allPlayers;
+    });
+
+    socket.on('playerTurnChanged', (data) => {
+      console.log('Player turn changed:', data);
+      currentPlayer.value = data.currentPlayer;
+      multiplayerGameState.value = data.gameState;
+    });
+
+    socket.on('speechRecognized', (data) => {
+      console.log('Speech recognized:', data);
+      recognizedWord.value = data.word;
+      recognizedLastLetter.value = data.lastLetter;
+      currentLetter.value = data.lastLetter;
+    });
+
+    socket.on('timerUpdated', (data) => {
+      console.log('Timer updated:', data);
+      timeLeft.value = data.timeLeft;
+      timerActive.value = data.timerActive;
+    });
+
+    socket.on('playerLeft', (data) => {
+      console.log('Player left:', data);
+      multiplayerPlayers.value = data.allPlayers;
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+      isConnected.value = false;
+    });
 
     // Start hosting
     isMultiplayerHost.value = true;
@@ -1640,11 +1813,115 @@ async function startMultiplayerHost() {
 }
 
 function joinMultiplayerGame() {
-  const playerName =
-    joinPlayerName.value.trim() ||
-    `Spieler ${Math.floor(Math.random() * 1000)}`;
-  // TODO: Implement client join logic
-  console.log('👤 Joining as:', playerName);
+  try {
+    console.log('👤 Starting multiplayer client...');
+    const playerName =
+      joinPlayerName.value.trim() ||
+      `Spieler ${Math.floor(Math.random() * 1000)}`;
+    console.log('👤 Player name:', playerName);
+    console.log('🏠 Host ID:', hostId.value);
+
+    // Initialize socket
+    socket = createSocket();
+
+    socket.on('connect', () => {
+      console.log('🔌 Connected to server as client');
+      isConnected.value = true;
+      playerId.value = socket!.id || '';
+
+      // Join room as client
+      socket!.emit('joinRoom', {
+        roomId: hostId.value,
+        playerName: playerName,
+        isHost: false,
+      });
+    });
+
+    socket.on('playerJoined', (data) => {
+      console.log('👥 Client: Joined room:', data);
+      multiplayerPlayers.value = data.allPlayers;
+      multiplayerGameState.value = data.gameState;
+    });
+
+    socket.on('diceRolled', (gameState) => {
+      console.log('🎲 === CLIENT DICE ROLLED EVENT ===');
+      console.log('📊 Game state:', gameState);
+
+      // Clear previous results
+      resultText.value = '';
+      subResult.value = '';
+      currentLetter.value = '-';
+
+      // Set rolling state
+      rolling.value = gameState.rolling;
+      isJackpot.value = gameState.isJackpot;
+
+      // Start dice animation
+      if (gameState.rolling) {
+        console.log('🎬 Client: Starting dice animation...');
+        const randomRotation = Math.floor(Math.random() * categories.length);
+        const randomCategory = categories[randomRotation];
+        diceRotation.value = {
+          x: (randomCategory.rotation.x || 0) * 360,
+          y: (randomCategory.rotation.y || 0) * 360,
+          z: (randomCategory.rotation.z || 0) * 360,
+        };
+      }
+    });
+
+    socket.on('diceStopped', (gameState) => {
+      console.log('🛑 === CLIENT DICE STOPPED EVENT ===');
+      console.log('📊 Final game state:', gameState);
+
+      rolling.value = false;
+
+      // Set final results
+      resultText.value = gameState.resultText;
+      subResult.value = gameState.subResult;
+      currentLetter.value = gameState.currentLetter;
+      isJackpot.value = gameState.isJackpot;
+
+      // Set final dice position
+      if (gameState.category) {
+        const categoryIndex = categories.findIndex(
+          (cat) => cat.name === gameState.category,
+        );
+        if (categoryIndex !== -1) {
+          const category = categories[categoryIndex];
+          diceRotation.value = {
+            x: category.endRotation.x || 0,
+            y: category.endRotation.y || 0,
+            z: category.endRotation.z || 0,
+          };
+          console.log(
+            '🎯 Client: Set dice to final position for:',
+            gameState.category,
+          );
+        }
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('🔌 Disconnected from server');
+      isConnected.value = false;
+    });
+
+    // Set client state
+    isMultiplayerHost.value = false;
+    isMultiplayerConnected.value = true;
+    multiplayerPlayerName.value = playerName;
+    roomId.value = hostId.value;
+    multiplayerStatusText.value = 'Verbunden mit Host';
+    multiplayerStatusClass.value = 'status-connected';
+
+    showJoinModal.value = false;
+    playSound('success');
+  } catch (error) {
+    console.error('❌ Client start error:', error);
+    multiplayerStatusText.value = 'Verbindungsfehler';
+    multiplayerStatusClass.value = 'status-error';
+    playSound('timer');
+  }
 }
 
 function disconnectMultiplayer() {
