@@ -1026,11 +1026,11 @@ function rollDice() {
 
   // Send dice roll to server if in multiplayer
   if (socket && roomId.value) {
-    console.log('🔌 Socket:', socket);
-    console.log('📡 Sending dice roll to server...');
+    console.log('🎲 === MULTIPLAYER DICE ROLL ===');
     console.log('🔌 Socket connected:', socket.connected);
     console.log('🏠 Room ID:', roomId.value);
     console.log('🆔 Socket ID:', socket.id);
+    console.log('👥 Current players:', multiplayerPlayers.value?.length || 0);
 
     // Check if socket is properly connected
     if (!socket.connected || !socket.id) {
@@ -1649,7 +1649,11 @@ async function startMultiplayerHost() {
     });
 
     socket.on('diceRolled', (gameState) => {
-      console.log('🎲 Host: Dice rolled event received:', gameState);
+      console.log('🎲 === HOST DICE ROLLED EVENT ===');
+      console.log('📊 Game state received:', gameState);
+      console.log('🎯 Category:', gameState.category);
+      console.log('📝 Result text:', gameState.resultText);
+      console.log('🔄 Rolling:', gameState.rolling);
       try {
         nextTick(() => {
           // Clear previous results
@@ -1693,7 +1697,10 @@ async function startMultiplayerHost() {
     });
 
     socket.on('diceStopped', (gameState) => {
-      console.log('🛑 Host: Dice stopped event received:', gameState);
+      console.log('🛑 === HOST DICE STOPPED EVENT ===');
+      console.log('📊 Final game state:', gameState);
+      console.log('🎯 Final category:', gameState.category);
+      console.log('📝 Final result text:', gameState.resultText);
       try {
         nextTick(() => {
           rolling.value = false;
@@ -1838,7 +1845,11 @@ function joinMultiplayerGame() {
     });
 
     socket.on('diceRolled', (gameState) => {
-      console.log('🎲 Client: Dice rolled event received:', gameState);
+      console.log('🎲 === CLIENT DICE ROLLED EVENT ===');
+      console.log('📊 Game state received:', gameState);
+      console.log('🎯 Category:', gameState.category);
+      console.log('📝 Result text:', gameState.resultText);
+      console.log('🔄 Rolling:', gameState.rolling);
       try {
         nextTick(() => {
           // Clear previous results
@@ -1883,7 +1894,10 @@ function joinMultiplayerGame() {
     });
 
     socket.on('diceStopped', (gameState) => {
-      console.log('🛑 Client: Dice stopped event received:', gameState);
+      console.log('🛑 === CLIENT DICE STOPPED EVENT ===');
+      console.log('📊 Final game state:', gameState);
+      console.log('🎯 Final category:', gameState.category);
+      console.log('📝 Final result text:', gameState.resultText);
       try {
         nextTick(() => {
           rolling.value = false;
