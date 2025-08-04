@@ -153,28 +153,39 @@
             </div>
           </div>
 
-          <!-- Aktuelle Kategorie und Buchstabe -->
-          <div v-if="isMultiplayerConnected" class="game-status-section">
-            <div class="game-status">
+          <!-- Multiplayer Game Status -->
+          <div v-if="isMultiplayerConnected" class="multiplayer-game-status">
+            <div class="status-card">
               <h4>🎯 Aktueller Spielstand</h4>
-              <div class="status-info">
-                <p v-if="resultText && resultText !== 'Bereit zum Würfeln!'">
+              <div class="status-content">
+                <div
+                  v-if="resultText && resultText !== 'Bereit zum Würfeln!'"
+                  class="status-item"
+                >
                   <strong>Kategorie:</strong> {{ resultText }}
-                </p>
-                <p v-if="currentLetter && currentLetter !== '-'">
+                </div>
+                <div
+                  v-if="currentLetter && currentLetter !== '-'"
+                  class="status-item"
+                >
                   <strong>Buchstabe:</strong> {{ currentLetter }}
-                </p>
-                <p v-if="!resultText || resultText === 'Bereit zum Würfeln!'">
+                </div>
+                <div
+                  v-if="!resultText || resultText === 'Bereit zum Würfeln!'"
+                  class="status-item"
+                >
                   <em>Würfle um zu beginnen!</em>
-                </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Spieler-Management (vereinfacht) -->
+          <!-- Spieler-Management -->
           <div class="players-section">
             <div class="players-header">
-              <h3 class="section-title">Spieler</h3>
+              <h3 class="section-title">
+                {{ isMultiplayerConnected ? 'Multiplayer Spieler' : 'Spieler' }}
+              </h3>
               <button
                 class="add-player-btn"
                 @click="addPlayer"
@@ -185,7 +196,7 @@
               </button>
             </div>
 
-            <!-- Spieler-Liste (vereinfacht) -->
+            <!-- Spieler-Liste -->
             <div class="players-list">
               <div
                 v-for="(p, i) in isMultiplayerConnected
@@ -199,26 +210,11 @@
                   <span class="player-avatar">{{
                     p.name.charAt(0).toUpperCase()
                   }}</span>
-                  <span
-                    class="player-name"
-                    @click="startEditPlayer(i)"
-                    v-if="!isMultiplayerConnected"
-                  >
-                    <template v-if="editingPlayerIndex === i">
-                      <input
-                        v-model="editingPlayerName"
-                        @keyup.enter="confirmEditPlayer"
-                        @blur="confirmEditPlayer"
-                        class="player-edit-input"
-                        autofocus
-                      />
-                    </template>
-                    <template v-else>{{ p.name }}</template>
-                  </span>
-                  <span class="player-name" v-else>{{ p.name }}</span>
+                  <span class="player-name">{{ p.name }}</span>
                   <span class="player-score">{{ p.score }}</span>
                 </div>
 
+                <!-- Nur im Singleplayer: Spieler-Aktionen -->
                 <div class="player-actions" v-if="!isMultiplayerConnected">
                   <button
                     class="action-btn"
@@ -247,6 +243,7 @@
               </div>
             </div>
 
+            <!-- Nur im Singleplayer: Reset-Button -->
             <button
               class="reset-all-btn"
               @click="resetAllPlayers"
