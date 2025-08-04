@@ -228,6 +228,21 @@
 
             <!-- Spieler-Liste -->
             <div class="players-list">
+              <!-- Debug Info -->
+              <div
+                v-if="isMultiplayerConnected"
+                style="
+                  background: #f0f0f0;
+                  padding: 0.5rem;
+                  margin-bottom: 0.5rem;
+                  font-size: 0.8rem;
+                "
+              >
+                Debug: isMultiplayerConnected={{ isMultiplayerConnected }},
+                multiplayerPlayers={{ multiplayerPlayers.length }},
+                localPlayers={{ players.length }}
+              </div>
+
               <!-- Multiplayer-Spieler -->
               <div
                 v-if="isMultiplayerConnected"
