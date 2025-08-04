@@ -2043,11 +2043,8 @@ async function generateQRCode(data: string) {
           light: '#ffffff',
         },
       });
-      const canvasRef = document.getElementById('qrCodeCanvas');
-      if (canvasRef) {
-        console.log('✅ Canvas element found', canvasRef, canvas);
-        await setCanvasSafely(canvas as HTMLCanvasElement, data);
-      }
+
+      await setCanvasSafely(canvas as HTMLCanvasElement, data);
     } catch (toDataURLError) {
       console.warn(
         '⚠️ QRCode.toDataURL failed, trying canvas method:',
