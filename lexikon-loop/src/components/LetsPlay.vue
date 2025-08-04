@@ -2034,7 +2034,20 @@ async function generateQRCode(data: string) {
       }
 
       // Set the QR code safely
-      await setQRCodeSafely(qrDataUrl, data);
+      //  await setQRCodeSafely(qrDataUrl, data);
+      const canvas = await QRCode.toCanvas(data, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#2563eb',
+          light: '#ffffff',
+        },
+      });
+      const canvasRef = document.getElementById('qrCodeCanvas');
+      if (canvasRef) {
+        console.log('✅ Canvas element found', canvasRef, canvas);
+        await setCanvasSafely(canvas as HTMLCanvasElement, data);
+      }
     } catch (toDataURLError) {
       console.warn(
         '⚠️ QRCode.toDataURL failed, trying canvas method:',
@@ -2133,18 +2146,15 @@ async function setQRCodeSafely(qrDataUrl: string, data: string) {
 async function setCanvasSafely(canvas: HTMLCanvasElement, data: string) {
   try {
     await nextTick();
-
     if (!qrCodeRef.value) {
       console.error('❌ qrCodeRef.value is null in setCanvasSafely');
       return;
     }
-
     // Clear and append canvas safely
     qrCodeRef.value.innerHTML = '';
     qrCodeRef.value.appendChild(canvas);
-
     // Store reference
-    hostQRCode.value = data;
+    // hostQRCode.value = data;
     console.log('✅ QR Code generated successfully with canvas method');
   } catch (error) {
     console.error('❌ Error in setCanvasSafely:', error);
