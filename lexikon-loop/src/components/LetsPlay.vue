@@ -100,26 +100,6 @@
                   <strong>🏠 Du bist der Host</strong>
                   <p>Andere Spieler können sich über QR-Code verbinden</p>
 
-                  <!-- QR Code für Verbindung -->
-                  <div class="qr-code-container">
-                    <h4>QR-Code für Spieler:</h4>
-                    <div class="qr-code" ref="qrCodeRef">
-                      <div
-                        v-if="!hostQRCode"
-                        style="
-                          padding: 20px;
-                          text-align: center;
-                          color: #64748b;
-                        "
-                      >
-                        QR-Code wird generiert...
-                      </div>
-                    </div>
-                    <p class="qr-instruction">
-                      Spieler scannen diesen QR-Code mit ihrem Handy
-                    </p>
-                  </div>
-
                   <!-- Share Game Section -->
                   <div class="share-game-section">
                     <h4>Spiel einladen:</h4>
@@ -182,6 +162,24 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- QR-Code immer sichtbar für Host -->
+          <div v-if="isMultiplayerHost" class="always-visible-qr">
+            <div class="qr-code-container">
+              <h4>QR-Code für Spieler:</h4>
+              <div class="qr-code" ref="qrCodeRef">
+                <div
+                  v-if="!hostQRCode"
+                  style="padding: 20px; text-align: center; color: #64748b"
+                >
+                  QR-Code wird generiert...
+                </div>
+              </div>
+              <p class="qr-instruction">
+                Spieler scannen diesen QR-Code mit ihrem Handy
+              </p>
             </div>
           </div>
 
@@ -4150,6 +4148,31 @@ function handleKeydown(e: KeyboardEvent) {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Immer sichtbarer QR-Code */
+  .always-visible-qr {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .always-visible-qr .qr-code-container {
+    text-align: center;
+  }
+
+  .always-visible-qr h4 {
+    margin: 0 0 0.5rem 0;
+    color: #374151;
+    font-size: 0.9rem;
+  }
+
+  .always-visible-qr .qr-instruction {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.8rem;
+    color: #6b7280;
   }
 }
 
