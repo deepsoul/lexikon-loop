@@ -858,6 +858,30 @@ onMounted(() => {
         }
       });
 
+      socket.on('playerAdded', (data) => {
+        console.log('👥 Client: Player added:', data);
+        multiplayerPlayers.value = data.allPlayers;
+        // Sync with local players
+        players.value = data.allPlayers.map((p) => ({
+          name: p.name,
+          score: p.score,
+        }));
+      });
+
+      socket.on('scoreUpdated', (data) => {
+        console.log('📊 Client: Score updated:', data);
+        // Update local player score
+        if (data.playerId === socket!.id) {
+          const playerIndex = players.value.findIndex(
+            (p) => p.name === data.playerName,
+          );
+          if (playerIndex !== -1) {
+            players.value[playerIndex].score = data.newScore;
+          }
+        }
+        multiplayerPlayers.value = data.allPlayers;
+      });
+
       socket.on('speechRecognized', (data) => {
         console.log('🗣️ Speech recognized:', data);
         recognizedWord.value = data.word;
@@ -1069,8 +1093,21 @@ function addPlayer() {
 function confirmAddPlayer() {
   const name =
     newPlayerName.value.trim() || `Spieler ${players.value.length + 1}`;
+
+  // Add to local players
   players.value.push({name, score: 0});
   currentPlayer.value = players.value.length - 1;
+
+  // Send to server if in multiplayer
+  if (socket && roomId.value && isMultiplayerConnected.value) {
+    console.log('📡 Sending new player to server:', name);
+    socket.emit('addPlayer', {
+      roomId: roomId.value,
+      playerName: name,
+      playerId: socket.id,
+    });
+  }
+
   showAddPlayer.value = false;
   newPlayerName.value = '';
   playSound('success');
@@ -1085,7 +1122,20 @@ function addPoints(points: number) {
   // Speed-Runde: +2 statt +1 für korrekte Antwort
   let actualPoints = points;
   if (points === 1 && isSpeedRound.value) actualPoints = 2;
+
+  // Add points to local player
   players.value[currentPlayer.value].score += actualPoints;
+
+  // Send points to server if in multiplayer
+  if (socket && roomId.value && isMultiplayerConnected.value) {
+    console.log('📡 Sending points to server:', actualPoints);
+    socket.emit('updateScore', {
+      roomId: roomId.value,
+      playerId: socket.id,
+      points: actualPoints,
+    });
+  }
+
   scorePulse.value = true;
   setTimeout(() => (scorePulse.value = false), 500);
   if (actualPoints > 0) playSound('success');
@@ -1908,6 +1958,30 @@ async function startMultiplayerHost() {
       console.log('Timer updated:', data);
       timeLeft.value = data.timeLeft;
       timerActive.value = data.timerActive;
+    });
+
+    socket.on('playerAdded', (data) => {
+      console.log('👥 Host: Player added:', data);
+      multiplayerPlayers.value = data.allPlayers;
+      // Sync with local players
+      players.value = data.allPlayers.map((p) => ({
+        name: p.name,
+        score: p.score,
+      }));
+    });
+
+    socket.on('scoreUpdated', (data) => {
+      console.log('📊 Host: Score updated:', data);
+      // Update local player score
+      if (data.playerId === socket.id) {
+        const playerIndex = players.value.findIndex(
+          (p) => p.name === data.playerName,
+        );
+        if (playerIndex !== -1) {
+          players.value[playerIndex].score = data.newScore;
+        }
+      }
+      multiplayerPlayers.value = data.allPlayers;
     });
 
     socket.on('speechRecognized', (data) => {
