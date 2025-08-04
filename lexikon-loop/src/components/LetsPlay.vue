@@ -69,7 +69,10 @@
             </div>
 
             <!-- Multiplayer Toggle Button -->
-            <div class="multiplayer-toggle">
+            <div
+              class="multiplayer-toggle"
+              v-if="isMultiplayerHost || isMultiplayerConnected"
+            >
               <button
                 class="toggle-btn"
                 @click="toggleMultiplayerPanel"
@@ -85,7 +88,10 @@
 
             <!-- Ausklappbares Multiplayer Panel -->
             <div
-              v-if="showMultiplayerPanel"
+              v-if="
+                showMultiplayerPanel &&
+                (isMultiplayerHost || isMultiplayerConnected)
+              "
               class="multiplayer-panel"
               :class="{expanded: showMultiplayerPanel}"
             >
