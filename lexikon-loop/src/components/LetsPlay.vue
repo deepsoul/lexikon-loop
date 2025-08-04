@@ -858,6 +858,13 @@ onMounted(() => {
         }
       });
 
+      socket.on('speechRecognized', (data) => {
+        console.log('🗣️ Speech recognized:', data);
+        recognizedWord.value = data.word;
+        recognizedLastLetter.value = data.lastLetter;
+        currentLetter.value = data.lastLetter;
+      });
+
       socket.on('disconnect', () => {
         console.log('🔌 Disconnected from server');
         isConnected.value = false;
@@ -1429,6 +1436,20 @@ function startSpeechRecognition() {
 
     // Validiere das Wort gegen die aktuelle Kategorie
     await validateWord(word);
+
+    // Send speech result to server if in multiplayer
+    if (socket && roomId.value && isMultiplayerConnected.value) {
+      console.log(
+        '📡 Sending speech result to server:',
+        word,
+        recognizedLastLetter.value,
+      );
+      socket.emit('speechResult', {
+        roomId: roomId.value,
+        word: word,
+        lastLetter: recognizedLastLetter.value,
+      });
+    }
   };
   recognition.onerror = () => {
     isListening.value = false;
@@ -1887,6 +1908,13 @@ async function startMultiplayerHost() {
       console.log('Timer updated:', data);
       timeLeft.value = data.timeLeft;
       timerActive.value = data.timerActive;
+    });
+
+    socket.on('speechRecognized', (data) => {
+      console.log('🗣️ Host: Speech recognized:', data);
+      recognizedWord.value = data.word;
+      recognizedLastLetter.value = data.lastLetter;
+      currentLetter.value = data.lastLetter;
     });
 
     socket.on('playerLeft', (data) => {
