@@ -4408,6 +4408,64 @@ function getCurrentPlayerScore() {
   }
 
   /* Responsive Design für manuelle Eingabe - NEUE VERSION */
+  @media (max-width: 1024px) {
+    .manual-input-section-new {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      max-width: 100%;
+    }
+
+    .input-icon-new {
+      font-size: 2rem;
+    }
+
+    .input-title-new {
+      font-size: 1.3rem;
+    }
+
+    .manual-input-new {
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+      min-height: 55px;
+      max-width: 100%;
+    }
+
+    .manual-input-new::placeholder {
+      font-size: 1.1rem;
+    }
+
+    .submit-btn-new {
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+      min-height: 55px;
+      max-width: 100%;
+    }
+
+    .btn-icon-new {
+      font-size: 1.3rem;
+    }
+
+    .btn-text-new {
+      font-size: 1.1rem;
+    }
+
+    .result-icon-new {
+      font-size: 1.5rem;
+    }
+
+    .result-label-new {
+      font-size: 0.9rem;
+    }
+
+    .result-word-new {
+      font-size: 1.2rem;
+    }
+
+    .manual-result-new {
+      max-width: 100%;
+    }
+  }
+
   @media (max-width: 768px) {
     .manual-input-section-new {
       margin-top: 1.5rem;
