@@ -948,7 +948,17 @@ import {useRouter} from 'vue-router';
 import QRCode from 'qrcode';
 import {Html5QrcodeScanner, Html5QrcodeScanType} from 'html5-qrcode';
 import {Socket} from 'socket.io-client';
-import {createSocket} from '../utils/socket';
+import {
+  createSocket,
+  joinRoomAsHost,
+  joinRoomAsClient,
+  rollDice,
+  registerDiceHandlers,
+  registerPlayerHandlers,
+  registerConnectionHandlers,
+  isSocketConnected,
+  getSocketId,
+} from '../utils/multiplayer.js';
 const router = useRouter();
 
 // Typ für Spieler
@@ -1629,7 +1639,7 @@ function resetGameTimer() {
   timeLeft.value = timerDuration.value;
 }
 
-function rollDice() {
+function localRollDice() {
   // Prevent multiple simultaneous rolls
   if (rolling.value) {
     console.log('⚠️ Dice already rolling, ignoring duplicate click');
