@@ -1024,8 +1024,19 @@ onMounted(() => {
 
       socket.on('playerJoined', (data) => {
         console.log('👥 Client: Joined room:', data);
-        multiplayerPlayers.value = data.allPlayers;
-        multiplayerGameState.value = data.gameState;
+        console.log('📊 All players received:', data.allPlayers);
+        try {
+          nextTick(() => {
+            multiplayerPlayers.value = data.allPlayers;
+            multiplayerGameState.value = data.gameState;
+            console.log(
+              '✅ Client: Updated multiplayerPlayers:',
+              multiplayerPlayers.value,
+            );
+          });
+        } catch (error) {
+          console.error('❌ Error updating player list:', error);
+        }
       });
 
       socket.on('diceRolled', (gameState) => {
@@ -1088,32 +1099,52 @@ onMounted(() => {
 
       socket.on('playerAdded', (data) => {
         console.log('👥 Client: Player added:', data);
-        multiplayerPlayers.value = data.allPlayers;
-        // Sync with local players
-        players.value = data.allPlayers.map((p) => ({
-          name: p.name,
-          score: p.score,
-        }));
+        console.log('📊 All players after add:', data.allPlayers);
+        try {
+          nextTick(() => {
+            multiplayerPlayers.value = data.allPlayers;
+            console.log(
+              '✅ Client: Updated multiplayerPlayers after add:',
+              multiplayerPlayers.value,
+            );
+          });
+        } catch (error) {
+          console.error('❌ Error updating player list after add:', error);
+        }
       });
 
       socket.on('playerTurnChanged', (data) => {
         console.log('🔄 Client: Player turn changed:', data);
-        currentPlayer.value = data.currentPlayer;
-        multiplayerGameState.value = data.gameState;
+        console.log('📊 All players after turn change:', data.allPlayers);
+        try {
+          nextTick(() => {
+            currentPlayer.value = data.currentPlayer;
+            multiplayerGameState.value = data.gameState;
+            multiplayerPlayers.value = data.allPlayers;
+            console.log(
+              '✅ Client: Updated multiplayerPlayers after turn:',
+              multiplayerPlayers.value,
+            );
+          });
+        } catch (error) {
+          console.error('❌ Error updating player list after turn:', error);
+        }
       });
 
       socket.on('scoreUpdated', (data) => {
         console.log('📊 Client: Score updated:', data);
-        // Update local player score
-        if (data.playerId === socket!.id) {
-          const playerIndex = players.value.findIndex(
-            (p) => p.name === data.playerName,
-          );
-          if (playerIndex !== -1) {
-            players.value[playerIndex].score = data.newScore;
-          }
+        console.log('📊 All players after score update:', data.allPlayers);
+        try {
+          nextTick(() => {
+            multiplayerPlayers.value = data.allPlayers;
+            console.log(
+              '✅ Client: Updated multiplayerPlayers after score:',
+              multiplayerPlayers.value,
+            );
+          });
+        } catch (error) {
+          console.error('❌ Error updating player list after score:', error);
         }
-        multiplayerPlayers.value = data.allPlayers;
       });
 
       socket.on('speechRecognized', (data) => {
