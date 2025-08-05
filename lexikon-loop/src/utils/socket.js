@@ -18,13 +18,31 @@ export function getSocketUrl() {
 // Create socket connection
 export function createSocket() {
   const socketUrl = getSocketUrl();
-  console.log('Connecting to socket:', socketUrl);
+  console.log('🔌 Connecting to socket:', socketUrl);
 
-  return io(socketUrl, {
+  const socket = io(socketUrl, {
     transports: ['websocket', 'polling'],
     timeout: 20000,
     forceNew: true,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
   });
+
+  // Add connection event listeners for debugging
+  socket.on('connect', () => {
+    console.log('✅ Socket connected successfully');
+  });
+
+  socket.on('connect_error', (error) => {
+    console.error('❌ Socket connection error:', error);
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('🔌 Socket disconnected:', reason);
+  });
+
+  return socket;
 }
 
 // Fetch socket config from API

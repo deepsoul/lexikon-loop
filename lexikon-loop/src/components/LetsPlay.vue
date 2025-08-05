@@ -1045,161 +1045,172 @@ onMounted(() => {
       }
     }
 
-    // Initialize socket if not already connected
-    if (!socket || !socket.connected) {
-      console.log('🔌 Initializing socket for existing connection...');
+    // Check if socket is already connected from JoinGame
+    const socketConnected = localStorage.getItem(
+      'multiplayer_socket_connected',
+    );
+    if (socketConnected === 'true') {
+      console.log('🔌 Reusing existing socket connection from JoinGame...');
       socket = createSocket();
-      // Setup client handlers
-      socket.on('connect', () => {
-        console.log('🔌 Connected to server as client');
-        isConnected.value = true;
-        playerId.value = socket!.id || '';
-
-        // Don't join room again - JoinGame.vue already did that
-        console.log('🔌 Client already joined room via JoinGame.vue');
-      });
-
-      socket.on('playerJoined', (data) => {
-        console.log('👥 Client: Joined room:', data);
-        console.log('📊 All players received:', data.allPlayers);
-        try {
-          nextTick(() => {
-            multiplayerPlayers.value = data.allPlayers;
-            multiplayerGameState.value = data.gameState;
-            console.log(
-              '✅ Client: Updated multiplayerPlayers:',
-              multiplayerPlayers.value,
-            );
-          });
-        } catch (error) {
-          console.error('❌ Error updating player list:', error);
-        }
-      });
-
-      socket.on('diceRolled', (gameState) => {
-        console.log('🎲 === CLIENT DICE ROLLED EVENT ===');
-        console.log('📊 Game state:', gameState);
-
-        // Clear previous results
-        resultText.value = '';
-        subResult.value = '';
-        currentLetter.value = '-';
-
-        // Set rolling state
-        rolling.value = gameState.rolling;
-        isJackpot.value = gameState.isJackpot;
-
-        // Start dice animation
-        if (gameState.rolling) {
-          console.log('🎬 Client: Starting dice animation...');
-          const randomRotation = Math.floor(Math.random() * categories.length);
-          const randomCategory = categories[randomRotation];
-          diceRotation.value = {
-            x: (randomCategory.rotation.x || 0) * 360,
-            y: (randomCategory.rotation.y || 0) * 360,
-            z: (randomCategory.rotation.z || 0) * 360,
-          };
-        }
-      });
-
-      socket.on('diceStopped', (gameState) => {
-        console.log('🛑 === CLIENT DICE STOPPED EVENT ===');
-        console.log('📊 Final game state:', gameState);
-
-        rolling.value = false;
-
-        // Set final results
-        resultText.value = gameState.resultText;
-        subResult.value = gameState.subResult;
-        currentLetter.value = gameState.currentLetter;
-        isJackpot.value = gameState.isJackpot;
-
-        // Set final dice position
-        if (gameState.category) {
-          const categoryIndex = categories.findIndex(
-            (cat) => cat.name === gameState.category,
-          );
-          if (categoryIndex !== -1) {
-            const category = categories[categoryIndex];
-            diceRotation.value = {
-              x: category.endRotation.x || 0,
-              y: category.endRotation.y || 0,
-              z: category.endRotation.z || 0,
-            };
-            console.log(
-              '🎯 Client: Set dice to final position for:',
-              gameState.category,
-            );
-          }
-        }
-      });
-
-      socket.on('playerAdded', (data) => {
-        console.log('👥 Client: Player added:', data);
-        console.log('📊 All players after add:', data.allPlayers);
-        try {
-          nextTick(() => {
-            multiplayerPlayers.value = data.allPlayers;
-            console.log(
-              '✅ Client: Updated multiplayerPlayers after add:',
-              multiplayerPlayers.value,
-            );
-          });
-        } catch (error) {
-          console.error('❌ Error updating player list after add:', error);
-        }
-      });
-
-      socket.on('playerTurnChanged', (data) => {
-        console.log('🔄 Client: Player turn changed:', data);
-        console.log('📊 All players after turn change:', data.allPlayers);
-        try {
-          nextTick(() => {
-            currentPlayer.value = data.currentPlayer;
-            multiplayerGameState.value = data.gameState;
-            multiplayerPlayers.value = data.allPlayers;
-            console.log(
-              '✅ Client: Updated multiplayerPlayers after turn:',
-              multiplayerPlayers.value,
-            );
-          });
-        } catch (error) {
-          console.error('❌ Error updating player list after turn:', error);
-        }
-      });
-
-      socket.on('scoreUpdated', (data) => {
-        console.log('📊 Client: Score updated:', data);
-        console.log('📊 All players after score update:', data.allPlayers);
-        try {
-          nextTick(() => {
-            multiplayerPlayers.value = data.allPlayers;
-            console.log(
-              '✅ Client: Updated multiplayerPlayers after score:',
-              multiplayerPlayers.value,
-            );
-          });
-        } catch (error) {
-          console.error('❌ Error updating player list after score:', error);
-        }
-      });
-
-      socket.on('speechRecognized', (data) => {
-        console.log('🗣️ Speech recognized:', data);
-        recognizedWord.value = data.word;
-        recognizedLastLetter.value = data.lastLetter;
-        currentLetter.value = data.lastLetter;
-      });
-
-      socket.on('disconnect', () => {
-        console.log('🔌 Disconnected from server');
-        isConnected.value = false;
-      });
+    } else {
+      console.log('🔌 Initializing new socket for existing connection...');
+      socket = createSocket();
     }
+    // Setup client handlers
+    socket.on('connect', () => {
+      console.log('🔌 Connected to server as client');
+      isConnected.value = true;
+      playerId.value = socket!.id || '';
 
-    multiplayerStatusText.value = 'Verbunden mit Host';
-    multiplayerStatusClass.value = 'status-connected';
+      // Always join room to receive dice events (server will handle duplicates)
+      console.log('🔌 Joining room to receive dice events...');
+      socket!.emit('joinRoom', {
+        roomId: storedHostId,
+        playerName: storedPlayerName,
+        isHost: false,
+      });
+    });
+
+    socket.on('playerJoined', (data) => {
+      console.log('👥 Client: Joined room:', data);
+      console.log('📊 All players received:', data.allPlayers);
+      try {
+        nextTick(() => {
+          multiplayerPlayers.value = data.allPlayers;
+          multiplayerGameState.value = data.gameState;
+          console.log(
+            '✅ Client: Updated multiplayerPlayers:',
+            multiplayerPlayers.value,
+          );
+        });
+      } catch (error) {
+        console.error('❌ Error updating player list:', error);
+      }
+    });
+
+    socket.on('diceRolled', (gameState) => {
+      console.log('🎲 === CLIENT DICE ROLLED EVENT ===');
+      console.log('📊 Game state:', gameState);
+
+      // Clear previous results
+      resultText.value = '';
+      subResult.value = '';
+      currentLetter.value = '-';
+
+      // Set rolling state
+      rolling.value = gameState.rolling;
+      isJackpot.value = gameState.isJackpot;
+
+      // Start dice animation
+      if (gameState.rolling) {
+        console.log('🎬 Client: Starting dice animation...');
+        const randomRotation = Math.floor(Math.random() * categories.length);
+        const randomCategory = categories[randomRotation];
+        diceRotation.value = {
+          x: (randomCategory.rotation.x || 0) * 360,
+          y: (randomCategory.rotation.y || 0) * 360,
+          z: (randomCategory.rotation.z || 0) * 360,
+        };
+      }
+    });
+
+    socket.on('diceStopped', (gameState) => {
+      console.log('🛑 === CLIENT DICE STOPPED EVENT ===');
+      console.log('📊 Final game state:', gameState);
+
+      rolling.value = false;
+
+      // Set final results
+      resultText.value = gameState.resultText;
+      subResult.value = gameState.subResult;
+      currentLetter.value = gameState.currentLetter;
+      isJackpot.value = gameState.isJackpot;
+
+      // Set final dice position
+      if (gameState.category) {
+        const categoryIndex = categories.findIndex(
+          (cat) => cat.name === gameState.category,
+        );
+        if (categoryIndex !== -1) {
+          const category = categories[categoryIndex];
+          diceRotation.value = {
+            x: category.endRotation.x || 0,
+            y: category.endRotation.y || 0,
+            z: category.endRotation.z || 0,
+          };
+          console.log(
+            '🎯 Client: Set dice to final position for:',
+            gameState.category,
+          );
+        }
+      }
+    });
+
+    socket.on('playerAdded', (data) => {
+      console.log('👥 Client: Player added:', data);
+      console.log('📊 All players after add:', data.allPlayers);
+      try {
+        nextTick(() => {
+          multiplayerPlayers.value = data.allPlayers;
+          console.log(
+            '✅ Client: Updated multiplayerPlayers after add:',
+            multiplayerPlayers.value,
+          );
+        });
+      } catch (error) {
+        console.error('❌ Error updating player list after add:', error);
+      }
+    });
+
+    socket.on('playerTurnChanged', (data) => {
+      console.log('🔄 Client: Player turn changed:', data);
+      console.log('📊 All players after turn change:', data.allPlayers);
+      try {
+        nextTick(() => {
+          currentPlayer.value = data.currentPlayer;
+          multiplayerGameState.value = data.gameState;
+          multiplayerPlayers.value = data.allPlayers;
+          console.log(
+            '✅ Client: Updated multiplayerPlayers after turn:',
+            multiplayerPlayers.value,
+          );
+        });
+      } catch (error) {
+        console.error('❌ Error updating player list after turn:', error);
+      }
+    });
+
+    socket.on('scoreUpdated', (data) => {
+      console.log('📊 Client: Score updated:', data);
+      console.log('📊 All players after score update:', data.allPlayers);
+      try {
+        nextTick(() => {
+          multiplayerPlayers.value = data.allPlayers;
+          console.log(
+            '✅ Client: Updated multiplayerPlayers after score:',
+            multiplayerPlayers.value,
+          );
+        });
+      } catch (error) {
+        console.error('❌ Error updating player list after score:', error);
+      }
+    });
+
+    socket.on('speechRecognized', (data) => {
+      console.log('🗣️ Speech recognized:', data);
+      recognizedWord.value = data.word;
+      recognizedLastLetter.value = data.lastLetter;
+      currentLetter.value = data.lastLetter;
+    });
+
+    socket.on('disconnect', () => {
+      console.log('🔌 Disconnected from server');
+      isConnected.value = false;
+    });
   }
+
+  multiplayerStatusText.value = 'Verbunden mit Host';
+  multiplayerStatusClass.value = 'status-connected';
 });
 
 const categories = [

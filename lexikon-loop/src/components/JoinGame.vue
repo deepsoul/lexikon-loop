@@ -148,9 +148,23 @@ async function joinGame() {
       });
     });
 
+    // Add timeout for connection
+    const connectionTimeout = setTimeout(() => {
+      if (!isConnected.value) {
+        console.error('❌ Connection timeout');
+        joinError.value = 'Verbindung zum Server fehlgeschlagen (Timeout).';
+        isLoading.value = false;
+      }
+    }, 10000); // 10 second timeout
+
     socket.on('playerJoined', (data) => {
       console.log('👥 Client: Player joined event received:', data);
       console.log('📊 All players:', data.allPlayers);
+
+      // Clear connection timeout
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+      }
 
       // Store player data in localStorage for the main game
       localStorage.setItem('multiplayer_player_name', playerName.value);
@@ -164,6 +178,13 @@ async function joinGame() {
       );
       console.log('💾 Stored player list in localStorage:', data.allPlayers);
 
+      // Store socket connection info for LetsPlay.vue
+      localStorage.setItem('multiplayer_socket_connected', 'true');
+      console.log('🔌 Socket connection stored for LetsPlay.vue');
+
+      // Mark that we've already joined (to prevent duplicate players)
+      localStorage.setItem('multiplayer_already_joined', 'true');
+
       isConnected.value = true;
       console.log('✅ Successfully joined game as:', playerName.value);
 
@@ -173,6 +194,12 @@ async function joinGame() {
 
     socket.on('error', (error) => {
       console.error('❌ Socket error:', error);
+
+      // Clear connection timeout
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+      }
+
       joinError.value = 'Verbindung zum Server fehlgeschlagen.';
       isLoading.value = false;
     });
