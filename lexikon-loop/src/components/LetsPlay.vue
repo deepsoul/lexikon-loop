@@ -2265,6 +2265,10 @@ function joinMultiplayerGame() {
       setTimeout(() => {
         console.log('🔌 Socket connected after timeout:', socket?.connected);
         console.log('🔌 Socket ID after timeout:', socket?.id);
+
+        // Test if we can receive any events
+        console.log('🔌 Testing if client can receive events...');
+        socket?.emit('testEvent', {message: 'test'});
       }, 1000);
     });
 
@@ -2275,6 +2279,7 @@ function joinMultiplayerGame() {
     });
 
     // Single universal dice event handler for both host and client
+    console.log('🔌 CLIENT: Registering diceRolled event handler');
     socket.on('diceRolled', (gameState) => {
       console.log('🎲 === SINGLE UNIVERSAL DICE ROLLED EVENT (CLIENT) ===');
       console.log('📊 Game state:', gameState);
