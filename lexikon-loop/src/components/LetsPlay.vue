@@ -1008,6 +1008,18 @@ onMounted(() => {
     hostId.value = storedHostId;
     roomId.value = storedHostId;
 
+    // Load player list from localStorage
+    const storedPlayers = localStorage.getItem('multiplayer_players');
+    if (storedPlayers) {
+      try {
+        const players = JSON.parse(storedPlayers);
+        multiplayerPlayers.value = players;
+        console.log('📊 Loaded player list from localStorage:', players);
+      } catch (error) {
+        console.error('❌ Error parsing stored player list:', error);
+      }
+    }
+
     // Initialize socket if not already connected
     if (!socket || !socket.connected) {
       console.log('🔌 Initializing socket for existing connection...');

@@ -157,6 +157,13 @@ async function joinGame() {
       localStorage.setItem('multiplayer_host_id', hostId.value);
       localStorage.setItem('multiplayer_connected', 'true');
 
+      // Store the complete player list for LetsPlay.vue
+      localStorage.setItem(
+        'multiplayer_players',
+        JSON.stringify(data.allPlayers),
+      );
+      console.log('💾 Stored player list in localStorage:', data.allPlayers);
+
       isConnected.value = true;
       console.log('✅ Successfully joined game as:', playerName.value);
 
