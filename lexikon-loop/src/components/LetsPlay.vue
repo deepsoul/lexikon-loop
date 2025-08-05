@@ -1691,10 +1691,8 @@ function rollDice() {
       return;
     }
 
-    socket.emit('rollDice', {roomId: roomId.value});
-
-    // Start local animation immediately for better UX
-    console.log('🎬 Starting local dice animation for client...');
+    // Start immediate animation for both host and client
+    console.log('🎬 Starting immediate dice animation...');
     try {
       nextTick(() => {
         // Clear previous results
@@ -1716,8 +1714,10 @@ function rollDice() {
         };
       });
     } catch (error) {
-      console.error('❌ Error starting local dice animation:', error);
+      console.error('❌ Error starting immediate dice animation:', error);
     }
+
+    socket.emit('rollDice', {roomId: roomId.value});
 
     // Add fallback for debugging
     setTimeout(() => {
