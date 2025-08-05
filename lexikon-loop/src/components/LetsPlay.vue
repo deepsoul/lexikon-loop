@@ -1102,41 +1102,7 @@ onMounted(() => {
       }
     });
 
-    socket.on('diceRolled', (gameState) => {
-      console.log('🎲 === CLIENT DICE ROLLED EVENT ===');
-      console.log('📊 Game state:', gameState);
-
-      // Prevent duplicate animations
-      if (rolling.value) {
-        console.log('⚠️ Dice already rolling, ignoring duplicate event');
-        return;
-      }
-
-      // Clear previous results
-      resultText.value = '';
-      subResult.value = '';
-      currentLetter.value = '-';
-
-      // Set rolling state
-      rolling.value = gameState.rolling;
-      isJackpot.value = gameState.isJackpot;
-
-      // Start dice animation
-      if (gameState.rolling) {
-        console.log('🎬 Client: Starting dice animation...');
-        try {
-          const randomRotation = Math.floor(Math.random() * categories.length);
-          const randomCategory = categories[randomRotation];
-          diceRotation.value = {
-            x: (randomCategory.rotation.x || 0) * 360,
-            y: (randomCategory.rotation.y || 0) * 360,
-            z: (randomCategory.rotation.z || 0) * 360,
-          };
-        } catch (error) {
-          console.error('❌ Error in client dice animation:', error);
-        }
-      }
-    });
+    // REMOVED: Duplicate diceRolled handler - using single universal handler
 
     // REMOVED: Duplicate diceStopped handler - using universal handler instead
 
@@ -2067,56 +2033,7 @@ async function startMultiplayerHost() {
       }
     });
 
-    // Universal dice event handler for both host and client
-    socket.on('diceRolled', (gameState) => {
-      console.log('🎲 === UNIVERSAL DICE ROLLED EVENT (HOST) ===');
-      console.log('📊 Game state:', gameState);
-      console.log('🏠 Is Host:', isMultiplayerHost.value);
-
-      // Prevent duplicate animations
-      if (rolling.value) {
-        console.log('⚠️ Dice already rolling, ignoring duplicate event');
-        return;
-      }
-
-      try {
-        nextTick(() => {
-          // Clear previous results
-          resultText.value = '';
-          subResult.value = '';
-          currentLetter.value = '-';
-
-          // Set rolling state
-          rolling.value = gameState.rolling;
-          isJackpot.value = gameState.isJackpot;
-
-          // Start dice animation
-          if (gameState.rolling) {
-            console.log('🎬 Starting dice animation...');
-            try {
-              // Ensure diceRotation.value exists
-              if (!diceRotation.value) {
-                diceRotation.value = {x: 0, y: 0, z: 0};
-              }
-
-              const randomRotation = Math.floor(
-                Math.random() * categories.length,
-              );
-              const randomCategory = categories[randomRotation];
-              diceRotation.value = {
-                x: (randomCategory.rotation.x || 0) * 360,
-                y: (randomCategory.rotation.y || 0) * 360,
-                z: (randomCategory.rotation.z || 0) * 360,
-              };
-            } catch (error) {
-              console.error('❌ Error in dice animation:', error);
-            }
-          }
-        });
-      } catch (error) {
-        console.error('❌ Error in universal diceRolled handler:', error);
-      }
-    });
+    // REMOVED: Duplicate diceRolled handler - using single universal handler
 
     // Universal dice stopped handler for both host and client
     socket.on('diceStopped', (gameState) => {
@@ -2291,9 +2208,9 @@ function joinMultiplayerGame() {
       multiplayerGameState.value = data.gameState;
     });
 
-    // Universal dice event handler for both host and client
+    // Single universal dice event handler for both host and client
     socket.on('diceRolled', (gameState) => {
-      console.log('🎲 === UNIVERSAL DICE ROLLED EVENT ===');
+      console.log('🎲 === SINGLE UNIVERSAL DICE ROLLED EVENT ===');
       console.log('📊 Game state:', gameState);
       console.log('🏠 Is Host:', isMultiplayerHost.value);
 
@@ -2314,24 +2231,38 @@ function joinMultiplayerGame() {
           rolling.value = gameState.rolling;
           isJackpot.value = gameState.isJackpot;
 
-          // Start dice animation
+          // Start synchronized dice animation
           if (gameState.rolling) {
-            console.log('🎬 Starting dice animation...');
+            console.log('🎬 Starting synchronized dice animation...');
             try {
               // Ensure diceRotation.value exists
               if (!diceRotation.value) {
                 diceRotation.value = {x: 0, y: 0, z: 0};
               }
 
-              const randomRotation = Math.floor(
-                Math.random() * categories.length,
+              // Use synchronized rotation based on server result
+              const categoryIndex = categories.findIndex(
+                (cat) => cat.name === gameState.category,
               );
-              const randomCategory = categories[randomRotation];
-              diceRotation.value = {
-                x: (randomCategory.rotation.x || 0) * 360,
-                y: (randomCategory.rotation.y || 0) * 360,
-                z: (randomCategory.rotation.z || 0) * 360,
-              };
+              if (categoryIndex !== -1) {
+                const category = categories[categoryIndex];
+                diceRotation.value = {
+                  x: (category.rotation.x || 0) * 360,
+                  y: (category.rotation.y || 0) * 360,
+                  z: (category.rotation.z || 0) * 360,
+                };
+              } else {
+                // Fallback to random if category not found
+                const randomRotation = Math.floor(
+                  Math.random() * categories.length,
+                );
+                const randomCategory = categories[randomRotation];
+                diceRotation.value = {
+                  x: (randomCategory.rotation.x || 0) * 360,
+                  y: (randomCategory.rotation.y || 0) * 360,
+                  z: (randomCategory.rotation.z || 0) * 360,
+                };
+              }
             } catch (error) {
               console.error('❌ Error in dice animation:', error);
             }
