@@ -1668,7 +1668,7 @@ function rollDice() {
   }
 
   // Check if in multiplayer mode
-  if (socket && roomId.value && isMultiplayerConnected.value) {
+  if (socket && roomId.value) {
     console.log('🎲 === MULTIPLAYER DICE ROLL ===');
     console.log('🔌 Socket connected:', socket.connected);
     console.log('🏠 Room ID:', roomId.value);
@@ -2020,9 +2020,91 @@ async function startMultiplayerHost() {
       }
     });
 
-    // REMOVED: Duplicate diceRolled handler - using single universal handler
+    // Single universal dice event handler for both host and client
+    socket.on('diceRolled', (gameState) => {
+      console.log('🎲 === SINGLE UNIVERSAL DICE ROLLED EVENT (HOST) ===');
+      console.log('📊 Game state:', gameState);
+      console.log('🏠 Is Host:', isMultiplayerHost.value);
 
-    // REMOVED: Duplicate diceStopped handler - using single universal handler
+      // Prevent duplicate animations
+      if (rolling.value) {
+        console.log('⚠️ Dice already rolling, ignoring duplicate event');
+        return;
+      }
+
+      try {
+        nextTick(() => {
+          // Clear previous results
+          resultText.value = '';
+          subResult.value = '';
+          currentLetter.value = '-';
+
+          // Set rolling state
+          rolling.value = gameState.rolling;
+          isJackpot.value = gameState.isJackpot;
+
+          // Only update rolling state, don't start new animation
+          if (gameState.rolling) {
+            console.log(
+              '🎲 Server dice roll received - animation already running locally',
+            );
+            // Don't start new animation, just ensure rolling state is set
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error in universal diceRolled handler:', error);
+      }
+    });
+
+    // Universal dice stopped handler for both host and client
+    socket.on('diceStopped', (gameState) => {
+      console.log('🛑 === UNIVERSAL DICE STOPPED EVENT (HOST) ===');
+      console.log('📊 Final game state:', gameState);
+
+      try {
+        nextTick(() => {
+          rolling.value = false;
+
+          // Set final results
+          resultText.value = gameState.resultText;
+          subResult.value = gameState.subResult;
+          currentLetter.value = gameState.currentLetter;
+          isJackpot.value = gameState.isJackpot;
+
+          // Set final dice position
+          if (gameState.category) {
+            try {
+              const categoryIndex = categories.findIndex(
+                (cat) => cat.name === gameState.category,
+              );
+              if (categoryIndex !== -1) {
+                const category = categories[categoryIndex];
+                // Ensure diceRotation.value exists
+                if (!diceRotation.value) {
+                  diceRotation.value = {x: 0, y: 0, z: 0};
+                }
+
+                diceRotation.value = {
+                  x: category.endRotation.x || 0,
+                  y: category.endRotation.y || 0,
+                  z: category.endRotation.z || 0,
+                };
+                console.log(
+                  '🎯 Set dice to final position for:',
+                  gameState.category,
+                );
+              } else {
+                console.log('⚠️ Category not found:', gameState.category);
+              }
+            } catch (error) {
+              console.error('❌ Error setting dice position:', error);
+            }
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error in universal diceStopped handler:', error);
+      }
+    });
 
     socket.on('scoreUpdated', (data) => {
       console.log('Score updated:', data);
