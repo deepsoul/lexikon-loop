@@ -4225,43 +4225,51 @@ function getCurrentPlayerScore() {
   /* Manuelle Eingabe - NEUE VERSION - Groß, Luftig & Responsiv */
   .manual-input-section-new {
     margin-top: 2rem;
-    padding: 2rem;
+    padding: 2.5rem;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border-radius: 24px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .manual-input-section-new:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    transform: translateY(-3px);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
   }
 
   .manual-input-header-new {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    justify-content: center;
   }
 
   .input-icon-new {
-    font-size: 2.5rem;
+    font-size: 3rem;
     animation: bounce 2s infinite;
   }
 
   .input-title-new {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 800;
     color: #1e293b;
     margin: 0;
+    text-align: center;
   }
 
   .input-group-new {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
     flex-direction: column;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .input-wrapper-new {
@@ -4271,29 +4279,29 @@ function getCurrentPlayerScore() {
 
   .manual-input-new {
     width: 100%;
-    padding: 1.5rem 2rem;
-    border: 3px solid #e2e8f0;
-    border-radius: 16px;
-    font-size: 1.25rem;
-    font-weight: 500;
+    padding: 2rem 2.5rem;
+    border: 4px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
     background: #ffffff;
     color: #1e293b;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    min-height: 60px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+    min-height: 80px;
   }
 
   .manual-input-new:focus {
     outline: none;
     border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
+    transform: translateY(-3px);
   }
 
   .manual-input-new::placeholder {
     color: #94a3b8;
-    font-weight: 400;
-    font-size: 1.2rem;
+    font-weight: 500;
+    font-size: 1.4rem;
   }
 
   .input-focus-border-new {
@@ -4302,42 +4310,45 @@ function getCurrentPlayerScore() {
     left: 0;
     right: 0;
     bottom: 0;
-    border-radius: 16px;
+    border-radius: 20px;
     pointer-events: none;
     transition: all 0.3s ease;
   }
 
   .manual-input-new:focus + .input-focus-border-new {
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3);
   }
 
   .submit-btn-new {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 1.5rem 2rem;
+    gap: 1rem;
+    padding: 2rem 3rem;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
-    border-radius: 16px;
-    font-size: 1.2rem;
-    font-weight: 700;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: 800;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-    min-height: 60px;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.5);
+    min-height: 80px;
     width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .submit-btn-new:hover:not(:disabled) {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 28px rgba(16, 185, 129, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.6);
   }
 
   .submit-btn-new:active:not(:disabled) {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
 
   .submit-btn-new:disabled {
@@ -4348,48 +4359,51 @@ function getCurrentPlayerScore() {
   }
 
   .btn-icon-new {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
 
   .btn-text-new {
-    font-weight: 700;
-    font-size: 1.2rem;
+    font-weight: 800;
+    font-size: 1.5rem;
   }
 
   .manual-result-new {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-top: 1.5rem;
-    padding: 1.5rem;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: 2rem;
     background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-    border-radius: 16px;
-    border: 2px solid #93c5fd;
+    border-radius: 20px;
+    border: 3px solid #93c5fd;
     animation: slideIn 0.3s ease;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .result-icon-new {
-    font-size: 2rem;
+    font-size: 2.5rem;
     animation: pulse 2s infinite;
   }
 
   .result-content-new {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .result-label-new {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.2rem;
+    font-weight: 800;
     color: #1e40af;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 
   .result-word-new {
-    font-size: 1.4rem;
-    font-weight: 800;
+    font-size: 1.8rem;
+    font-weight: 900;
     color: #1e293b;
   }
 
