@@ -1641,16 +1641,30 @@ function rollDice() {
 
   console.log('🎲 Rolling dice...');
 
-  // Clear previous results immediately
-  console.log('🎲 Clearing previous results...');
+  // Start immediate animation for all modes
+  console.log('🎬 Starting immediate dice animation...');
   try {
     nextTick(() => {
+      // Clear previous results
       resultText.value = '';
       subResult.value = '';
       currentLetter.value = '-';
+
+      // Start dice animation
+      if (!diceRotation.value) {
+        diceRotation.value = {x: 0, y: 0, z: 0};
+      }
+
+      const randomRotation = Math.floor(Math.random() * categories.length);
+      const randomCategory = categories[randomRotation];
+      diceRotation.value = {
+        x: (randomCategory.rotation.x || 0) * 360,
+        y: (randomCategory.rotation.y || 0) * 360,
+        z: (randomCategory.rotation.z || 0) * 360,
+      };
     });
   } catch (error) {
-    console.error('❌ Error clearing results:', error);
+    console.error('❌ Error starting immediate dice animation:', error);
   }
 
   // Check if in multiplayer mode
