@@ -2233,9 +2233,11 @@ function joinMultiplayerGame() {
 
     // Single universal dice event handler for both host and client
     socket.on('diceRolled', (gameState) => {
-      console.log('🎲 === SINGLE UNIVERSAL DICE ROLLED EVENT ===');
+      console.log('🎲 === SINGLE UNIVERSAL DICE ROLLED EVENT (CLIENT) ===');
       console.log('📊 Game state:', gameState);
       console.log('🏠 Is Host:', isMultiplayerHost.value);
+      console.log('🔌 Socket connected:', socket?.connected);
+      console.log('🏠 Room ID:', roomId.value);
 
       // Prevent duplicate animations
       if (rolling.value) {
@@ -2285,8 +2287,10 @@ function joinMultiplayerGame() {
 
     // Universal dice stopped handler for both host and client
     socket.on('diceStopped', (gameState) => {
-      console.log('🛑 === UNIVERSAL DICE STOPPED EVENT ===');
+      console.log('🛑 === UNIVERSAL DICE STOPPED EVENT (CLIENT) ===');
       console.log('📊 Final game state:', gameState);
+      console.log('🔌 Socket connected:', socket?.connected);
+      console.log('🏠 Room ID:', roomId.value);
 
       try {
         nextTick(() => {
