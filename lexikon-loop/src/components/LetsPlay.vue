@@ -1106,6 +1106,12 @@ onMounted(() => {
       console.log('🎲 === CLIENT DICE ROLLED EVENT ===');
       console.log('📊 Game state:', gameState);
 
+      // Prevent duplicate animations
+      if (rolling.value) {
+        console.log('⚠️ Dice already rolling, ignoring duplicate event');
+        return;
+      }
+
       // Clear previous results
       resultText.value = '';
       subResult.value = '';
@@ -1118,13 +1124,17 @@ onMounted(() => {
       // Start dice animation
       if (gameState.rolling) {
         console.log('🎬 Client: Starting dice animation...');
-        const randomRotation = Math.floor(Math.random() * categories.length);
-        const randomCategory = categories[randomRotation];
-        diceRotation.value = {
-          x: (randomCategory.rotation.x || 0) * 360,
-          y: (randomCategory.rotation.y || 0) * 360,
-          z: (randomCategory.rotation.z || 0) * 360,
-        };
+        try {
+          const randomRotation = Math.floor(Math.random() * categories.length);
+          const randomCategory = categories[randomRotation];
+          diceRotation.value = {
+            x: (randomCategory.rotation.x || 0) * 360,
+            y: (randomCategory.rotation.y || 0) * 360,
+            z: (randomCategory.rotation.z || 0) * 360,
+          };
+        } catch (error) {
+          console.error('❌ Error in client dice animation:', error);
+        }
       }
     });
 
@@ -1684,7 +1694,12 @@ function resetGameTimer() {
 }
 
 function rollDice() {
-  if (rolling.value) return;
+  // Prevent multiple simultaneous rolls
+  if (rolling.value) {
+    console.log('⚠️ Dice already rolling, ignoring duplicate click');
+    return;
+  }
+
   rolling.value = true;
   playSound('roll');
 
@@ -2311,6 +2326,12 @@ function joinMultiplayerGame() {
       console.log('🎲 === CLIENT DICE ROLLED EVENT ===');
       console.log('📊 Game state:', gameState);
 
+      // Prevent duplicate animations
+      if (rolling.value) {
+        console.log('⚠️ Dice already rolling, ignoring duplicate event');
+        return;
+      }
+
       // Clear previous results
       resultText.value = '';
       subResult.value = '';
@@ -2323,13 +2344,17 @@ function joinMultiplayerGame() {
       // Start dice animation
       if (gameState.rolling) {
         console.log('🎬 Client: Starting dice animation...');
-        const randomRotation = Math.floor(Math.random() * categories.length);
-        const randomCategory = categories[randomRotation];
-        diceRotation.value = {
-          x: (randomCategory.rotation.x || 0) * 360,
-          y: (randomCategory.rotation.y || 0) * 360,
-          z: (randomCategory.rotation.z || 0) * 360,
-        };
+        try {
+          const randomRotation = Math.floor(Math.random() * categories.length);
+          const randomCategory = categories[randomRotation];
+          diceRotation.value = {
+            x: (randomCategory.rotation.x || 0) * 360,
+            y: (randomCategory.rotation.y || 0) * 360,
+            z: (randomCategory.rotation.z || 0) * 360,
+          };
+        } catch (error) {
+          console.error('❌ Error in client dice animation:', error);
+        }
       }
     });
 
