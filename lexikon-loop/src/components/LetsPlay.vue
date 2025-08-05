@@ -1640,16 +1640,38 @@ function rollDice() {
   playSound('roll');
 
   console.log('🎲 Rolling dice...');
-  console.log('🔌 Socket active:', !!socket);
-  console.log('🏠 Room ID:', roomId.value);
 
-  // Send dice roll to server if in multiplayer
-  if (socket && roomId.value) {
+  // Start immediate animation for all modes
+  console.log('🎬 Starting immediate dice animation...');
+  try {
+    nextTick(() => {
+      // Clear previous results
+      resultText.value = '';
+      subResult.value = '';
+      currentLetter.value = '-';
+
+      // Start dice animation
+      if (!diceRotation.value) {
+        diceRotation.value = {x: 0, y: 0, z: 0};
+      }
+
+      const randomRotation = Math.floor(Math.random() * categories.length);
+      const randomCategory = categories[randomRotation];
+      diceRotation.value = {
+        x: (randomCategory.rotation.x || 0) * 360,
+        y: (randomCategory.rotation.y || 0) * 360,
+        z: (randomCategory.rotation.z || 0) * 360,
+      };
+    });
+  } catch (error) {
+    console.error('❌ Error starting immediate dice animation:', error);
+  }
+
+  // Check if in multiplayer mode
+  if (socket && roomId.value && isMultiplayerConnected.value) {
     console.log('🎲 === MULTIPLAYER DICE ROLL ===');
     console.log('🔌 Socket connected:', socket.connected);
     console.log('🏠 Room ID:', roomId.value);
-    console.log('🆔 Socket ID:', socket.id);
-    console.log('👥 Current players:', multiplayerPlayers.value?.length || 0);
 
     // Check if socket is properly connected
     if (!socket.connected || !socket.id) {
@@ -1664,57 +1686,20 @@ function rollDice() {
             socket.emit('rollDice', {roomId: roomId.value});
           } else {
             console.log('❌ Socket still not connected, using fallback...');
-            // Use nextTick to ensure Vue reactivity
-            nextTick(() => {
-              rolling.value = false;
-              // Fallback to single player mode
-              const result = Math.floor(Math.random() * categories.length);
-              const category = categories[result];
-              resultText.value = category.name;
-              subResult.value = category.description;
-              isJackpot.value = result === 5;
-              if (isJackpot.value) {
-                resultText.value = '🎰 JACKPOT 🎰';
-                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                currentLetter.value = letters[Math.floor(Math.random() * 26)];
-              }
-            });
+            // Fallback to single player mode
+            setTimeout(() => {
+              finishDiceRoll();
+            }, 1500);
           }
         } catch (error) {
           console.error('❌ Error in socket retry timeout:', error);
-          nextTick(() => {
-            rolling.value = false;
-          });
+          setTimeout(() => {
+            finishDiceRoll();
+          }, 1500);
         }
       }, 1000);
 
       return;
-    }
-
-    // Start immediate animation for both host and client
-    console.log('🎬 Starting immediate dice animation...');
-    try {
-      nextTick(() => {
-        // Clear previous results
-        resultText.value = '';
-        subResult.value = '';
-        currentLetter.value = '-';
-
-        // Start dice animation
-        if (!diceRotation.value) {
-          diceRotation.value = {x: 0, y: 0, z: 0};
-        }
-
-        const randomRotation = Math.floor(Math.random() * categories.length);
-        const randomCategory = categories[randomRotation];
-        diceRotation.value = {
-          x: (randomCategory.rotation.x || 0) * 360,
-          y: (randomCategory.rotation.y || 0) * 360,
-          z: (randomCategory.rotation.z || 0) * 360,
-        };
-      });
-    } catch (error) {
-      console.error('❌ Error starting immediate dice animation:', error);
     }
 
     socket.emit('rollDice', {roomId: roomId.value});
@@ -1724,27 +1709,11 @@ function rollDice() {
       try {
         if (rolling.value) {
           console.log('⚠️ Server did not respond, using fallback...');
-          // Use nextTick to ensure Vue reactivity
-          nextTick(() => {
-            rolling.value = false;
-            // Fallback to single player mode
-            const result = Math.floor(Math.random() * categories.length);
-            const category = categories[result];
-            resultText.value = category.name;
-            subResult.value = category.description;
-            isJackpot.value = result === 5;
-            if (isJackpot.value) {
-              resultText.value = '🎰 JACKPOT 🎰';
-              const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-              currentLetter.value = letters[Math.floor(Math.random() * 26)];
-            }
-          });
+          finishDiceRoll();
         }
       } catch (error) {
         console.error('❌ Error in server timeout fallback:', error);
-        nextTick(() => {
-          rolling.value = false;
-        });
+        finishDiceRoll();
       }
     }, 3000); // 3 second timeout
 
@@ -1752,31 +1721,23 @@ function rollDice() {
   }
 
   console.log('🎮 Single player mode - local dice roll');
-  // Single player mode
-  // Zufällige Kategorie auswählen
-  const result = Math.floor(Math.random() * categories.length);
-  const category = categories[result];
-
-  // Animation mit zufälliger Rotation
-  const randomRotation = Math.floor(Math.random() * categories.length);
-  const randomCategory = categories[randomRotation];
-  diceRotation.value = {
-    x: randomCategory.rotation.x * 360,
-    y: randomCategory.rotation.y * 360,
-    z: randomCategory.rotation.z * 360,
-  };
-
-  // Text während der Animation ausblenden
-  resultText.value = '';
-  subResult.value = '';
-  currentLetter.value = '-';
-
+  // Single player mode - finish after animation
   setTimeout(() => {
-    // Endposition setzen basierend auf der gewählten Kategorie
-    diceRotation.value = category.endRotation;
+    finishDiceRoll();
+  }, 1500);
+}
 
-    // Kurze Verzögerung für bessere Synchronisation
-    setTimeout(() => {
+// Helper function to finish dice roll
+function finishDiceRoll() {
+  try {
+    nextTick(() => {
+      // Zufällige Kategorie auswählen
+      const result = Math.floor(Math.random() * categories.length);
+      const category = categories[result];
+
+      // Endposition setzen basierend auf der gewählten Kategorie
+      diceRotation.value = category.endRotation;
+
       // Ergebnis anzeigen
       resultText.value = category.name;
       subResult.value = category.description;
@@ -1796,8 +1757,11 @@ function rollDice() {
         resetGameTimer();
         startTimer();
       }
-    }, 1100); // Zusätzliche 100ms Verzögerung für bessere Synchronisation
-  }, 400);
+    });
+  } catch (error) {
+    console.error('❌ Error finishing dice roll:', error);
+    rolling.value = false;
+  }
 }
 
 // LocalStorage: Spieler speichern und laden
@@ -2058,55 +2022,7 @@ async function startMultiplayerHost() {
 
     // REMOVED: Duplicate diceRolled handler - using single universal handler
 
-    // Universal dice stopped handler for both host and client
-    socket.on('diceStopped', (gameState) => {
-      console.log('🛑 === UNIVERSAL DICE STOPPED EVENT (HOST) ===');
-      console.log('📊 Final game state:', gameState);
-
-      try {
-        nextTick(() => {
-          rolling.value = false;
-
-          // Set final results
-          resultText.value = gameState.resultText;
-          subResult.value = gameState.subResult;
-          currentLetter.value = gameState.currentLetter;
-          isJackpot.value = gameState.isJackpot;
-
-          // Set final dice position
-          if (gameState.category) {
-            try {
-              const categoryIndex = categories.findIndex(
-                (cat) => cat.name === gameState.category,
-              );
-              if (categoryIndex !== -1) {
-                const category = categories[categoryIndex];
-                // Ensure diceRotation.value exists
-                if (!diceRotation.value) {
-                  diceRotation.value = {x: 0, y: 0, z: 0};
-                }
-
-                diceRotation.value = {
-                  x: category.endRotation.x || 0,
-                  y: category.endRotation.y || 0,
-                  z: category.endRotation.z || 0,
-                };
-                console.log(
-                  '🎯 Set dice to final position for:',
-                  gameState.category,
-                );
-              } else {
-                console.log('⚠️ Category not found:', gameState.category);
-              }
-            } catch (error) {
-              console.error('❌ Error setting dice position:', error);
-            }
-          }
-        });
-      } catch (error) {
-        console.error('❌ Error in universal diceStopped handler:', error);
-      }
-    });
+    // REMOVED: Duplicate diceStopped handler - using single universal handler
 
     socket.on('scoreUpdated', (data) => {
       console.log('Score updated:', data);
