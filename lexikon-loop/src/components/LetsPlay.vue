@@ -1693,8 +1693,31 @@ function rollDice() {
 
     socket.emit('rollDice', {roomId: roomId.value});
 
-    // Don't start local animation - wait for server response for synchronization
-    console.log('🎲 Waiting for server response for synchronized animation...');
+    // Start local animation immediately for better UX
+    console.log('🎬 Starting local dice animation for client...');
+    try {
+      nextTick(() => {
+        // Clear previous results
+        resultText.value = '';
+        subResult.value = '';
+        currentLetter.value = '-';
+
+        // Start dice animation
+        if (!diceRotation.value) {
+          diceRotation.value = {x: 0, y: 0, z: 0};
+        }
+
+        const randomRotation = Math.floor(Math.random() * categories.length);
+        const randomCategory = categories[randomRotation];
+        diceRotation.value = {
+          x: (randomCategory.rotation.x || 0) * 360,
+          y: (randomCategory.rotation.y || 0) * 360,
+          z: (randomCategory.rotation.z || 0) * 360,
+        };
+      });
+    } catch (error) {
+      console.error('❌ Error starting local dice animation:', error);
+    }
 
     // Add fallback for debugging
     setTimeout(() => {
@@ -2231,41 +2254,12 @@ function joinMultiplayerGame() {
           rolling.value = gameState.rolling;
           isJackpot.value = gameState.isJackpot;
 
-          // Start synchronized dice animation
+          // Only update rolling state, don't start new animation
           if (gameState.rolling) {
-            console.log('🎬 Starting synchronized dice animation...');
-            try {
-              // Ensure diceRotation.value exists
-              if (!diceRotation.value) {
-                diceRotation.value = {x: 0, y: 0, z: 0};
-              }
-
-              // Use synchronized rotation based on server result
-              const categoryIndex = categories.findIndex(
-                (cat) => cat.name === gameState.category,
-              );
-              if (categoryIndex !== -1) {
-                const category = categories[categoryIndex];
-                diceRotation.value = {
-                  x: (category.rotation.x || 0) * 360,
-                  y: (category.rotation.y || 0) * 360,
-                  z: (category.rotation.z || 0) * 360,
-                };
-              } else {
-                // Fallback to random if category not found
-                const randomRotation = Math.floor(
-                  Math.random() * categories.length,
-                );
-                const randomCategory = categories[randomRotation];
-                diceRotation.value = {
-                  x: (randomCategory.rotation.x || 0) * 360,
-                  y: (randomCategory.rotation.y || 0) * 360,
-                  z: (randomCategory.rotation.z || 0) * 360,
-                };
-              }
-            } catch (error) {
-              console.error('❌ Error in dice animation:', error);
-            }
+            console.log(
+              '🎲 Server dice roll received - animation already running locally',
+            );
+            // Don't start new animation, just ensure rolling state is set
           }
         });
       } catch (error) {
