@@ -2253,6 +2253,13 @@ function joinMultiplayerGame() {
         playerName: multiplayerPlayerName.value,
         isHost: false,
       });
+
+      // Test if we can receive events
+      console.log('🔌 Testing event reception...');
+      setTimeout(() => {
+        console.log('🔌 Socket connected after timeout:', socket?.connected);
+        console.log('🔌 Socket ID after timeout:', socket?.id);
+      }, 1000);
     });
 
     socket.on('playerJoined', (data) => {
@@ -2274,6 +2281,7 @@ function joinMultiplayerGame() {
         socket?.hasListeners('diceRolled'),
       );
       console.log('🔌 Socket connected:', socket?.connected);
+      console.log('🎬 CLIENT RECEIVED DICE ROLLED EVENT!');
 
       // Prevent duplicate animations
       if (rolling.value) {
