@@ -2241,6 +2241,8 @@ function joinMultiplayerGame() {
 
     socket.on('connect', () => {
       console.log('🔌 Connected to server as client');
+      console.log('🔌 Socket ID:', socket?.id);
+      console.log('🔌 Room ID:', roomId.value);
       isConnected.value = true;
       playerId.value = socket!.id || '';
 
@@ -2266,6 +2268,7 @@ function joinMultiplayerGame() {
         '🔌 Socket events registered:',
         socket?.hasListeners('diceRolled'),
       );
+      console.log('🔌 Socket connected:', socket?.connected);
 
       // Prevent duplicate animations
       if (rolling.value) {
