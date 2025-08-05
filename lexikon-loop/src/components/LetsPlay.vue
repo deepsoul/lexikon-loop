@@ -661,243 +661,268 @@
                 </div>
               </div>
 
-              <!-- Spracheingabe -->
-              <div class="speech-section">
-                <button
-                  class="speech-btn"
-                  @click="
-                    isListening
-                      ? stopSpeechRecognition()
-                      : startSpeechRecognition()
-                  "
-                >
-                  <span v-if="isListening">🎤 Hören…</span>
-                  <span v-else>🎤 Spracheingabe</span>
-                </button>
-                <div v-if="recognizedWord" class="speech-result">
-                  <strong>Erkannt:</strong> {{ recognizedWord }}<br />
-                  <span v-if="recognizedLastLetter">
-                    <strong>Letzter Buchstabe:</strong>
-                    {{ recognizedLastLetter }}
-                  </span>
-                </div>
-
-                <!-- Validierungsergebnis -->
-                <div
-                  v-if="validationResult"
-                  class="validation-result"
-                  :class="{
-                    'validation-success': validationResult.includes('✅'),
-                    'validation-error': validationResult.includes('❌'),
-                    'validation-warning': validationResult.includes('⚠️'),
-                  }"
-                >
-                  <div v-if="isValidating" class="validating-indicator">
-                    🔍 Validiere...
+              <!-- Spracheingabe und manuelle Eingabe -->
+              <div class="input-section">
+                <!-- Spracheingabe -->
+                <div class="speech-section">
+                  <button
+                    class="speech-btn"
+                    @click="
+                      isListening
+                        ? stopSpeechRecognition()
+                        : startSpeechRecognition()
+                    "
+                  >
+                    <span v-if="isListening">🎤 Hören…</span>
+                    <span v-else>🎤 Spracheingabe</span>
+                  </button>
+                  <div v-if="recognizedWord" class="speech-result">
+                    <strong>Erkannt:</strong> {{ recognizedWord }}<br />
+                    <span v-if="recognizedLastLetter">
+                      <strong>Letzter Buchstabe:</strong>
+                      {{ recognizedLastLetter }}
+                    </span>
                   </div>
-                  <div v-else class="validation-message">
-                    {{ validationResult }}
-                    <!-- "Ist trotzdem richtig" Button für Fehler -->
-                    <div
-                      v-if="validationResult.includes('❌')"
-                      class="manual-approval"
-                    >
-                      <button
-                        class="approval-btn"
-                        @click="approveWordManually"
-                        title="Wort genehmigen"
+
+                  <!-- Validierungsergebnis -->
+                  <div
+                    v-if="validationResult"
+                    class="validation-result"
+                    :class="{
+                      'validation-success': validationResult.includes('✅'),
+                      'validation-error': validationResult.includes('❌'),
+                      'validation-warning': validationResult.includes('⚠️'),
+                    }"
+                  >
+                    <div v-if="isValidating" class="validating-indicator">
+                      🔍 Validiere...
+                    </div>
+                    <div v-else class="validation-message">
+                      {{ validationResult }}
+                      <!-- "Ist trotzdem richtig" Button für Fehler -->
+                      <div
+                        v-if="validationResult.includes('❌')"
+                        class="manual-approval"
                       >
-                        ✅ Wort genehmigen
-                      </button>
+                        <button
+                          class="approval-btn"
+                          @click="approveWordManually"
+                          title="Wort genehmigen"
+                        >
+                          ✅ Wort genehmigen
+                        </button>
+                        <button
+                          class="approval-btn reject"
+                          @click="rejectWord"
+                          title="Wort ablehnen"
+                        >
+                          ❌ Wort ablehnen
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Manuelle Texteingabe -->
+                  <div class="manual-input-section">
+                    <div class="input-group">
+                      <input
+                        v-model="manualWord"
+                        class="manual-input"
+                        placeholder="Begriff manuell eingeben..."
+                        @keyup.enter="submitManualWord"
+                      />
                       <button
-                        class="approval-btn reject"
-                        @click="rejectWord"
-                        title="Wort ablehnen"
+                        class="submit-btn"
+                        @click="submitManualWord"
+                        :disabled="!manualWord.trim()"
                       >
-                        ❌ Wort ablehnen
+                        ✅ Eingeben
                       </button>
+                    </div>
+                    <div v-if="manualWord" class="manual-result">
+                      <strong>Eingegeben:</strong> {{ manualWord }}
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Spielsteuerung -->
-            <div class="game-controls">
-              <!-- Timer-Bereich -->
-              <div class="timer-section">
-                <div
-                  class="timer-display"
-                  v-if="timerActive || timeLeft < timerDuration"
-                >
-                  <div class="timer-time">{{ timeLeft }}s</div>
-                  <div class="timer-bar">
-                    <div
-                      class="timer-progress"
-                      :style="timerProgressStyle"
-                    ></div>
+              <!-- Spielsteuerung -->
+              <div class="game-controls">
+                <!-- Timer-Bereich -->
+                <div class="timer-section">
+                  <div
+                    class="timer-display"
+                    v-if="timerActive || timeLeft < timerDuration"
+                  >
+                    <div class="timer-time">{{ timeLeft }}s</div>
+                    <div class="timer-bar">
+                      <div
+                        class="timer-progress"
+                        :style="timerProgressStyle"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div class="timer-buttons">
+                    <button
+                      class="timer-btn"
+                      :class="{'timer-active': timerActive}"
+                      @click="toggleTimer"
+                    >
+                      <span v-if="timerActive">⏸️ Pause</span>
+                      <span v-else>▶️ Start</span>
+                    </button>
+                    <button class="timer-btn" @click="resetGameTimer">
+                      🔄 Reset
+                    </button>
                   </div>
                 </div>
 
-                <div class="timer-buttons">
-                  <button
-                    class="timer-btn"
-                    :class="{'timer-active': timerActive}"
-                    @click="toggleTimer"
+                <!-- Spieler-Navigation -->
+                <div class="player-navigation">
+                  <button class="nav-btn" @click="switchPlayer('prev')">
+                    ← Vorheriger
+                  </button>
+                  <button class="nav-btn" @click="switchPlayer('next')">
+                    Nächster →
+                  </button>
+                </div>
+
+                <!-- Punkte-Steuerung -->
+                <div class="points-controls">
+                  <button class="points-btn" @click="addPoints(1)">
+                    +1 Punkt
+                  </button>
+                  <button class="points-btn" @click="addPoints(2)">
+                    +2 Punkte
+                  </button>
+                  <button class="points-btn negative" @click="addPoints(-1)">
+                    -1 Punkt
+                  </button>
+                  <button class="points-btn reset" @click="resetPoints">
+                    Reset Punkte
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spielregeln -->
+            <div class="rules-section">
+              <h3 class="section-title">Spielregeln</h3>
+              <ul class="rules-list">
+                <li>
+                  <strong>Würfle</strong> und beachte die angezeigte Kategorie
+                </li>
+                <li>
+                  Bei <span class="jackpot-highlight">JACKPOT</span>: Wähle frei
+                  Kategorie & Anfangsbuchstabe
+                </li>
+                <li>
+                  Bei anderen Kategorien: Beginne mit dem letzten Buchstaben des
+                  vorherigen Begriffs
+                </li>
+                <li>
+                  Bei korrekter Antwort: Punkte erhalten (1 Punkt normal, 2 für
+                  Jackpot)
+                </li>
+                <li>Nach deinem Zug: Klicke auf "Nächster Spieler"</li>
+                <li>
+                  <span class="speed-info"
+                    >⚡ Bei Speed-Runden (10 oder 15 Sekunden) gibt es für jede
+                    richtige Antwort automatisch 2 Punkte!</span
                   >
-                    <span v-if="timerActive">⏸️ Pause</span>
-                    <span v-else>▶️ Start</span>
-                  </button>
-                  <button class="timer-btn" @click="resetGameTimer">
-                    🔄 Reset
-                  </button>
-                </div>
-              </div>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-              <!-- Spieler-Navigation -->
-              <div class="player-navigation">
-                <button class="nav-btn" @click="switchPlayer('prev')">
-                  ← Vorheriger
+          <!-- Spieler hinzufügen Dialog -->
+          <div v-if="showAddPlayer" class="add-player-modal">
+            <div class="add-player-card">
+              <label class="modal-label">Spielername:</label>
+              <input
+                v-model="newPlayerName"
+                @keyup.enter="confirmAddPlayer"
+                class="modal-input"
+                placeholder="Name eingeben"
+                autofocus
+              />
+              <div class="modal-buttons">
+                <button class="modal-btn primary" @click="confirmAddPlayer">
+                  Hinzufügen
                 </button>
-                <button class="nav-btn" @click="switchPlayer('next')">
-                  Nächster →
-                </button>
-              </div>
-
-              <!-- Punkte-Steuerung -->
-              <div class="points-controls">
-                <button class="points-btn" @click="addPoints(1)">
-                  +1 Punkt
-                </button>
-                <button class="points-btn" @click="addPoints(2)">
-                  +2 Punkte
-                </button>
-                <button class="points-btn negative" @click="addPoints(-1)">
-                  -1 Punkt
-                </button>
-                <button class="points-btn reset" @click="resetPoints">
-                  Reset Punkte
+                <button class="modal-btn secondary" @click="cancelAddPlayer">
+                  Abbrechen
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Spielregeln -->
-          <div class="rules-section">
-            <h3 class="section-title">Spielregeln</h3>
-            <ul class="rules-list">
-              <li>
-                <strong>Würfle</strong> und beachte die angezeigte Kategorie
-              </li>
-              <li>
-                Bei <span class="jackpot-highlight">JACKPOT</span>: Wähle frei
-                Kategorie & Anfangsbuchstabe
-              </li>
-              <li>
-                Bei anderen Kategorien: Beginne mit dem letzten Buchstaben des
-                vorherigen Begriffs
-              </li>
-              <li>
-                Bei korrekter Antwort: Punkte erhalten (1 Punkt normal, 2 für
-                Jackpot)
-              </li>
-              <li>Nach deinem Zug: Klicke auf "Nächster Spieler"</li>
-              <li>
-                <span class="speed-info"
-                  >⚡ Bei Speed-Runden (10 oder 15 Sekunden) gibt es für jede
-                  richtige Antwort automatisch 2 Punkte!</span
-                >
-              </li>
-            </ul>
-          </div>
-        </div>
+          <!-- Multiplayer Join Modal -->
+          <div v-if="showJoinModal" class="add-player-modal">
+            <div class="add-player-card">
+              <h3 class="modal-title">🎮 Multiplayer beitreten</h3>
 
-        <!-- Spieler hinzufügen Dialog -->
-        <div v-if="showAddPlayer" class="add-player-modal">
-          <div class="add-player-card">
-            <label class="modal-label">Spielername:</label>
-            <input
-              v-model="newPlayerName"
-              @keyup.enter="confirmAddPlayer"
-              class="modal-input"
-              placeholder="Name eingeben"
-              autofocus
-            />
-            <div class="modal-buttons">
-              <button class="modal-btn primary" @click="confirmAddPlayer">
-                Hinzufügen
-              </button>
-              <button class="modal-btn secondary" @click="cancelAddPlayer">
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Multiplayer Join Modal -->
-        <div v-if="showJoinModal" class="add-player-modal">
-          <div class="add-player-card">
-            <h3 class="modal-title">🎮 Multiplayer beitreten</h3>
-
-            <div class="qr-scanner-section">
-              <h4>QR-Code scannen:</h4>
-              <div class="qr-scanner-container">
-                <div id="qr-scanner" class="qr-scanner"></div>
-                <p class="scanner-instruction">
-                  Richte die Kamera auf den QR-Code des Hosts
-                </p>
-                <div class="scanner-status" v-if="scannerStatus">
-                  {{ scannerStatus }}
+              <div class="qr-scanner-section">
+                <h4>QR-Code scannen:</h4>
+                <div class="qr-scanner-container">
+                  <div id="qr-scanner" class="qr-scanner"></div>
+                  <p class="scanner-instruction">
+                    Richte die Kamera auf den QR-Code des Hosts
+                  </p>
+                  <div class="scanner-status" v-if="scannerStatus">
+                    {{ scannerStatus }}
+                  </div>
+                  <button
+                    v-if="!scannerActive"
+                    class="scanner-start-btn"
+                    @click="startQRScanner"
+                  >
+                    📷 Scanner starten
+                  </button>
                 </div>
+              </div>
+
+              <div class="manual-join-section">
+                <h4>Oder manuell verbinden:</h4>
+                <div class="form-group">
+                  <label class="modal-label">Spielername:</label>
+                  <input
+                    v-model="joinPlayerName"
+                    class="modal-input"
+                    placeholder="Dein Name"
+                    autofocus
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="modal-label">Host-ID:</label>
+                  <input
+                    v-model="hostId"
+                    class="modal-input"
+                    placeholder="Host-ID eingeben"
+                  />
+                </div>
+              </div>
+
+              <div class="modal-buttons">
+                <button class="modal-btn primary" @click="joinMultiplayerGame">
+                  Beitreten
+                </button>
                 <button
-                  v-if="!scannerActive"
-                  class="scanner-start-btn"
-                  @click="startQRScanner"
+                  class="modal-btn secondary"
+                  @click="showJoinModal = false"
                 >
-                  📷 Scanner starten
+                  Abbrechen
                 </button>
               </div>
             </div>
-
-            <div class="manual-join-section">
-              <h4>Oder manuell verbinden:</h4>
-              <div class="form-group">
-                <label class="modal-label">Spielername:</label>
-                <input
-                  v-model="joinPlayerName"
-                  class="modal-input"
-                  placeholder="Dein Name"
-                  autofocus
-                />
-              </div>
-              <div class="form-group">
-                <label class="modal-label">Host-ID:</label>
-                <input
-                  v-model="hostId"
-                  class="modal-input"
-                  placeholder="Host-ID eingeben"
-                />
-              </div>
-            </div>
-
-            <div class="modal-buttons">
-              <button class="modal-btn primary" @click="joinMultiplayerGame">
-                Beitreten
-              </button>
-              <button
-                class="modal-btn secondary"
-                @click="showJoinModal = false"
-              >
-                Abbrechen
-              </button>
-            </div>
           </div>
-        </div>
 
-        <!-- Zurück zur Startseite -->
-        <button class="back-home-btn" @click="router.push('/')">
-          Zurück zur Startseite
-        </button>
+          <!-- Zurück zur Startseite -->
+          <button class="back-home-btn" @click="router.push('/')">
+            Zurück zur Startseite
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1504,6 +1529,59 @@ function rejectWord() {
   }
 }
 
+// Manuelle Wort-Eingabe
+function submitManualWord() {
+  if (manualWord.value.trim()) {
+    console.log('📝 Manuelle Eingabe:', manualWord.value);
+
+    // Wort zur Validierung setzen
+    recognizedWord.value = manualWord.value.trim();
+    recognizedLastLetter.value = manualWord.value
+      .trim()
+      .charAt(manualWord.value.trim().length - 1);
+
+    // Wort validieren
+    const validation = validateWord(
+      manualWord.value.trim(),
+      currentCategory.value,
+      currentLetter.value,
+    );
+
+    if (validation.valid) {
+      // Wort zur verwendeten Liste hinzufügen
+      usedWords.value.push(manualWord.value.trim().toLowerCase());
+
+      // Punkte geben
+      addPoints(1);
+
+      // Erfolgsmeldung anzeigen
+      validationResult.value = `✅ "${manualWord.value.trim()}" wurde genehmigt! +1 Punkt`;
+
+      // Sound abspielen
+      playSound('success');
+
+      // Nächsten Spieler
+      switchPlayer('next');
+    } else {
+      // Fehlermeldung anzeigen
+      validationResult.value = `❌ "${manualWord.value.trim()}": ${
+        validation.reason
+      }`;
+      playSound('timer');
+    }
+
+    // Eingabefeld leeren
+    manualWord.value = '';
+
+    // Nach 3 Sekunden zurücksetzen
+    setTimeout(() => {
+      validationResult.value = '';
+      recognizedWord.value = '';
+      recognizedLastLetter.value = '';
+    }, 3000);
+  }
+}
+
 // Multiplayer Panel Toggle
 function toggleMultiplayerPanel() {
   showMultiplayerPanel.value = !showMultiplayerPanel.value;
@@ -1848,6 +1926,7 @@ const validationResult = ref('');
 const isValidating = ref(false);
 const usedWords = ref<string[]>([]);
 const currentCategory = ref('');
+const manualWord = ref('');
 let recognition: any = null;
 
 // Speech Recognition Variables
@@ -4116,6 +4195,64 @@ function getCurrentPlayerScore() {
 
   .approval-btn.reject:hover {
     background: #dc2626;
+  }
+
+  /* Manuelle Eingabe */
+  .manual-input-section {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .manual-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .manual-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+
+  .submit-btn {
+    padding: 0.75rem 1rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background: #059669;
+  }
+
+  .submit-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  .manual-result {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #dbeafe;
+    border-radius: 4px;
+    font-size: 0.9rem;
   }
 
   /* Multiplayer Toggle Button */
