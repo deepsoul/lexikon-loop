@@ -4408,63 +4408,6 @@ function getCurrentPlayerScore() {
   }
 
   /* Responsive Design für manuelle Eingabe - NEUE VERSION */
-  @media (max-width: 1024px) {
-    .manual-input-section-new {
-      margin-top: 1.5rem;
-      padding: 1.5rem;
-      max-width: 100%;
-    }
-
-    .input-icon-new {
-      font-size: 2rem;
-    }
-
-    .input-title-new {
-      font-size: 1.3rem;
-    }
-
-    .manual-input-new {
-      padding: 1.25rem 1.5rem;
-      font-size: 1.1rem;
-      min-height: 55px;
-      max-width: 100%;
-    }
-
-    .manual-input-new::placeholder {
-      font-size: 1.1rem;
-    }
-
-    .submit-btn-new {
-      padding: 1.25rem 1.5rem;
-      font-size: 1.1rem;
-      min-height: 55px;
-      max-width: 100%;
-    }
-
-    .btn-icon-new {
-      font-size: 1.3rem;
-    }
-
-    .btn-text-new {
-      font-size: 1.1rem;
-    }
-
-    .result-icon-new {
-      font-size: 1.5rem;
-    }
-
-    .result-label-new {
-      font-size: 0.9rem;
-    }
-
-    .result-word-new {
-      font-size: 1.2rem;
-    }
-
-    .manual-result-new {
-      max-width: 100%;
-    }
-  }
 
   @media (max-width: 768px) {
     .manual-input-section-new {
@@ -4737,6 +4680,751 @@ function getCurrentPlayerScore() {
   .points-btn {
     font-size: 0.9rem;
     padding: 0.6rem 0.8rem;
+  }
+}
+
+// @media (min-width: 769px) {
+//   .manual-input-section-new {
+//     margin-top: 1.5rem;
+//     padding: 1.5rem;
+//     max-width: 100%;
+//   }
+
+//   .input-icon-new {
+//     font-size: 2rem;
+//   }
+
+//   .input-title-new {
+//     font-size: 1.3rem;
+//   }
+
+//   .manual-input-new {
+//     padding: 1.25rem 1.5rem;
+//     font-size: 1.1rem;
+//     min-height: 55px;
+//     max-width: 100%;
+//   }
+
+//   .manual-input-new::placeholder {
+//     font-size: 1.1rem;
+//   }
+
+//   .submit-btn-new {
+//     padding: 1.25rem 1.5rem;
+//     font-size: 1.1rem;
+//     min-height: 55px;
+//     max-width: 100%;
+//   }
+
+//   .btn-icon-new {
+//     font-size: 1.3rem;
+//   }
+
+//   .btn-text-new {
+//     font-size: 1.1rem;
+//   }
+
+//   .result-icon-new {
+//     font-size: 1.5rem;
+//   }
+
+//   .result-label-new {
+//     font-size: 0.9rem;
+//   }
+
+//   .result-word-new {
+//     font-size: 1.2rem;
+//   }
+
+//   .manual-result-new {
+//     max-width: 100%;
+//   }
+// }
+@media (min-width: 769px) {
+  .main-card {
+    padding: 24px 16px 20px 16px;
+    margin: 0 8px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .game-title-animated {
+    font-size: 1.8rem;
+  }
+
+  .subtitle-animated {
+    font-size: 1rem;
+  }
+
+  .timer-settings {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .timer-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .players-list {
+    gap: 0.25rem;
+  }
+
+  .player-item {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .player-info {
+    gap: 0.5rem;
+  }
+
+  .player-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+
+  .player-name {
+    font-size: 0.9rem;
+  }
+
+  .player-score {
+    font-size: 0.9rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .action-btn {
+    font-size: 0.9rem;
+    padding: 0.2rem;
+  }
+
+  .dice-container {
+    width: 160px;
+    height: 160px;
+  }
+
+  .dice-face {
+    width: 160px;
+    height: 160px;
+    font-size: 1.4rem;
+    padding: 16px;
+  }
+
+  .roll-btn {
+    font-size: 1.1rem;
+    padding: 0.8rem 1.5rem;
+    min-width: 180px;
+  }
+
+  .result-category {
+    font-size: 1.6rem;
+  }
+
+  .result-description {
+    font-size: 1rem;
+  }
+
+  .current-letter {
+    font-size: 2.5rem;
+    padding: 0.4rem 0.8rem;
+    min-width: 70px;
+  }
+
+  .game-controls {
+    gap: 1rem;
+  }
+
+  .timer-time {
+    font-size: 2rem;
+  }
+
+  .timer-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .timer-btn {
+    width: 100%;
+  }
+
+  .player-navigation {
+    flex-direction: column;
+  }
+
+  .nav-btn {
+    max-width: none;
+  }
+
+  .points-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .rules-section {
+    padding: 1rem;
+  }
+
+  .rules-list li {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Multiplayer responsive */
+  .multiplayer-section {
+    padding: 1rem;
+  }
+
+  .multiplayer-controls {
+    flex-direction: column;
+  }
+
+  .multiplayer-btn {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .multiplayer-player {
+    font-size: 0.9rem;
+  }
+
+  .qr-code,
+  .qr-scanner {
+    width: 150px;
+    height: 150px;
+  }
+
+  .game-status p {
+    font-size: 0.85rem;
+  }
+
+  /* Share Game Section */
+  .share-game-section {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px solid #e0e7ff;
+  }
+
+  .share-game-section h4 {
+    margin-bottom: 0.75rem;
+    color: #1e293b;
+    font-size: 1rem;
+  }
+
+  .share-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .share-btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 100px;
+  }
+
+  .share-btn.whatsapp {
+    background: #25d366;
+    color: #fff;
+  }
+
+  .share-btn.whatsapp:hover {
+    background: #128c7e;
+  }
+
+  .share-btn.email {
+    background: #ea4335;
+    color: #fff;
+  }
+
+  .share-btn.email:hover {
+    background: #d32f2f;
+  }
+
+  .share-btn.copy {
+    background: #64748b;
+    color: #fff;
+  }
+
+  .share-btn.copy:hover {
+    background: #475569;
+  }
+
+  .join-link-info {
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .join-link-info p {
+    margin: 0.25rem 0;
+    word-break: break-all;
+  }
+
+  .join-link-info code {
+    background: #e2e8f0;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
+  }
+
+  /* Manuelle Genehmigung Button */
+  .manual-approval {
+    margin-top: 0.75rem;
+  }
+
+  .approval-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .approval-btn:hover {
+    background: #059669;
+    transform: translateY(-1px);
+  }
+
+  .approval-btn:active {
+    transform: translateY(0);
+  }
+
+  .approval-btn.reject {
+    background: #ef4444;
+  }
+
+  .approval-btn.reject:hover {
+    background: #dc2626;
+  }
+
+  /* Manuelle Eingabe - NEUE VERSION - Groß, Luftig & Responsiv */
+  .manual-input-section-new {
+    margin-top: 2rem;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 24px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .manual-input-section-new:hover {
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+  }
+
+  .manual-input-header-new {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+  }
+
+  .input-icon-new {
+    font-size: 3rem;
+    animation: bounce 2s infinite;
+  }
+
+  .input-title-new {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+    text-align: center;
+  }
+
+  .input-group-new {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-direction: column;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .input-wrapper-new {
+    flex: 1;
+    position: relative;
+  }
+
+  .manual-input-new {
+    width: 100%;
+    padding: 2rem 2.5rem;
+    border: 4px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: #ffffff;
+    color: #1e293b;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+    min-height: 80px;
+  }
+
+  .manual-input-new:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
+    transform: translateY(-3px);
+  }
+
+  .manual-input-new::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+    font-size: 1.4rem;
+  }
+
+  .input-focus-border-new {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  .manual-input-new:focus + .input-focus-border-new {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3);
+  }
+
+  .submit-btn-new {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem 3rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.5);
+    min-height: 80px;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .submit-btn-new:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.6);
+  }
+
+  .submit-btn-new:active:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  .submit-btn-new:disabled {
+    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-icon-new {
+    font-size: 2rem;
+  }
+
+  .btn-text-new {
+    font-weight: 800;
+    font-size: 1.5rem;
+  }
+
+  .manual-result-new {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 20px;
+    border: 3px solid #93c5fd;
+    animation: slideIn 0.3s ease;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .result-icon-new {
+    font-size: 2.5rem;
+    animation: pulse 2s infinite;
+  }
+
+  .result-content-new {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .result-label-new {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1e40af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .result-word-new {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #1e293b;
+  }
+
+  /* Responsive Design für manuelle Eingabe - NEUE VERSION */
+
+  @media (max-width: 768px) {
+    .manual-input-section-new {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    .input-icon-new {
+      font-size: 2rem;
+    }
+
+    .input-title-new {
+      font-size: 1.3rem;
+    }
+
+    .manual-input-new {
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+      min-height: 55px;
+    }
+
+    .manual-input-new::placeholder {
+      font-size: 1.1rem;
+    }
+
+    .submit-btn-new {
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+      min-height: 55px;
+    }
+
+    .btn-icon-new {
+      font-size: 1.3rem;
+    }
+
+    .btn-text-new {
+      font-size: 1.1rem;
+    }
+
+    .result-icon-new {
+      font-size: 1.5rem;
+    }
+
+    .result-label-new {
+      font-size: 0.9rem;
+    }
+
+    .result-word-new {
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .manual-input-section-new {
+      margin-top: 1rem;
+      padding: 1.25rem;
+    }
+
+    .input-icon-new {
+      font-size: 1.8rem;
+    }
+
+    .input-title-new {
+      font-size: 1.2rem;
+    }
+
+    .manual-input-new {
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      min-height: 50px;
+    }
+
+    .manual-input-new::placeholder {
+      font-size: 1rem;
+    }
+
+    .submit-btn-new {
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      min-height: 50px;
+    }
+
+    .btn-icon-new {
+      font-size: 1.2rem;
+    }
+
+    .btn-text-new {
+      font-size: 1rem;
+    }
+
+    .result-icon-new {
+      font-size: 1.3rem;
+    }
+
+    .result-label-new {
+      font-size: 0.85rem;
+    }
+
+    .result-word-new {
+      font-size: 1.1rem;
+    }
+  }
+
+  /* Animations */
+  @keyframes bounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-5px);
+    }
+    60% {
+      transform: translateY(-3px);
+    }
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Multiplayer Toggle Button */
+  .multiplayer-toggle {
+    margin-bottom: 1rem;
+  }
+
+  .toggle-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .toggle-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  .toggle-btn.expanded {
+    background: #1d4ed8;
+  }
+
+  .toggle-icon {
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+  }
+
+  .toggle-btn.expanded .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  /* Multiplayer Panel */
+  .multiplayer-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Immer sichtbarer QR-Code */
+  .always-visible-qr {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .always-visible-qr .qr-code-container {
+    text-align: center;
+  }
+
+  .always-visible-qr h4 {
+    margin: 0 0 0.5rem 0;
+    color: #374151;
+    font-size: 0.9rem;
+  }
+
+  .always-visible-qr .qr-instruction {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.8rem;
+    color: #6b7280;
   }
 }
 
