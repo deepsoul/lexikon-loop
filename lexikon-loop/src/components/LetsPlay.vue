@@ -724,23 +724,37 @@
 
                   <!-- Manuelle Texteingabe -->
                   <div class="manual-input-section">
+                    <div class="manual-input-header">
+                      <div class="input-icon">✍️</div>
+                      <h4 class="input-title">Manuelle Eingabe</h4>
+                    </div>
+
                     <div class="input-group">
-                      <input
-                        v-model="manualWord"
-                        class="manual-input"
-                        placeholder="Begriff manuell eingeben..."
-                        @keyup.enter="submitManualWord"
-                      />
+                      <div class="input-wrapper">
+                        <input
+                          v-model="manualWord"
+                          class="manual-input"
+                          placeholder="Dein Begriff hier eingeben..."
+                          @keyup.enter="submitManualWord"
+                        />
+                        <div class="input-focus-border"></div>
+                      </div>
                       <button
                         class="submit-btn"
                         @click="submitManualWord"
                         :disabled="!manualWord.trim()"
                       >
-                        ✅ Eingeben
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">Eingeben</span>
                       </button>
                     </div>
+
                     <div v-if="manualWord" class="manual-result">
-                      <strong>Eingegeben:</strong> {{ manualWord }}
+                      <div class="result-icon">📝</div>
+                      <div class="result-content">
+                        <span class="result-label">Eingegeben:</span>
+                        <span class="result-word">{{ manualWord }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -4208,62 +4222,316 @@ function getCurrentPlayerScore() {
     background: #dc2626;
   }
 
-  /* Manuelle Eingabe */
+  /* Manuelle Eingabe - Groß, Luftig & Responsiv */
   .manual-input-section {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 8px;
+    margin-top: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
     border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .manual-input-section:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+  }
+
+  .manual-input-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .input-icon {
+    font-size: 2.5rem;
+    animation: bounce 2s infinite;
+  }
+
+  .input-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
   }
 
   .input-group {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-direction: column;
+  }
+
+  .input-wrapper {
+    flex: 1;
+    position: relative;
   }
 
   .manual-input {
-    flex: 1;
-    padding: 0.75rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: border-color 0.2s;
+    width: 100%;
+    padding: 1.5rem 2rem;
+    border: 3px solid #e2e8f0;
+    border-radius: 16px;
+    font-size: 1.25rem;
+    font-weight: 500;
+    background: #ffffff;
+    color: #1e293b;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    min-height: 60px;
   }
 
   .manual-input:focus {
     outline: none;
     border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .manual-input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 1.2rem;
+  }
+
+  .input-focus-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 16px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  .manual-input:focus + .input-focus-border {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
   }
 
   .submit-btn {
-    padding: 0.75rem 1rem;
-    background: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    border-radius: 16px;
+    font-size: 1.2rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    min-height: 60px;
+    width: 100%;
   }
 
   .submit-btn:hover:not(:disabled) {
-    background: #059669;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(16, 185, 129, 0.5);
+  }
+
+  .submit-btn:active:not(:disabled) {
+    transform: translateY(-1px);
   }
 
   .submit-btn:disabled {
-    background: #9ca3af;
+    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-icon {
+    font-size: 1.5rem;
+  }
+
+  .btn-text {
+    font-weight: 700;
+    font-size: 1.2rem;
   }
 
   .manual-result {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    background: #dbeafe;
-    border-radius: 4px;
-    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 16px;
+    border: 2px solid #93c5fd;
+    animation: slideIn 0.3s ease;
+  }
+
+  .result-icon {
+    font-size: 2rem;
+    animation: pulse 2s infinite;
+  }
+
+  .result-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .result-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e40af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .result-word {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  /* Responsive Design für manuelle Eingabe */
+  @media (max-width: 768px) {
+    .manual-input-section {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    .input-icon {
+      font-size: 2rem;
+    }
+
+    .input-title {
+      font-size: 1.3rem;
+    }
+
+    .manual-input {
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+      min-height: 55px;
+    }
+
+    .manual-input::placeholder {
+      font-size: 1.1rem;
+    }
+
+    .submit-btn {
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+      min-height: 55px;
+    }
+
+    .btn-icon {
+      font-size: 1.3rem;
+    }
+
+    .btn-text {
+      font-size: 1.1rem;
+    }
+
+    .result-icon {
+      font-size: 1.5rem;
+    }
+
+    .result-label {
+      font-size: 0.9rem;
+    }
+
+    .result-word {
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .manual-input-section {
+      margin-top: 1rem;
+      padding: 1.25rem;
+    }
+
+    .input-icon {
+      font-size: 1.8rem;
+    }
+
+    .input-title {
+      font-size: 1.2rem;
+    }
+
+    .manual-input {
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      min-height: 50px;
+    }
+
+    .manual-input::placeholder {
+      font-size: 1rem;
+    }
+
+    .submit-btn {
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      min-height: 50px;
+    }
+
+    .btn-icon {
+      font-size: 1.2rem;
+    }
+
+    .btn-text {
+      font-size: 1rem;
+    }
+
+    .result-icon {
+      font-size: 1.3rem;
+    }
+
+    .result-label {
+      font-size: 0.85rem;
+    }
+
+    .result-word {
+      font-size: 1.1rem;
+    }
+  }
+
+  /* Animations */
+  @keyframes bounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-5px);
+    }
+    60% {
+      transform: translateY(-3px);
+    }
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* Multiplayer Toggle Button */
