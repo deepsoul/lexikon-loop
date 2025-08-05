@@ -723,37 +723,37 @@
                   </div>
 
                   <!-- Manuelle Texteingabe -->
-                  <div class="manual-input-section">
-                    <div class="manual-input-header">
-                      <div class="input-icon">✍️</div>
-                      <h4 class="input-title">Manuelle Eingabe</h4>
+                  <div class="manual-input-section-new">
+                    <div class="manual-input-header-new">
+                      <div class="input-icon-new">✍️</div>
+                      <h4 class="input-title-new">Manuelle Eingabe</h4>
                     </div>
 
-                    <div class="input-group">
-                      <div class="input-wrapper">
+                    <div class="input-group-new">
+                      <div class="input-wrapper-new">
                         <input
                           v-model="manualWord"
-                          class="manual-input"
+                          class="manual-input-new"
                           placeholder="Dein Begriff hier eingeben..."
                           @keyup.enter="submitManualWord"
                         />
-                        <div class="input-focus-border"></div>
+                        <div class="input-focus-border-new"></div>
                       </div>
                       <button
-                        class="submit-btn"
+                        class="submit-btn-new"
                         @click="submitManualWord"
                         :disabled="!manualWord.trim()"
                       >
-                        <span class="btn-icon">🚀</span>
-                        <span class="btn-text">Eingeben</span>
+                        <span class="btn-icon-new">🚀</span>
+                        <span class="btn-text-new">Eingeben</span>
                       </button>
                     </div>
 
-                    <div v-if="manualWord" class="manual-result">
-                      <div class="result-icon">📝</div>
-                      <div class="result-content">
-                        <span class="result-label">Eingegeben:</span>
-                        <span class="result-word">{{ manualWord }}</span>
+                    <div v-if="manualWord" class="manual-result-new">
+                      <div class="result-icon-new">📝</div>
+                      <div class="result-content-new">
+                        <span class="result-label-new">Eingegeben:</span>
+                        <span class="result-word-new">{{ manualWord }}</span>
                       </div>
                     </div>
                   </div>
@@ -4222,8 +4222,8 @@ function getCurrentPlayerScore() {
     background: #dc2626;
   }
 
-  /* Manuelle Eingabe - Groß, Luftig & Responsiv */
-  .manual-input-section {
+  /* Manuelle Eingabe - NEUE VERSION - Groß, Luftig & Responsiv */
+  .manual-input-section-new {
     margin-top: 2rem;
     padding: 2rem;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -4233,43 +4233,43 @@ function getCurrentPlayerScore() {
     transition: all 0.3s ease;
   }
 
-  .manual-input-section:hover {
+  .manual-input-section-new:hover {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
     transform: translateY(-3px);
   }
 
-  .manual-input-header {
+  .manual-input-header-new {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
   }
 
-  .input-icon {
+  .input-icon-new {
     font-size: 2.5rem;
     animation: bounce 2s infinite;
   }
 
-  .input-title {
+  .input-title-new {
     font-size: 1.5rem;
     font-weight: 700;
     color: #1e293b;
     margin: 0;
   }
 
-  .input-group {
+  .input-group-new {
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
     flex-direction: column;
   }
 
-  .input-wrapper {
+  .input-wrapper-new {
     flex: 1;
     position: relative;
   }
 
-  .manual-input {
+  .manual-input-new {
     width: 100%;
     padding: 1.5rem 2rem;
     border: 3px solid #e2e8f0;
@@ -4283,20 +4283,20 @@ function getCurrentPlayerScore() {
     min-height: 60px;
   }
 
-  .manual-input:focus {
+  .manual-input-new:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
     transform: translateY(-2px);
   }
 
-  .manual-input::placeholder {
+  .manual-input-new::placeholder {
     color: #94a3b8;
     font-weight: 400;
     font-size: 1.2rem;
   }
 
-  .input-focus-border {
+  .input-focus-border-new {
     position: absolute;
     top: 0;
     left: 0;
@@ -4307,11 +4307,11 @@ function getCurrentPlayerScore() {
     transition: all 0.3s ease;
   }
 
-  .manual-input:focus + .input-focus-border {
+  .manual-input-new:focus + .input-focus-border-new {
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
   }
 
-  .submit-btn {
+  .submit-btn-new {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4330,33 +4330,33 @@ function getCurrentPlayerScore() {
     width: 100%;
   }
 
-  .submit-btn:hover:not(:disabled) {
+  .submit-btn-new:hover:not(:disabled) {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
     transform: translateY(-3px);
     box-shadow: 0 8px 28px rgba(16, 185, 129, 0.5);
   }
 
-  .submit-btn:active:not(:disabled) {
+  .submit-btn-new:active:not(:disabled) {
     transform: translateY(-1px);
   }
 
-  .submit-btn:disabled {
+  .submit-btn-new:disabled {
     background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
   }
 
-  .btn-icon {
+  .btn-icon-new {
     font-size: 1.5rem;
   }
 
-  .btn-text {
+  .btn-text-new {
     font-weight: 700;
     font-size: 1.2rem;
   }
 
-  .manual-result {
+  .manual-result-new {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -4368,18 +4368,18 @@ function getCurrentPlayerScore() {
     animation: slideIn 0.3s ease;
   }
 
-  .result-icon {
+  .result-icon-new {
     font-size: 2rem;
     animation: pulse 2s infinite;
   }
 
-  .result-content {
+  .result-content-new {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .result-label {
+  .result-label-new {
     font-size: 1rem;
     font-weight: 700;
     color: #1e40af;
@@ -4387,111 +4387,111 @@ function getCurrentPlayerScore() {
     letter-spacing: 0.5px;
   }
 
-  .result-word {
+  .result-word-new {
     font-size: 1.4rem;
     font-weight: 800;
     color: #1e293b;
   }
 
-  /* Responsive Design für manuelle Eingabe */
+  /* Responsive Design für manuelle Eingabe - NEUE VERSION */
   @media (max-width: 768px) {
-    .manual-input-section {
+    .manual-input-section-new {
       margin-top: 1.5rem;
       padding: 1.5rem;
     }
 
-    .input-icon {
+    .input-icon-new {
       font-size: 2rem;
     }
 
-    .input-title {
+    .input-title-new {
       font-size: 1.3rem;
     }
 
-    .manual-input {
+    .manual-input-new {
       padding: 1.25rem 1.5rem;
       font-size: 1.1rem;
       min-height: 55px;
     }
 
-    .manual-input::placeholder {
+    .manual-input-new::placeholder {
       font-size: 1.1rem;
     }
 
-    .submit-btn {
+    .submit-btn-new {
       padding: 1.25rem 1.5rem;
       font-size: 1.1rem;
       min-height: 55px;
     }
 
-    .btn-icon {
+    .btn-icon-new {
       font-size: 1.3rem;
     }
 
-    .btn-text {
+    .btn-text-new {
       font-size: 1.1rem;
     }
 
-    .result-icon {
+    .result-icon-new {
       font-size: 1.5rem;
     }
 
-    .result-label {
+    .result-label-new {
       font-size: 0.9rem;
     }
 
-    .result-word {
+    .result-word-new {
       font-size: 1.2rem;
     }
   }
 
   @media (max-width: 480px) {
-    .manual-input-section {
+    .manual-input-section-new {
       margin-top: 1rem;
       padding: 1.25rem;
     }
 
-    .input-icon {
+    .input-icon-new {
       font-size: 1.8rem;
     }
 
-    .input-title {
+    .input-title-new {
       font-size: 1.2rem;
     }
 
-    .manual-input {
+    .manual-input-new {
       padding: 1rem 1.25rem;
       font-size: 1rem;
       min-height: 50px;
     }
 
-    .manual-input::placeholder {
+    .manual-input-new::placeholder {
       font-size: 1rem;
     }
 
-    .submit-btn {
+    .submit-btn-new {
       padding: 1rem 1.25rem;
       font-size: 1rem;
       min-height: 50px;
     }
 
-    .btn-icon {
+    .btn-icon-new {
       font-size: 1.2rem;
     }
 
-    .btn-text {
+    .btn-text-new {
       font-size: 1rem;
     }
 
-    .result-icon {
+    .result-icon-new {
       font-size: 1.3rem;
     }
 
-    .result-label {
+    .result-label-new {
       font-size: 0.85rem;
     }
 
-    .result-word {
+    .result-word-new {
       font-size: 1.1rem;
     }
   }
