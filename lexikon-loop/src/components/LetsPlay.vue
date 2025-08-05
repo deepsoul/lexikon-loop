@@ -2246,8 +2246,13 @@ function joinMultiplayerGame() {
       isConnected.value = true;
       playerId.value = socket!.id || '';
 
-      // Don't join room again - JoinGame.vue already did that
-      console.log('🔌 Client already joined room via JoinGame.vue');
+      // Join the room explicitly
+      console.log('🔌 Joining room:', roomId.value);
+      socket?.emit('joinRoom', {
+        roomId: roomId.value,
+        playerName: multiplayerPlayerName.value,
+        isHost: false,
+      });
     });
 
     socket.on('playerJoined', (data) => {
