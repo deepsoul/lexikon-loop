@@ -591,9 +591,16 @@
                       <button
                         class="approval-btn"
                         @click="approveWordManually"
-                        title="Punkte trotzdem geben"
+                        title="Wort genehmigen"
                       >
-                        ✅ Ist trotzdem richtig
+                        ✅ Wort genehmigen
+                      </button>
+                      <button
+                        class="approval-btn reject"
+                        @click="rejectWord"
+                        title="Wort ablehnen"
+                      >
+                        ❌ Wort ablehnen
                       </button>
                     </div>
                   </div>
@@ -1246,19 +1253,94 @@ function cancelAddPlayer() {
   newPlayerName.value = '';
 }
 
-// Manuelle Wort-Genehmigung
+// Neue Wort-Validierung (ohne REST-API)
+function validateWord(word: string, category: string, currentLetter: string) {
+  if (!word || !category || !currentLetter) {
+    return {valid: false, reason: 'Ungültige Eingabe'};
+  }
+
+  const cleanWord = word.trim().toLowerCase();
+  const cleanLetter = currentLetter.toLowerCase();
+
+  // Prüfe ob das Wort mit dem aktuellen Buchstaben beginnt
+  if (!cleanWord.startsWith(cleanLetter)) {
+    return {
+      valid: false,
+      reason: 'Wort muss mit ' + currentLetter + ' beginnen',
+    };
+  }
+
+  // Prüfe Mindestlänge
+  if (cleanWord.length < 3) {
+    return {valid: false, reason: 'Wort muss mindestens 3 Buchstaben haben'};
+  }
+
+  // Prüfe ob das Wort bereits verwendet wurde
+  if (usedWords.value.includes(cleanWord)) {
+    return {valid: false, reason: 'Wort wurde bereits verwendet'};
+  }
+
+  return {valid: true, reason: 'Wort ist gültig'};
+}
+
+// Manuelle Wort-Genehmigung (Verbessert)
 function approveWordManually() {
   if (recognizedWord.value) {
     console.log('✅ Manuelle Genehmigung für:', recognizedWord.value);
 
-    // Punkte geben
-    addPoints(1);
+    // Wort validieren
+    const validation = validateWord(
+      recognizedWord.value,
+      currentCategory.value,
+      currentLetter.value,
+    );
 
-    // Erfolgsmeldung anzeigen
-    validationResult.value = `✅ "${recognizedWord.value}" wurde manuell genehmigt!`;
+    if (validation.valid) {
+      // Wort zur verwendeten Liste hinzufügen
+      usedWords.value.push(recognizedWord.value.toLowerCase());
+
+      // Punkte geben
+      addPoints(1);
+
+      // Erfolgsmeldung anzeigen
+      validationResult.value = `✅ "${recognizedWord.value}" wurde genehmigt! +1 Punkt`;
+
+      // Sound abspielen
+      playSound('success');
+
+      // Nächsten Spieler
+      switchPlayer('next');
+    } else {
+      // Fehlermeldung anzeigen
+      validationResult.value = `❌ "${recognizedWord.value}": ${validation.reason}`;
+      playSound('timer');
+    }
+
+    // Nach 3 Sekunden zurücksetzen
+    setTimeout(() => {
+      validationResult.value = '';
+      recognizedWord.value = '';
+      recognizedLastLetter.value = '';
+    }, 3000);
+  }
+}
+
+// Wort ablehnen
+function rejectWord() {
+  if (recognizedWord.value) {
+    console.log('❌ Wort abgelehnt:', recognizedWord.value);
+
+    // Punkte abziehen
+    addPoints(-1);
+
+    // Fehlermeldung anzeigen
+    validationResult.value = `❌ "${recognizedWord.value}" wurde abgelehnt! -1 Punkt`;
 
     // Sound abspielen
-    playSound('success');
+    playSound('timer');
+
+    // Nächsten Spieler
+    switchPlayer('next');
 
     // Nach 3 Sekunden zurücksetzen
     setTimeout(() => {
@@ -1611,6 +1693,8 @@ const recognizedWord = ref('');
 const recognizedLastLetter = ref('');
 const validationResult = ref('');
 const isValidating = ref(false);
+const usedWords = ref<string[]>([]);
+const currentCategory = ref('');
 let recognition: any = null;
 
 // Speech Recognition Variables
@@ -2697,6 +2781,15 @@ function handleKeydown(e: KeyboardEvent) {
   if (e.code === 'ArrowLeft') {
     switchPlayer('prev');
   }
+}
+
+// Current Player Display (Prominent)
+function getCurrentPlayerName() {
+  return players.value[currentPlayer.value]?.name || '';
+}
+
+function getCurrentPlayerScore() {
+  return players.value[currentPlayer.value]?.score || 0;
 }
 </script>
 
@@ -4249,6 +4342,76 @@ function handleKeydown(e: KeyboardEvent) {
   .points-btn {
     font-size: 0.9rem;
     padding: 0.6rem 0.8rem;
+  }
+}
+
+/* Current Player Display (Prominent) */
+.current-player-display {
+  margin-bottom: 2rem;
+}
+
+.current-player-card {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 12px rgba(30, 41, 59, 0.1);
+}
+
+.current-player-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.current-player-info {
+  flex: 1;
+}
+
+.current-player-label {
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.current-player-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2563eb;
+}
+
+.current-player-score {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.current-player-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  margin-left: 1rem;
+}
+
+.pulse-dot {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
   }
 }
 </style>
