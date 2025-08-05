@@ -2034,37 +2034,15 @@ async function startMultiplayerHost() {
 
       try {
         nextTick(() => {
-          // Clear previous results
-          resultText.value = '';
-          subResult.value = '';
-          currentLetter.value = '-';
-
           // Set rolling state
           rolling.value = gameState.rolling;
           isJackpot.value = gameState.isJackpot;
 
-          // Start animation when server sends diceRolled event
+          // Animation is already running locally, just ensure state is set
           if (gameState.rolling) {
-            console.log('🎬 Starting dice animation from server event...');
-            try {
-              // Ensure diceRotation.value exists
-              if (!diceRotation.value) {
-                diceRotation.value = {x: 0, y: 0, z: 0};
-              }
-
-              // Start random animation
-              const randomRotation = Math.floor(
-                Math.random() * categories.length,
-              );
-              const randomCategory = categories[randomRotation];
-              diceRotation.value = {
-                x: (randomCategory.rotation.x || 0) * 360,
-                y: (randomCategory.rotation.y || 0) * 360,
-                z: (randomCategory.rotation.z || 0) * 360,
-              };
-            } catch (error) {
-              console.error('❌ Error starting dice animation:', error);
-            }
+            console.log(
+              '🎲 Server dice roll received - animation already running locally',
+            );
           }
         });
       } catch (error) {
@@ -2270,28 +2248,11 @@ function joinMultiplayerGame() {
           rolling.value = gameState.rolling;
           isJackpot.value = gameState.isJackpot;
 
-          // Start animation when server sends diceRolled event
+          // Animation is already running locally, just ensure state is set
           if (gameState.rolling) {
-            console.log('🎬 Starting dice animation from server event...');
-            try {
-              // Ensure diceRotation.value exists
-              if (!diceRotation.value) {
-                diceRotation.value = {x: 0, y: 0, z: 0};
-              }
-
-              // Start random animation
-              const randomRotation = Math.floor(
-                Math.random() * categories.length,
-              );
-              const randomCategory = categories[randomRotation];
-              diceRotation.value = {
-                x: (randomCategory.rotation.x || 0) * 360,
-                y: (randomCategory.rotation.y || 0) * 360,
-                z: (randomCategory.rotation.z || 0) * 360,
-              };
-            } catch (error) {
-              console.error('❌ Error starting dice animation:', error);
-            }
+            console.log(
+              '🎲 Server dice roll received - animation already running locally',
+            );
           }
         });
       } catch (error) {
