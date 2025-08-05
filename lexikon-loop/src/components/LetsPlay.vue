@@ -2006,6 +2006,12 @@ async function startMultiplayerHost() {
           playerName: 'Host',
           isHost: true,
         });
+
+        // Test if host is in room
+        setTimeout(() => {
+          console.log('🏠 Host room check - Socket ID:', socket?.id);
+          console.log('🏠 Host room check - Room ID:', generatedRoomId);
+        }, 500);
       }, 100);
     });
 
