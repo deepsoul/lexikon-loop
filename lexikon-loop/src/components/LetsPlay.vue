@@ -1729,8 +1729,8 @@ function startSpeechRecognition() {
       currentLetter.value = recognizedLastLetter.value;
     isListening.value = false;
 
-    // Validiere das Wort gegen die aktuelle Kategorie
-    await validateWord(word);
+    // Wort zur manuellen Validierung bereitstellen
+    console.log('🎤 Wort erkannt:', word);
 
     // Send speech result to server if in multiplayer
     if (socket && roomId.value && isMultiplayerConnected.value) {
@@ -1759,265 +1759,11 @@ function stopSpeechRecognition() {
   isListening.value = false;
 }
 
-// Wort-Validierung gegen die aktuelle Kategorie
-async function validateWord(word: string) {
-  if (
-    !word ||
-    !resultText.value ||
-    resultText.value === 'Bereit zum Würfeln!'
-  ) {
-    return;
-  }
+// REST-API Validierung entfernt - jetzt nur noch manuelle Validierung
 
-  isValidating.value = true;
-  validationResult.value = '';
+// Alte REST-API Validierungsfunktionen entfernt
 
-  try {
-    const category = resultText.value;
-    const validation = await validateWordForCategory(word, category);
-
-    if (validation.isValid) {
-      validationResult.value = `✅ Korrekt! "${word}" ist ein gültiges ${category.toLowerCase()} Wort.`;
-      playSound('success');
-      // Automatisch Punkte geben
-      addPoints(1);
-    } else {
-      validationResult.value = `❌ "${word}" ist kein gültiges ${category.toLowerCase()} Wort. ${
-        validation.reason
-      }`;
-      playSound('timer');
-    }
-  } catch (error) {
-    validationResult.value =
-      '⚠️ Validierung nicht verfügbar. Bitte manuell prüfen.';
-  } finally {
-    isValidating.value = false;
-  }
-}
-
-// Validierung für verschiedene Kategorien
-async function validateWordForCategory(
-  word: string,
-  category: string,
-): Promise<{isValid: boolean; reason?: string}> {
-  const cleanWord = word.toLowerCase().trim();
-
-  switch (category) {
-    case 'STADT':
-      return await validateCity(cleanWord);
-    case 'LAND':
-      return await validateCountry(cleanWord);
-    case 'FLUSS':
-      return await validateRiver(cleanWord);
-    case 'NAME':
-      return await validateName(cleanWord);
-    case 'TIER':
-      return await validateAnimal(cleanWord);
-    case 'JACKPOT':
-      return {isValid: true, reason: 'Jackpot - alle Wörter erlaubt!'};
-    default:
-      return {isValid: false, reason: 'Unbekannte Kategorie'};
-  }
-}
-
-// Stadt-Validierung
-async function validateCity(
-  word: string,
-): Promise<{isValid: boolean; reason?: string}> {
-  try {
-    // Wikipedia API für deutsche Städte
-    const response = await fetch(
-      `https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-        word,
-      )}`,
-    );
-    const data = await response.json();
-
-    if (data.type === 'standard' && data.content_urls?.desktop?.page) {
-      // Prüfe, ob es sich um eine Stadt handelt
-      const content = data.extract?.toLowerCase() || '';
-      const isCity =
-        content.includes('stadt') ||
-        content.includes('gemeinde') ||
-        content.includes('stadt in') ||
-        content.includes('stadt der');
-
-      if (isCity) {
-        return {isValid: true};
-      } else {
-        return {isValid: false, reason: 'Keine bekannte Stadt'};
-      }
-    } else {
-      return {isValid: false, reason: 'Stadt nicht gefunden'};
-    }
-  } catch (error) {
-    // Fallback: Einfache Validierung
-    return validateGermanWord(word, 'Stadt');
-  }
-}
-
-// Land-Validierung
-async function validateCountry(
-  word: string,
-): Promise<{isValid: boolean; reason?: string}> {
-  try {
-    const response = await fetch(
-      `https://restcountries.com/v3.1/name/${encodeURIComponent(word)}`,
-    );
-    const countries = await response.json();
-
-    if (countries.length > 0) {
-      const country = countries[0];
-      const germanName =
-        country.translations?.deu?.common || country.name.common;
-
-      if (
-        germanName.toLowerCase().includes(word) ||
-        word.includes(germanName.toLowerCase())
-      ) {
-        return {isValid: true};
-      }
-    }
-
-    return {isValid: false, reason: 'Land nicht gefunden'};
-  } catch (error) {
-    return validateGermanWord(word, 'Land');
-  }
-}
-
-// Fluss-Validierung
-async function validateRiver(
-  word: string,
-): Promise<{isValid: boolean; reason?: string}> {
-  try {
-    const response = await fetch(
-      `https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-        word,
-      )}`,
-    );
-    const data = await response.json();
-
-    if (data.type === 'standard' && data.content_urls?.desktop?.page) {
-      const content = data.extract?.toLowerCase() || '';
-      const isRiver =
-        content.includes('fluss') ||
-        content.includes('river') ||
-        content.includes('gewässer') ||
-        content.includes('wasserlauf');
-
-      if (isRiver) {
-        return {isValid: true};
-      } else {
-        return {isValid: false, reason: 'Kein bekannter Fluss'};
-      }
-    } else {
-      return {isValid: false, reason: 'Fluss nicht gefunden'};
-    }
-  } catch (error) {
-    return validateGermanWord(word, 'Fluss');
-  }
-}
-
-// Name-Validierung
-async function validateName(
-  word: string,
-): Promise<{isValid: boolean; reason?: string}> {
-  try {
-    // Deutsche Vornamen-Datenbank
-    const response = await fetch(
-      `https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-        word,
-      )}`,
-    );
-    const data = await response.json();
-
-    if (data.type === 'standard' && data.content_urls?.desktop?.page) {
-      const content = data.extract?.toLowerCase() || '';
-      const isName =
-        content.includes('vorname') ||
-        content.includes('name') ||
-        content.includes('person') ||
-        content.includes('männlich') ||
-        content.includes('weiblich');
-
-      if (isName) {
-        return {isValid: true};
-      } else {
-        return {isValid: false, reason: 'Kein bekannter Vorname'};
-      }
-    } else {
-      return {isValid: false, reason: 'Name nicht gefunden'};
-    }
-  } catch (error) {
-    return validateGermanWord(word, 'Name');
-  }
-}
-
-// Tier-Validierung
-async function validateAnimal(
-  word: string,
-): Promise<{isValid: boolean; reason?: string}> {
-  try {
-    const response = await fetch(
-      `https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-        word,
-      )}`,
-    );
-    const data = await response.json();
-
-    if (data.type === 'standard' && data.content_urls?.desktop?.page) {
-      const content = data.extract?.toLowerCase() || '';
-      const isAnimal =
-        content.includes('tier') ||
-        content.includes('animal') ||
-        content.includes('säugetier') ||
-        content.includes('vogel') ||
-        content.includes('fisch') ||
-        content.includes('reptil') ||
-        content.includes('insekten') ||
-        content.includes('amphibien');
-
-      if (isAnimal) {
-        return {isValid: true};
-      } else {
-        return {isValid: false, reason: 'Kein bekanntes Tier'};
-      }
-    } else {
-      return {isValid: false, reason: 'Tier nicht gefunden'};
-    }
-  } catch (error) {
-    return validateGermanWord(word, 'Tier');
-  }
-}
-
-// Fallback-Validierung für deutsche Wörter
-function validateGermanWord(
-  word: string,
-  category: string,
-): {isValid: boolean; reason?: string} {
-  // Einfache Validierung basierend auf Wortlänge und deutschen Zeichen
-  if (word.length < 2) {
-    return {isValid: false, reason: 'Wort zu kurz'};
-  }
-
-  // Prüfe auf deutsche Umlaute und ß
-  const germanChars = /[äöüÄÖÜß]/;
-  const hasGermanChars = germanChars.test(word);
-
-  // Prüfe auf gültige deutsche Buchstaben
-  const validGermanWord = /^[a-zA-ZäöüÄÖÜß\s-]+$/.test(word);
-
-  if (!validGermanWord) {
-    return {isValid: false, reason: 'Enthält ungültige Zeichen'};
-  }
-
-  // Für Fallback akzeptieren wir das Wort, wenn es deutsche Zeichen enthält
-  if (hasGermanChars) {
-    return {isValid: true, reason: 'Fallback-Validierung: Wort akzeptiert'};
-  }
-
-  return {isValid: true, reason: 'Fallback-Validierung: Wort akzeptiert'};
-}
+// Alle alten REST-API Validierungsfunktionen entfernt
 
 // Multiplayer Functions with WebSocket
 async function startMultiplayerHost() {
@@ -4209,6 +3955,14 @@ function getCurrentPlayerScore() {
 
   .approval-btn:active {
     transform: translateY(0);
+  }
+
+  .approval-btn.reject {
+    background: #ef4444;
+  }
+
+  .approval-btn.reject:hover {
+    background: #dc2626;
   }
 
   /* Multiplayer Toggle Button */
