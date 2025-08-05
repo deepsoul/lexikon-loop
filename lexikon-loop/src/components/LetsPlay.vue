@@ -1676,6 +1676,10 @@ function rollDice() {
       return;
     }
 
+    console.log(
+      '📡 Sending rollDice event to server with roomId:',
+      roomId.value,
+    );
     socket.emit('rollDice', {roomId: roomId.value});
 
     // Add fallback for debugging
@@ -2373,6 +2377,10 @@ function joinMultiplayerGame() {
     roomId.value = hostId.value;
     multiplayerStatusText.value = 'Verbunden mit Host';
     multiplayerStatusClass.value = 'status-connected';
+
+    console.log('🔌 Client connected to room:', roomId.value);
+    console.log('🔌 Client socket ID:', socket?.id);
+    console.log('🔌 Client player name:', playerName);
 
     showJoinModal.value = false;
     playSound('success');
