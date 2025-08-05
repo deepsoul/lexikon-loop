@@ -2024,6 +2024,12 @@ async function startMultiplayerHost() {
       console.log('🎲 === SINGLE UNIVERSAL DICE ROLLED EVENT (HOST) ===');
       console.log('📊 Game state:', gameState);
       console.log('🏠 Is Host:', isMultiplayerHost.value);
+      console.log('🔌 Socket connected:', socket?.connected);
+      console.log('🔌 Socket ID:', socket?.id);
+      console.log(
+        '🔌 Socket events registered:',
+        socket?.hasListeners('diceRolled'),
+      );
 
       // Prevent duplicate animations
       if (rolling.value) {
@@ -2251,6 +2257,11 @@ function joinMultiplayerGame() {
       console.log('🏠 Is Host:', isMultiplayerHost.value);
       console.log('🔌 Socket connected:', socket?.connected);
       console.log('🏠 Room ID:', roomId.value);
+      console.log('🔌 Socket ID:', socket?.id);
+      console.log(
+        '🔌 Socket events registered:',
+        socket?.hasListeners('diceRolled'),
+      );
 
       // Prevent duplicate animations
       if (rolling.value) {
