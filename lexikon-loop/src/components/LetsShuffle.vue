@@ -13,8 +13,10 @@
     <div class="game-container">
       <!-- Header -->
       <header class="game-header">
-        <h1 class="game-title">🎲 Lexikon-Loop</h1>
-        <p class="game-subtitle">Das digitale Wortketten-Spiel</p>
+        <router-link to="/">
+          <h1 class="game-title">🎲 Lexikon-Loop</h1>
+          <p class="game-subtitle">Das digitale Wortketten-Spiel</p>
+        </router-link>
       </header>
 
       <!-- Timer Settings -->
@@ -477,6 +479,9 @@ function setTimerDuration(duration: number) {
 }
 
 function toggleTimer() {
+  // Initialize audio context on first user interaction (iOS requirement)
+  initAudioContext();
+
   if (timerActive.value) {
     stopTimer();
   } else {
@@ -521,11 +526,28 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+// Audio context for iOS compatibility
+let audioContext: AudioContext | null = null;
+
+// Initialize audio context on first user interaction
+function initAudioContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
+  }
+  // Resume if suspended (iOS requirement)
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+}
+
 // Sound function
 function playSound(type: 'roll' | 'success' | 'jackpot' | 'timer') {
   try {
-    const audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
+    // Initialize audio context if not exists
+    initAudioContext();
+
+    if (!audioContext) return;
 
     switch (type) {
       case 'roll':
@@ -665,6 +687,9 @@ function playSound(type: 'roll' | 'success' | 'jackpot' | 'timer') {
 function rollDice() {
   if (isRolling.value) return;
 
+  // Initialize audio context on first user interaction (iOS requirement)
+  initAudioContext();
+
   isRolling.value = true;
   showResult.value = false;
   isJackpot.value = false;
@@ -686,7 +711,7 @@ function rollDice() {
     isRolling.value = false;
     showResult.value = true;
     playSound('success');
-  }, 2000);
+  }, 1000);
 }
 
 // Cleanup on unmount

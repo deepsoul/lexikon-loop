@@ -275,28 +275,6 @@
             </svg>
             Würfel & Zubehör kaufen
           </a>
-          <button
-            class="icons-link-btn"
-            @click="router.push('/icons')"
-            title="Alle Icons anzeigen"
-          >
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-              <circle
-                cx="11"
-                cy="11"
-                r="10"
-                stroke="#2563eb"
-                stroke-width="2"
-              />
-              <path
-                d="M7 11h8M11 7v8"
-                stroke="#2563eb"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-            <span class="icons-link-text">Icons</span>
-          </button>
         </div>
       </section>
       <footer class="main-footer">
