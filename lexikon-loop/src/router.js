@@ -3,7 +3,7 @@ import Home from './components/Home.vue';
 import Login from './components/Login.vue';
 import NotFound from './components/NotFound.vue';
 
-const LetsPlay = () => import('./components/LetsPlay.vue');
+const LetsShuffle = () => import('./components/LetsShuffle.vue');
 const IconsPage = () => import('./components/IconsPage.vue');
 const Shop = () => import('./components/Shop.vue');
 const JoinGame = () => import('./components/JoinGame.vue');
@@ -21,8 +21,8 @@ const routes = [
   },
   {
     path: '/lets-play',
-    name: 'LetsPlay',
-    component: LetsPlay,
+    name: 'LetsShuffle',
+    component: LetsShuffle,
     meta: {requiresAuth: true},
   },
   {path: '/icons', name: 'Icons', component: IconsPage},
