@@ -360,7 +360,7 @@
       <div v-if="showResult" class="result-section">
         <div class="result-card" :class="{jackpot: isJackpot}">
           <div class="result-icon">{{ resultIcon }}</div>
-          <div class="result-category">{{ resultCategory }}</div>
+          <h3 class="result-category">{{ resultCategory }}</h3>
           <div class="result-description">{{ resultDescription }}</div>
           <div v-if="currentLetter" class="current-letter">
             <span class="letter-label">Aktueller Buchstabe:</span>
