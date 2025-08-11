@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Social Media Crawlers
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Sitemap
+Sitemap: https://lexikon-loop.de/sitemap.xml
+
+# Crawl-delay for social media bots
+Crawl-delay: 1 
