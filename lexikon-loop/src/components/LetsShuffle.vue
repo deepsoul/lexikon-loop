@@ -51,7 +51,10 @@
           <span v-else>▶️ Start</span>
         </button>
         <button class="timer-control-btn reset" @click="resetTimer">
-          🔄 Reset
+          🔄 Timer Reset
+        </button>
+        <button class="timer-control-btn reset-game" @click="resetGame">
+          🎲 Spiel Reset
         </button>
       </div>
 
@@ -397,6 +400,7 @@ const isRolling = ref(false);
 const showResult = ref(false);
 const currentFace = ref(1);
 const isJackpot = ref(false);
+const lastRolledFace = ref(0); // Speichert den letzten gewürfelten Begriff
 
 // Timer state
 const timerOptions = [10, 15, 30, 45, 60];
@@ -526,6 +530,14 @@ function resetTimer() {
   stopTimer();
   timeLeft.value = timerDuration.value;
   startTimer();
+}
+
+function resetGame() {
+  lastRolledFace.value = 0; // Reset last rolled face
+  currentFace.value = 1;
+  showResult.value = false;
+  isJackpot.value = false;
+  isRolling.value = false;
 }
 
 function formatTime(seconds: number): string {
@@ -705,9 +717,31 @@ function rollDice() {
   // Play roll sound
   playSound('roll');
 
-  // Random result
-  const result = Math.floor(Math.random() * 6) + 1;
+  // Random result - ensure it's different from the last roll
+  let result;
+  if (lastRolledFace.value === 0) {
+    // Erster Wurf - kann alles sein
+    result = Math.floor(Math.random() * 6) + 1;
+  } else {
+    // Folge-Würfe - muss anders sein als der letzte
+    do {
+      result = Math.floor(Math.random() * 6) + 1;
+    } while (result === lastRolledFace.value);
+  }
+
   currentFace.value = result;
+  lastRolledFace.value = result; // Speichere den aktuellen Wurf
+
+  // Log für Debugging
+  console.log(
+    `Gewürfelt: ${result} (${
+      categories[result - 1]?.name || 'Unbekannt'
+    }), Letzter: ${lastRolledFace.value} (${
+      lastRolledFace.value > 0
+        ? categories[lastRolledFace.value - 1]?.name || 'Unbekannt'
+        : 'Erster Wurf'
+    })`,
+  );
 
   // Check if jackpot
   if (result === 6) {
@@ -964,6 +998,11 @@ onUnmounted(() => {
 .timer-control-btn.reset {
   background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
+}
+
+.timer-control-btn.reset-game {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
 }
 
 .dice-section {
