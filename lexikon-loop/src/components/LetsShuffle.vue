@@ -389,6 +389,29 @@
         </ul>
       </div>
     </div>
+
+    <!-- Time Up Dialog -->
+    <div
+      v-if="showTimeUpDialog"
+      class="time-up-overlay"
+      @click="showTimeUpDialog = false"
+    >
+      <div class="time-up-dialog" @click.stop>
+        <div class="time-up-icon">⏰</div>
+        <h2 class="time-up-title">Zeit abgelaufen!</h2>
+        <p class="time-up-message">
+          Die Runde ist beendet. Möchtest du eine neue Runde starten?
+        </p>
+        <div class="time-up-buttons">
+          <button class="time-up-btn restart" @click="restartTimer">
+            🔄 Neue Runde
+          </button>
+          <button class="time-up-btn close" @click="showTimeUpDialog = false">
+            ✖️ Schließen
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -401,6 +424,7 @@ const showResult = ref(false);
 const currentFace = ref(1);
 const isJackpot = ref(false);
 const lastRolledFace = ref(0); // Speichert den letzten gewürfelten Begriff
+const showTimeUpDialog = ref(false); // Zeigt den "Zeit abgelaufen" Dialog an
 
 // Timer state
 const timerOptions = [10, 15, 30, 45, 60];
@@ -506,6 +530,7 @@ function startTimer() {
 
   timerActive.value = true;
   timeLeft.value = timerDuration.value;
+  showTimeUpDialog.value = false; // Schließe den Dialog wenn der Timer startet
 
   timerInterval = window.setInterval(() => {
     timeLeft.value--;
@@ -513,7 +538,7 @@ function startTimer() {
     if (timeLeft.value <= 0) {
       stopTimer();
       playSound('timer');
-      alert('Zeit abgelaufen!');
+      showTimeUpDialog.value = true;
     }
   }, 1000);
 }
@@ -529,6 +554,7 @@ function stopTimer() {
 function resetTimer() {
   stopTimer();
   timeLeft.value = timerDuration.value;
+  showTimeUpDialog.value = false; // Schließe den Dialog wenn der Timer zurückgesetzt wird
   startTimer();
 }
 
@@ -538,6 +564,14 @@ function resetGame() {
   showResult.value = false;
   isJackpot.value = false;
   isRolling.value = false;
+  showTimeUpDialog.value = false; // Schließe den Dialog wenn das Spiel zurückgesetzt wird
+}
+
+function restartTimer() {
+  showTimeUpDialog.value = false;
+  timeLeft.value = timerDuration.value;
+  startTimer();
+  playSound('success'); // Spiele einen Erfolgs-Sound ab
 }
 
 function formatTime(seconds: number): string {
@@ -1003,6 +1037,173 @@ onUnmounted(() => {
 .timer-control-btn.reset-game {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+}
+
+/* Time Up Dialog Styles */
+.time-up-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.time-up-dialog {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  animation: slideInUp 0.4s ease-out;
+  border: 2px solid #ef4444;
+  position: relative;
+  overflow: hidden;
+}
+
+.time-up-dialog::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    #ef4444,
+    #f97316,
+    #eab308,
+    #22c55e,
+    #3b82f6,
+    #8b5cf6
+  );
+  background-size: 200% 100%;
+  animation: rainbowFlow 2s linear infinite;
+}
+
+.time-up-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.time-up-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #dc2626;
+  margin-bottom: 15px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.time-up-message {
+  font-size: 1.1rem;
+  color: #4b5563;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.time-up-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.time-up-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  min-width: 140px;
+}
+
+.time-up-btn.restart {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+}
+
+.time-up-btn.restart:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.6);
+}
+
+.time-up-btn.close {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
+}
+
+.time-up-btn.close:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 114, 128, 0.6);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes rainbowFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
 }
 
 .dice-section {
