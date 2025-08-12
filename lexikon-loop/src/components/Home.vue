@@ -220,6 +220,77 @@
           Blitzrunde mit JACKPOT!-Würfen.
         </p>
       </section>
+
+      <!-- Würfel-Vorlage Section -->
+      <section class="card vorlage-section">
+        <h2>🎲 Würfel-Vorlage herunterladen</h2>
+        <p>
+          Drucke dir die Würfel-Vorlage aus und bastle dir deinen eigenen
+          Lexikon-Loop Würfel! Perfekt für das Spiel zu Hause oder unterwegs.
+        </p>
+
+        <!-- Vorlagen-Vorschau -->
+        <div class="vorlage-preview">
+          <img
+            src="/assets/vorlage.png"
+            alt="Würfel-Vorlage Vorschau"
+            class="vorlage-image"
+            @click="openVorlagePreview"
+          />
+          <div class="vorlage-overlay">
+            <span class="preview-text">👆 Klicken für größere Ansicht</span>
+          </div>
+        </div>
+
+        <!-- Download Buttons -->
+        <div class="vorlage-buttons">
+          <a
+            href="/assets/wuerfel_vorlage2.pdf"
+            download="Lexikon-Loop-Wuerfel-Vorlage.pdf"
+            class="download-btn primary"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M10 2v12m0 0l-4-4m4 4l4-4"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Vorlage herunterladen (PDF)
+          </a>
+
+          <a
+            href="/assets/vorlage.png"
+            download="Lexikon-Loop-Wuerfel-Vorlage.png"
+            class="download-btn secondary"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M10 2v12m0 0l-4-4m4 4l4-4"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Als Bild herunterladen (PNG)
+          </a>
+        </div>
+
+        <div class="vorlage-tips">
+          <h3>💡 Bastel-Tipps:</h3>
+          <ul>
+            <li>Drucke auf festem Papier (mind. 160g/m²)</li>
+            <li>Schneide entlang der gestrichelten Linien</li>
+            <li>Falte an den durchgezogenen Linien</li>
+            <li>Klebe die Klebelaschen zusammen</li>
+            <li>Fertig ist dein persönlicher Lexikon-Loop Würfel! 🎲</li>
+          </ul>
+        </div>
+      </section>
+
       <section>
         <div class="pdf-link-wrapper">
           <a
@@ -287,7 +358,13 @@
 <script lang="ts" setup>
 import {useRouter} from 'vue-router';
 import Logo from './Logo.vue';
+
 const router = useRouter();
+
+// Funktion zum Öffnen der Vorlagen-Vorschau
+function openVorlagePreview() {
+  window.open('/assets/vorlage.png', '_blank', 'width=800,height=600');
+}
 </script>
 
 <style lang="scss" scoped>
@@ -541,6 +618,120 @@ p,
   box-shadow: 0 4px 16px #2563eb22;
 }
 
+/* Vorlagen-Sektion */
+.vorlage-section {
+  text-align: center;
+}
+
+.vorlage-preview {
+  position: relative;
+  margin: 2rem 0;
+  cursor: pointer;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vorlage-preview:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.vorlage-image {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+}
+
+.vorlage-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  padding: 2rem 1rem 1rem;
+  color: white;
+  text-align: center;
+}
+
+.preview-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.vorlage-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0;
+  align-items: center;
+}
+
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 2rem;
+  border-radius: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.download-btn.primary {
+  background: linear-gradient(90deg, #2563eb 60%, #fbbf24 100%);
+  color: white;
+  border: none;
+}
+
+.download-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+}
+
+.download-btn.secondary {
+  background: white;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+}
+
+.download-btn.secondary:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.2);
+}
+
+.vorlage-tips {
+  text-align: left;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(90deg, #f0f9ff 0%, #fef3c7 100%);
+  border-radius: 16px;
+  border-left: 4px solid #fbbf24;
+}
+
+.vorlage-tips h3 {
+  margin-top: 0;
+  color: #92400e;
+  font-size: 1.1rem;
+}
+
+.vorlage-tips ul {
+  margin: 1rem 0 0 0;
+  padding-left: 1.5rem;
+}
+
+.vorlage-tips li {
+  margin-bottom: 0.5rem;
+  color: #78350f;
+}
+
 /* Logo Link */
 .logo-link {
   display: block;
@@ -631,6 +822,19 @@ p,
     font-size: 0.98rem;
     padding: 0.8rem 1.1rem;
     margin-top: 1.2rem;
+  }
+
+  .vorlage-buttons {
+    gap: 0.8rem;
+  }
+
+  .download-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .vorlage-tips {
+    padding: 1rem;
   }
 }
 </style>
