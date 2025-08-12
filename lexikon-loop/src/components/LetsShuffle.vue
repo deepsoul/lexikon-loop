@@ -388,6 +388,13 @@
           <li>✅ Bei korrekter Antwort: Punkte erhalten</li>
         </ul>
       </div>
+
+      <!-- Back to Home Button -->
+      <div class="back-home-section">
+        <router-link to="/" class="back-home-btn">
+          🏠 Zurück zur Startseite
+        </router-link>
+      </div>
     </div>
 
     <!-- Time Up Dialog -->
@@ -857,6 +864,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.game-header a {
+  text-decoration: none;
+}
 .dice-game {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1432,6 +1442,37 @@ onUnmounted(() => {
   font-weight: bold;
   position: absolute;
   left: 0;
+}
+
+/* Back to Home Button */
+.back-home-section {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.back-home-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  text-decoration: none;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.back-home-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.back-home-btn:active {
+  transform: translateY(0);
 }
 
 @media (max-width: 768px) {
