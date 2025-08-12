@@ -58,7 +58,7 @@
       <!-- Dice Section -->
       <div class="dice-section">
         <div class="dice-container">
-          <div class="dice" :class="{rolling: isRolling}" :style="diceStyle">
+          <div class="dice" :style="diceStyle">
             <div class="dice-face dice-face-1">
               <!-- Stadt-Icon -->
               <svg
@@ -457,6 +457,14 @@ const diceStyle = computed(() => {
   const rotation = rotations[currentFace.value as keyof typeof rotations];
   return {
     transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg)`,
+    animationName: isRolling.value ? 'roll' : 'none',
+    animationDuration: isRolling.value ? '0.8s' : '0s',
+    animationTimingFunction: 'ease-out',
+    animationFillMode: 'forwards',
+    animationDelay: '0s',
+    animationIterationCount: '1',
+    animationDirection: 'normal',
+    animationPlayState: isRolling.value ? 'running' : 'paused',
   };
 });
 
@@ -706,12 +714,70 @@ function rollDice() {
     isJackpot.value = true;
   }
 
-  // Show result after animation
+  // Show result after animation - but stop rolling immediately when animation ends
   setTimeout(() => {
     isRolling.value = false;
     showResult.value = true;
     playSound('success');
-  }, 1000);
+  }, 800); // Reduced from 1000ms to 800ms for better responsiveness
+
+  // Force stop animation after 800ms to prevent glitching
+  setTimeout(() => {
+    if (!isRolling.value) {
+      // Force the dice to stop at the final position
+      const diceElement = document.querySelector('.dice') as HTMLElement;
+      if (diceElement) {
+        const rotations = {
+          1: {x: 0, y: 0, z: 0},
+          2: {x: 0, y: 90, z: 0},
+          3: {x: 0, y: -90, z: 0},
+          4: {x: 90, y: 0, z: 0},
+          5: {x: -90, y: 0, z: 0},
+          6: {x: 0, y: 180, z: 0},
+        };
+
+        // Immediately stop all animations
+        diceElement.style.animation = 'none';
+        diceElement.style.animationName = 'none';
+        diceElement.style.animationDuration = '0s';
+        diceElement.style.animationPlayState = 'paused';
+
+        // Set final position
+        diceElement.style.transform = `rotateX(${
+          rotations[currentFace.value as keyof typeof rotations].x
+        }deg) rotateY(${
+          rotations[currentFace.value as keyof typeof rotations].y
+        }deg) rotateZ(${
+          rotations[currentFace.value as keyof typeof rotations].z
+        }deg)`;
+
+        // Force a reflow to ensure the animation stops
+        diceElement.offsetHeight;
+
+        // Remove any remaining animation styles
+        diceElement.style.removeProperty('animation-name');
+        diceElement.style.removeProperty('animation-duration');
+        diceElement.style.removeProperty('animation-timing-function');
+        diceElement.style.removeProperty('animation-fill-mode');
+        diceElement.style.removeProperty('animation-delay');
+        diceElement.style.removeProperty('animation-iteration-count');
+        diceElement.style.removeProperty('animation-direction');
+        diceElement.style.removeProperty('animation-play-state');
+
+        // Add a small delay to ensure the browser processes the changes
+        requestAnimationFrame(() => {
+          diceElement.style.animation = 'none';
+          diceElement.style.transform = `rotateX(${
+            rotations[currentFace.value as keyof typeof rotations].x
+          }deg) rotateY(${
+            rotations[currentFace.value as keyof typeof rotations].y
+          }deg) rotateZ(${
+            rotations[currentFace.value as keyof typeof rotations].z
+          }deg)`;
+        });
+      }
+    }
+  }, 800);
 }
 
 // Cleanup on unmount
@@ -916,11 +982,7 @@ onUnmounted(() => {
   height: 120px;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.dice.rolling {
-  animation: roll 2s ease-in-out;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 @keyframes roll {
