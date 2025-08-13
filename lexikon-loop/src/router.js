@@ -23,7 +23,7 @@ const routes = [
     path: '/lets-play',
     name: 'LetsShuffle',
     component: LetsShuffle,
-    meta: {requiresAuth: true},
+    meta: {requiresAuth: false},
   },
   {path: '/icons', name: 'Icons', component: IconsPage},
   {path: '/shop', name: 'Shop', component: Shop},
